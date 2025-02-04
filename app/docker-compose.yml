@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    command: sh -c "yes | npx expo start --tunnel"
+    develop:
+      watch:
+        - action: sync
+          path: ./
+          target: /app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./package.json
+    ports:
+      - "8081:8081"
+    environment:
+      - NODE_ENV=development

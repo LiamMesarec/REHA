@@ -2,12 +2,9 @@ FROM node:latest
 
 WORKDIR /server
 
-COPY package.json .
-COPY package-lock.json .
+COPY package*.json .
+COPY tsconfig.json .
+COPY src ./src
 
-RUN npm install
-RUN npm install -g nodemon
-
-COPY . /server
-
-CMD ["npm", "run", "dev"]
+RUN npm install -g ts-node nodemon
+RUN npm install --include=dev
