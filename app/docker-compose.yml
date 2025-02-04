@@ -1,7 +1,7 @@
 services:
   app:
     build: .
-    command: sh -c "yes | npx expo start --tunnel"
+    command: npx expo start
     develop:
       watch:
         - action: sync
