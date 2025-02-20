@@ -12,4 +12,3 @@ COPY assets ./assets
 COPY tsconfig.json .
 COPY app.json .
 COPY package*.json .
-COPY expo-env.d.ts .
