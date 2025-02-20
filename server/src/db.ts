@@ -1,7 +1,12 @@
+import {Database} from "sqlite3";
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('test.db');
 
-export function close()
+export function createDB(path: string): Database
+{
+    return new sqlite3.Database(path);
+}
+
+export function close(db: Database)
 {
     db.close((err: any) => {
       if (err) {
@@ -10,12 +15,7 @@ export function close()
     });
 }
 
-export function getDB()
-{
-    return db;
-}
-
-export function create_tables_if_not_exists()
+export function create_tables_if_not_exists(db: Database)
 {
     db.serialize(() => {
       db.run(`CREATE TABLE IF NOT EXISTS Events (
@@ -54,7 +54,5 @@ CREATE INDEX idx_event_id ON EventFiles (event_id);
 CREATE INDEX idx_file_id ON EventFiles (file_id);
 `);
     });
-
-
 }
 
