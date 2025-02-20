@@ -1,20 +1,19 @@
-import React from "react";
-import { View } from "react-native";
-import FileList from "./fileDisplay"; 
-import MapList from "./mapDisplay";
+import React from 'react';
+import { NavigationContainer, NavigationIndependentTree } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import FileList from './fileDisplay';  // The file display screen
+import MapList from './mapDisplay';   // The map screen
+
+const Stack = createStackNavigator();
 
 export default function Index() {
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "flex-start",
-        alignItems: "flex-start",
-      }}
-    >
-      {//<FileList />
-      }
-      <MapList/>
-    </View>
+
+      <NavigationIndependentTree>
+        <Stack.Navigator initialRouteName="Map">
+          <Stack.Screen name="Map" component={MapList} />
+          <Stack.Screen name="Files" component={FileList} />
+        </Stack.Navigator>
+      </NavigationIndependentTree>
   );
 }
