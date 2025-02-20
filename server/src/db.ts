@@ -9,6 +9,12 @@ export function close()
       }
     });
 }
+
+export function getDB()
+{
+    return db;
+}
+
 export function create_tables_if_not_exists()
 {
     db.serialize(() => {
