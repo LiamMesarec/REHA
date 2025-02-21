@@ -39,11 +39,18 @@ function Calendar() {
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => { 
           if (item.header === false) {
-            return (
-              <TouchableOpacity style={{width: "100%",margin: 0, padding: 0}} onPress={() => navigation.navigate('EventPage')} >
-                <DayEvent {...item} />
-              </TouchableOpacity>
-            );
+            if (item.event !== "No event") {
+        return (
+          <TouchableOpacity
+            style={{ width: '100%',margin: 0, padding: 0 }}
+            onPress={() => navigation.navigate('EventPage', { eventId: item.id })}
+          >
+            <DayEvent {...item} />
+          </TouchableOpacity>
+        );
+      } else {
+        return <DayEvent {...item} />;
+      }
           }
           
           return <MonthHeader month={item.month} year={item.year} />; 
@@ -67,17 +74,15 @@ function Calendar() {
 }
 
 
-function EventPage() {
-  let dateDisplayed:Date = new Date();
-  const events = getMonthEvents(dateDisplayed.getMonth(), dateDisplayed.getFullYear());
-  
+function EventPage({ route }) {
+  const { eventId } = route.params;
+
   return (
     <View>
-      <Text>Event1</Text>
+      <Text>Event id: {eventId}</Text>
     </View>
   );
 }
-
 export default function Index() {
   return (
     <NavigationIndependentTree>

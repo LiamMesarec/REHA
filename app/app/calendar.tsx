@@ -13,6 +13,7 @@ interface DayEventProps {
     month: string;
     year: number;
     header: boolean;
+    id: number;
 }
 
 const getDayOfWeekName = (day: Date): string => {
@@ -67,7 +68,8 @@ export const getEvents = (): DayEventProps[] => {
                 dayNum: i,
                 month: monthNames[dateDisplayed.getMonth()],
                 year: dateDisplayed.getFullYear(),
-                header: false
+                header: false,
+                id: i+dateDisplayed.getMonth()
             });
         }
     return events;
@@ -81,7 +83,8 @@ export const getMonthEvents = (month: number, year: number): DayEventProps[] => 
         dayNum: 0,
         month: monthNames[month],
         year: year,
-        header: true
+        header: true,
+        id: 0
     });
     for (let i = 1; i <= getDaysInMonth(year, month); i++) {
         let date:Date = new Date(year, month, i);
@@ -91,7 +94,8 @@ export const getMonthEvents = (month: number, year: number): DayEventProps[] => 
             dayNum: i,
             month: monthNames[month],
             year: year,
-            header: false
+            header: false,
+            id: i+month
         });
     }
     return events;
