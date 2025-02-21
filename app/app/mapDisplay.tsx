@@ -1,41 +1,21 @@
+// mapDisplay.tsx (Modified to accept props)
 import React, { useState, useEffect } from "react";
 import { Text, TouchableOpacity, View, StyleSheet, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { StackNavigationProp } from '@react-navigation/stack';
-
-
-type RootStackParamList = {
-  Map: undefined;
-  Files: undefined;
-};
-
-
-type MapListNavigationProp = StackNavigationProp<RootStackParamList, 'Map'>;
 
 interface MapListProps {
-  navigation: MapListNavigationProp;
+  folderNames: string[];  // Receive folder names as props
+  onFolderPress: (folderName: string) => void;  // Callback when a folder is clicked
 }
 
-const folderNames: string[] = [
-  "Mapa1",
-  "Mapa2",
-  "Mapa3",
-];
-
-const MapList: React.FC<MapListProps> = ({ navigation }) => {
-  const [folders, setFolders] = useState<string[]>([]);
-
-  useEffect(() => {
-    setFolders(folderNames);
-  }, []);
-
+const MapList: React.FC<MapListProps> = ({ folderNames, onFolderPress }) => {
   return (
     <ScrollView style={styles.container}>
-      {folders.map((folder, index) => (
+      {folderNames.map((folder, index) => (
         <TouchableOpacity
           key={index}
           style={styles.fileButton}
-          onPress={() => navigation.navigate('Files')}
+          onPress={() => onFolderPress(folder)} // Trigger callback when folder is clicked
         >
           <View style={styles.rowContainer}>
             <Icon name="folder" size={24} color="#F1C27D" />
