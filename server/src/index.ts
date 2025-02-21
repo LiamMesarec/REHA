@@ -3,6 +3,8 @@ import { connectDB, closeDB, runMigrations, dropTables } from "./database/db";
 import { testSeedDatabase } from "./database/seeder";
 import eventRoutes from "./routes/eventRoutes";
 import fileRoutes from "./routes/fileRoutes";
+import { notFound } from "./middleware/errorHandler";
+import { errorHandler } from "./middleware/errorHandler";
 
 const db = connectDB("./test.db");
 
@@ -22,6 +24,9 @@ app.get("/", (_: Request, res: Response) => {
 
 app.use("/api/events", eventRoutes);
 app.use("/api/files", fileRoutes);
+
+app.use(notFound);
+app.use(errorHandler);
 
 process.on("SIGINT", () => {
   closeDB(db);

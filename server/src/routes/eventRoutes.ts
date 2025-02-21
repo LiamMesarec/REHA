@@ -14,4 +14,5 @@ router.route("/").get(getEvents).post(createEvent);
 
 router.route("/:id").get(getEventById).put(updateEvent).delete(deleteEvent);
 router.route("/:id/files").get(getFilesByEventId);
+
 export default router;

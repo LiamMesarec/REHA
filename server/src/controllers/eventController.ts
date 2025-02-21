@@ -16,16 +16,24 @@ const getEvents = asyncHandler(
   }
 );
 
-// @desc    Fetch an event with all of its files
+// @desc    Fetch an event information
 // @route   GET /api/event/:id
 // @access  Public
 const getEventById = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { id } = req.params;
-
-    db.all(
-      `SELECT * FROM Events 
+    db.get(
+      `SELECT 
+        Events.id,
+        Events.title,
+        Events.coordinator,
+        Events.description,
+        Events.start,
+        RepeatableEvents.from_date,
+        RepeatableEvents.to_date
+      FROM Events  
+       LEFT JOIN RepeatableEvents ON Events.id = RepeatableEvents.event_id
        WHERE Events.id = ?`,
       [id],
       (err: any, rows: any) => {
@@ -44,10 +52,11 @@ const getEventById = asyncHandler(
 const getFilesByEventId = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
-    const { id } = req.params; // Correctly extract the id from params
+    const { id } = req.params;
 
-    db.all(
+    db.get(
       `SELECT 
+        Files.id,
         Files.path,
         Files.name
       FROM Files 
