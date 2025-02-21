@@ -1,17 +1,26 @@
 import express, { Request, Response } from "express";
-import * as DB from "./db";
-import { testSeedDatabase } from "./seed";
+import { connectDB, closeDB } from "./database/db";
+// import { testSeedDatabase } from "./database/seeder";
+import eventRoutes from "./routes/eventRoutes";
+const db = connectDB("./test.db");
 
-const db = DB.createDB("test.db");
+// dropTables(db);
 
-DB.create_tables_if_not_exists(db);
-testSeedDatabase(db);
+// runMigrations(db);
+
+// testSeedDatabase(db);
 
 const app = express();
 
 app.get("/", (_: Request, res: Response) => {
-  res.send("Helloo World!");
+  res.send("Hello World!");
+});
+
+app.use("/api/events", eventRoutes);
+
+process.on("SIGINT", () => {
+  closeDB(db);
+  process.exit();
 });
 
 app.listen(3000);
-DB.close(db);

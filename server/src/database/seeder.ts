@@ -1,10 +1,9 @@
 import { Database } from "sqlite3";
 
-export function testSeedDatabase(db: Database) {
+export function testSeedDatabase(db: Database): void {
   db.serialize(() => {
     console.log("Seeding database...");
 
-    // Insert sample events
     db.run(
       `INSERT INTO Events (title, coordinator, description) VALUES 
         ('Tech Conference', 'John Doe', 'An event about new technology trends.'),
@@ -12,7 +11,6 @@ export function testSeedDatabase(db: Database) {
         ('AI Workshop', 'Alice Johnson', 'Workshop on Artificial Intelligence.')`
     );
 
-    // Insert sample files
     db.run(
       `INSERT INTO Files (name, path) VALUES 
         ('presentation.pdf', '/files/presentation.pdf'),
@@ -20,7 +18,6 @@ export function testSeedDatabase(db: Database) {
         ('brochure.png', '/files/brochure.png')`
     );
 
-    // Insert sample event-file relationships
     db.run(
       `INSERT INTO EventFiles (event_id, file_id) VALUES 
         (1, 1),
