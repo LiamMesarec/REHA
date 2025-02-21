@@ -14,12 +14,6 @@ interface FileListProps {
 
 
 
-const folderNames: string[] = [
-  "Mapa1",
-  "Mapa2",
-  "Mapa3",
-];
-
 const FileList: React.FC<FileListProps> = ({ route }) => {
   const [files, setFiles] = useState<string[]>([]);
   const [folders, setFolders] = useState<string[]>([]);
@@ -78,6 +72,9 @@ const FileList: React.FC<FileListProps> = ({ route }) => {
 
   return (
     <ScrollView style={styles.container}>
+      <TouchableOpacity>
+        <Text>Back</Text>
+      </TouchableOpacity>
       <Text style={styles.text}>
         {selectedMap ? `${selectedMap} Datoteke:` : 'Select a Map to View Files'}
       </Text>
