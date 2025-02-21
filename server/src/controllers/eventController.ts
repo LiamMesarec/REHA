@@ -22,7 +22,7 @@ const getEvents = asyncHandler(
 const getEventById = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
-    const { id } = req.params; // Correctly extract the id from params
+    const { id } = req.params;
 
     db.all(
       `SELECT * FROM Events 
