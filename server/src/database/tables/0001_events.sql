@@ -3,5 +3,5 @@ CREATE TABLE IF NOT EXISTS Events (
     title VARCHAR NOT NULL,
     coordinator VARCHAR NOT NULL,
     description VARCHAR NOT NULL,
-    eventtime DATETIME NOT NULL
+    start DATETIME NOT NULL
 );

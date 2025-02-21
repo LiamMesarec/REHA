@@ -1,14 +1,14 @@
 import express, { Request, Response } from "express";
-import { connectDB, closeDB, runMigrations } from "./database/db";
-// import { testSeedDatabase } from "./database/seeder";
+import { connectDB, closeDB, runMigrations, dropTables } from "./database/db";
+import { testSeedDatabase } from "./database/seeder";
 import eventRoutes from "./routes/eventRoutes";
 const db = connectDB("./test.db");
 
-// dropTables(db);
+dropTables(db);
 
 runMigrations(db);
 
-// testSeedDatabase(db);
+testSeedDatabase(db);
 
 const app = express();
 
