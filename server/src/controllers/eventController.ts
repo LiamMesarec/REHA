@@ -11,7 +11,7 @@ const getEvents = asyncHandler(
       if (err) {
         return next(err);
       }
-      res.json({ events: rows }).status(200);
+      res.status(200).json({ events: rows });
     });
   }
 );
@@ -23,6 +23,7 @@ const getEventById = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { id } = req.params;
+
     db.get(
       `SELECT 
         Events.id,
@@ -36,11 +37,16 @@ const getEventById = asyncHandler(
        LEFT JOIN RepeatableEvents ON Events.id = RepeatableEvents.event_id
        WHERE Events.id = ?`,
       [id],
-      (err: any, rows: any) => {
+      (err: any, row: any) => {
         if (err) {
           return next(err);
         }
-        res.json({ events: rows });
+
+        if (!row) {
+          return res.status(404).json({ message: "Event not found" });
+        }
+
+        res.status(200).json({ event: row });
       }
     );
   }
@@ -54,7 +60,7 @@ const getFilesByEventId = asyncHandler(
     const db = req.app.locals.db;
     const { id } = req.params;
 
-    db.get(
+    db.all(
       `SELECT 
         Files.id,
         Files.path,
@@ -67,7 +73,14 @@ const getFilesByEventId = asyncHandler(
         if (err) {
           return next(err);
         }
-        res.json({ files: rows });
+
+        if (!rows || rows.length === 0) {
+          return res
+            .status(404)
+            .json({ message: "Files attached to the Event not found!" });
+        }
+
+        res.status(200).json({ files: rows });
       }
     );
   }
@@ -104,14 +117,46 @@ const updateEvent = asyncHandler(
   }
 );
 
-// @desc    Delete an event
+// @desc    Delete an event with all of its appended files
 // @route   DELETE /api/events/:id
-// @access  Private/Admin
+// @access  Public
 const deleteEvent = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    console.log("deleteEvent called with params:", req.params);
-    const dummyNext = next.toString();
-    res.json({ message: "deleteEvent called", params: req.params, dummyNext });
+    const db = req.app.locals.db;
+    const { id } = req.params;
+
+    db.get(
+      "SELECT id FROM Events WHERE id = ?",
+      [id],
+      function (err: any, row: any) {
+        if (err) {
+          return next(err);
+        }
+        if (!row) {
+          return res.status(404).json({ message: "Event not found!" });
+        }
+      }
+    );
+
+    db.run(
+      "DELETE FROM Files WHERE id IN (SELECT file_id FROM EventFiles WHERE event_id = ?)",
+      [id],
+      (err: any) => {
+        if (err) {
+          return next(err);
+        }
+
+        db.run("DELETE FROM Events WHERE id = ?", [id], (err: any) => {
+          if (err) {
+            return next(err);
+          }
+
+          res.status(200).json({
+            message: "Event and its attached files are deleted successfully.",
+          });
+        });
+      }
+    );
   }
 );
 
