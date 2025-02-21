@@ -1,6 +1,3 @@
--- migrations/2024XXXXXX_create_event_files_table.sql
-
--- Up migration
 CREATE TABLE IF NOT EXISTS EventFiles (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     event_id INTEGER NOT NULL,

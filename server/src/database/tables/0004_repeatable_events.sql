@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS RepeatableEvents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    from_date DATE NOT NULL,
+    to_date DATE,
+    event_id INTEGER NOT NULL UNIQUE,
+
+    FOREIGN KEY (event_id) REFERENCES Events (id) ON DELETE CASCADE
+
+);

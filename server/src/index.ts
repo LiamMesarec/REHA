@@ -1,12 +1,12 @@
 import express, { Request, Response } from "express";
-import { connectDB, closeDB } from "./database/db";
+import { connectDB, closeDB, runMigrations } from "./database/db";
 // import { testSeedDatabase } from "./database/seeder";
 import eventRoutes from "./routes/eventRoutes";
 const db = connectDB("./test.db");
 
 // dropTables(db);
 
-// runMigrations(db);
+runMigrations(db);
 
 // testSeedDatabase(db);
 

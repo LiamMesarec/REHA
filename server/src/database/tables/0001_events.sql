@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS Events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title VARCHAR NOT NULL,
+    coordinator VARCHAR NOT NULL,
+    description VARCHAR NOT NULL,
+    eventtime DATETIME NOT NULL
+);
