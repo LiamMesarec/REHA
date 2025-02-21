@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { Text, View, StyleSheet } from "react-native";
 import React from "react";
 
 
@@ -24,14 +24,13 @@ export const DayEvent = (props: DayEventProps) => {
     const { event, day, dayNum, month, year } = props;
     return (
   
-    <View style={{ flexDirection: 'row', width: '80%', justifyContent: 'space-between', borderBottomColor: 'black',
-        borderBottomWidth: 1, paddingVertical: 10 }}>
-        <View style={{ flexDirection: 'column', width: 'auto', justifyContent: 'space-between' }}>
+    <View style={styles.dayEventContainer}>
+        <View style={styles.dayEventColumn}>
         
-        <Text style={{ textAlign: 'left', fontWeight: 'bold' }}>{day}</Text>
-        <Text style={{ textAlign: 'left'}}>{dayNum}</Text>
+        <Text style={styles.dayT}>{day}</Text>
+        <Text style={styles.dayNumT}>{dayNum}</Text>
         </View>
-        <Text style={{ textAlign: 'left', fontWeight: 'bold' }}>{event}</Text>
+        <Text style={styles.eventT}>{event}</Text>
         
     </View>
     );
@@ -40,8 +39,8 @@ export const DayEvent = (props: DayEventProps) => {
 export const MonthHeader = (props: { month: string, year: number }) => {
     const { month, year } = props;
     return (
-        <View style={{ marginBottom: 20, marginTop: 25 }}>
-            <Text style={{ fontWeight: "bold", fontSize: 24}}>{year} {month}</Text>
+        <View style={styles.monthHeaderContainer}>
+            <Text style={styles.monthHeaderT}>{year} {month}</Text>
         </View>
     );
 }
@@ -101,3 +100,38 @@ export const getMonthEvents = (month: number, year: number): DayEventProps[] => 
     return events;
 };
 
+
+const styles = StyleSheet.create({
+    dayEventContainer: {
+        flexDirection: 'row',
+        width: '80%',
+        justifyContent: 'space-between',
+        borderBottomColor: 'black',
+        borderBottomWidth: 1,
+        paddingVertical: 10
+    },
+    dayEventColumn: {
+        flexDirection: 'column',
+        width: 'auto',
+        justifyContent: 'space-between'
+    },
+    dayT: {
+        textAlign: 'left',
+        fontWeight: 'bold'
+    },
+    dayNumT: {
+        textAlign: 'left'
+    },
+    eventT: {
+        textAlign: 'left',
+        fontWeight: 'bold'
+    },
+    monthHeaderContainer: {
+        marginBottom: 20,
+        marginTop: 25
+    },
+    monthHeaderT: {
+        fontWeight: 'bold',
+        fontSize: 24
+    }
+});
