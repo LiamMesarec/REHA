@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { connectDB, closeDB, runMigrations, dropTables } from "./database/db";
 import { testSeedDatabase } from "./database/seeder";
 import eventRoutes from "./routes/eventRoutes";
+
 const db = connectDB("./test.db");
 
 dropTables(db);
@@ -11,6 +12,8 @@ runMigrations(db);
 testSeedDatabase(db);
 
 const app = express();
+
+app.locals.db = db;
 
 app.get("/", (_: Request, res: Response) => {
   res.send("Hello World!");

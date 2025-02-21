@@ -5,6 +5,7 @@ import {
   getEventById,
   getEvents,
   updateEvent,
+  getFilesByEventId,
 } from "../controllers/eventController";
 
 const router = express.Router();
@@ -12,5 +13,5 @@ const router = express.Router();
 router.route("/").get(getEvents).post(createEvent);
 
 router.route("/:id").get(getEventById).put(updateEvent).delete(deleteEvent);
-
+router.route("/:id/files").get(getFilesByEventId);
 export default router;

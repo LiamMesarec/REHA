@@ -6,20 +6,61 @@ import asyncHandler from "../middleware/asyncHandler";
 // @access  Public
 const getEvents = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    console.log("getEvents called with query:", req.query);
-    const dummyNext = next.toString();
-    res.json({ message: "getEvents called", query: req.query, dummyNext });
+    const db = req.app.locals.db;
+    db.all("SELECT * FROM Events", [], (err: any, rows: any) => {
+      if (err) {
+        return next(err);
+      }
+      res.json({ events: rows }).status(200);
+    });
   }
 );
 
-// @desc    Fetch an event
+// @desc    Fetch an event with all of its files
 // @route   GET /api/event/:id
 // @access  Public
 const getEventById = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    console.log("getEventById called with params:", req.params);
-    const dummyNext = next.toString();
-    res.json({ message: "getEventById called", params: req.params, dummyNext });
+    const db = req.app.locals.db;
+    const { id } = req.params; // Correctly extract the id from params
+
+    db.all(
+      `SELECT * FROM Events 
+       WHERE Events.id = ?`,
+      [id],
+      (err: any, rows: any) => {
+        if (err) {
+          return next(err);
+        }
+        res.json({ events: rows });
+      }
+    );
+  }
+);
+
+// @desc    Fetch all files of an event
+// @route   GET /api/event/:id/files
+// @access  Public
+const getFilesByEventId = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const db = req.app.locals.db;
+    const { id } = req.params; // Correctly extract the id from params
+
+    db.all(
+      `SELECT 
+        Files.path,
+        Files.name
+      FROM Files 
+       LEFT JOIN EventFiles ON Files.id = EventFiles.file_id
+       WHERE EventFiles.event_id = ?`,
+      [id],
+      (err: any, rows: any) => {
+        if (err) {
+          return next(err);
+        }
+        res.json({ files: rows });
+      }
+    );
   }
 );
 
@@ -65,4 +106,11 @@ const deleteEvent = asyncHandler(
   }
 );
 
-export { getEvents, getEventById, createEvent, updateEvent, deleteEvent };
+export {
+  getEvents,
+  getEventById,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  getFilesByEventId,
+};
