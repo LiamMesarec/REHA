@@ -2,7 +2,7 @@ import { Text, View } from "react-native";
 import React from "react";
 
 
-const monthNames = ["January", "February", "March", "April", "May", "June", 
+export const monthNames = ["January", "February", "March", "April", "May", "June", 
     "July", "August", "September", "October", "November", "December"];
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -10,18 +10,19 @@ interface DayEventProps {
     event: string;
     day: string;
     dayNum: number;
-    month?: string;
-    year?: number;
+    month: string;
+    year: number;
+    header: boolean;
 }
 
 const getDayOfWeekName = (day: Date): string => {
     return days[day.getDay()];
 }
 
-
 export const DayEvent = (props: DayEventProps) => {
     const { event, day, dayNum, month, year } = props;
     return (
+  
     <View style={{ flexDirection: 'row', width: '80%', justifyContent: 'space-between', borderBottomColor: 'black',
         borderBottomWidth: 1, paddingVertical: 10 }}>
         <View style={{ flexDirection: 'column', width: 'auto', justifyContent: 'space-between' }}>
@@ -38,8 +39,8 @@ export const DayEvent = (props: DayEventProps) => {
 export const MonthHeader = (props: { month: string, year: number }) => {
     const { month, year } = props;
     return (
-        <View>
-            <Text>{year} {month}</Text>
+        <View style={{ marginBottom: 20, marginTop: 25 }}>
+            <Text style={{ fontWeight: "bold", fontSize: 24}}>{year} {month}</Text>
         </View>
     );
 }
@@ -57,10 +58,7 @@ export const getEvents = (): DayEventProps[] => {
     let events: DayEventProps[] = [];
     let dateDisplayed:Date = new Date();
     
-    for (let i = dateDisplayed.getMonth(); i <= 11; i++) // loops through this and all next months
-    {
-        dateDisplayed.setMonth(i);
-
+        //dateDisplayed.setMonth(i);
         for (let i = 1; i <= getDaysInMonth(dateDisplayed.getFullYear(), dateDisplayed.getMonth()); i++) {
             let date:Date = new Date(dateDisplayed.getFullYear(), dateDisplayed.getMonth(), i);
             events.push({
@@ -68,20 +66,34 @@ export const getEvents = (): DayEventProps[] => {
                 day: getDayOfWeekName(date),
                 dayNum: i,
                 month: monthNames[dateDisplayed.getMonth()],
-                year: dateDisplayed.getFullYear()
+                year: dateDisplayed.getFullYear(),
+                header: false
             });
         }
-    
-    }
     return events;
 };//<MonthHeader month={monthNames[dateDisplayed.getMonth() + 1]} year={dateDisplayed.getFullYear()} />
 
-export const renderEditingTexts = () => {
-    
-    const events = getEvents();
-    return events.map((event, index) => (
-            
-            <DayEvent {...event} />
-
-    ));
+export const getMonthEvents = (month: number, year: number): DayEventProps[] => {
+    let events: DayEventProps[] = [];
+    events.push({
+        event: "",
+        day: "",
+        dayNum: 0,
+        month: monthNames[month],
+        year: year,
+        header: true
+    });
+    for (let i = 1; i <= getDaysInMonth(year, month); i++) {
+        let date:Date = new Date(year, month, i);
+        events.push({
+            event: eventNames[i]?.toString() || "No event",
+            day: getDayOfWeekName(date),
+            dayNum: i,
+            month: monthNames[month],
+            year: year,
+            header: false
+        });
+    }
+    return events;
 };
+

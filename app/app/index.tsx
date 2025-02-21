@@ -1,8 +1,10 @@
 import { ScrollView,FlatList, View } from "react-native";
-import { renderEditingTexts, getEvents, DayEvent } from "./calendar";
+import { getMonthEvents, MonthHeader, DayEvent, monthNames } from "./calendar";
 
 export default function Index() {
-  const events = getEvents();
+  let dateDisplayed:Date = new Date();
+  const events = getMonthEvents(dateDisplayed.getMonth(), dateDisplayed.getFullYear());
+  
   return (
     <View
       style={{
@@ -12,8 +14,19 @@ export default function Index() {
            <FlatList
         data={events}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => <DayEvent {...item} />}
+        renderItem={({ item }) => { if (item.header == false) { return <DayEvent {...item} />; } return <MonthHeader month={item.month} year={item.year} />; }}
         contentContainerStyle={{ alignItems: 'center', padding: 10 }}
+        onEndReached={() => {
+          dateDisplayed.setMonth((dateDisplayed.getMonth() + 1));
+          const newEvents = getMonthEvents(dateDisplayed.getMonth(), dateDisplayed.getFullYear());
+          events.push(...newEvents);
+        }
+        /*onScroll={({ nativeEvent }) => {
+          if (nativeEvent.contentOffset.y <= 0) {
+            events = getMonthEvents(dateDisplayed.getMonth(), dateDisplayed.getFullYear());
+          }
+        }*/
+        }
       />
     </View>
   );
