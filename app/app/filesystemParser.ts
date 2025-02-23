@@ -13,7 +13,7 @@ export class Filesystem {
   addPath(path: string) {
     const pathArray = path.split("\\");
     let treePointer = this.root;
-
+//
     for (let i = 0; i < pathArray.length; i++) {
       const currentPathPart = pathArray[i];
 
