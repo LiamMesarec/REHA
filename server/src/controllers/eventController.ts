@@ -7,6 +7,7 @@ import asyncHandler from "../middleware/asyncHandler";
 const getEvents = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
+
     db.all("SELECT * FROM Events", [], (err: any, rows: any) => {
       if (err) {
         return next(err);
@@ -17,7 +18,7 @@ const getEvents = asyncHandler(
 );
 
 // @desc    Fetch an event information
-// @route   GET /api/event/:id
+// @route   GET /api/events/:id
 // @access  Public
 const getEventById = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -53,71 +54,224 @@ const getEventById = asyncHandler(
 );
 
 // @desc    Fetch all files of an event
-// @route   GET /api/event/:id/files
+// @route   GET /api/events/:id/files
 // @access  Public
 const getFilesByEventId = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { id } = req.params;
 
-    db.all(
-      `SELECT 
-        Files.id,
-        Files.path,
-        Files.name
-      FROM Files 
-       LEFT JOIN EventFiles ON Files.id = EventFiles.file_id
-       WHERE EventFiles.event_id = ?`,
-      [id],
-      (err: any, rows: any) => {
-        if (err) {
-          return next(err);
-        }
-
-        if (!rows || rows.length === 0) {
-          return res
-            .status(404)
-            .json({ message: "Files attached to the Event not found!" });
-        }
-
-        res.status(200).json({ files: rows });
+    db.get("SELECT id FROM Events WHERE id = ?", [id], (err: any, row: any) => {
+      if (err) {
+        return next(err);
       }
-    );
+      if (!row) {
+        return res.status(404).json({ message: "Event not found!" });
+      }
+
+      db.all(
+        `SELECT 
+          Files.id,
+          Files.path,
+          Files.name
+        FROM Files 
+         LEFT JOIN EventFiles ON Files.id = EventFiles.file_id
+         WHERE EventFiles.event_id = ?`,
+        [id],
+        (err: any, rows: any) => {
+          if (err) {
+            return next(err);
+          }
+
+          if (!rows || rows.length === 0) {
+            return res.status(200).json({ files: [] });
+          }
+
+          res.status(200).json({ files: rows });
+        }
+      );
+    });
   }
 );
 
 // @desc    Create an event
 // @route   POST /api/events
-// @access  Private/Admin
+// @access  Public - for now
 const createEvent = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    console.log("createEvent called with body:", req.body);
-    const dummyNext = next.toString();
-    res.json({ message: "createEvent called", body: req.body, dummyNext });
+    const db = req.app.locals.db;
+    const { title, coordinator, description, start, from_date, to_date } =
+      req.body;
+
+    if (!title || !coordinator || !description || !start) {
+      res.status(400).json({
+        message:
+          "Missing required fields: title, coordinator, description, start.",
+      });
+    }
+
+    db.run(
+      `INSERT INTO Events (title, coordinator, description, start)
+        VALUES (?, ?, ?, ?)`,
+      [title, coordinator, description, start],
+      (err: any) => {
+        if (err) {
+          return next(err);
+        }
+
+        // Getting Events.id for foreign key
+        db.get("SELECT last_insert_rowid() AS id", (err: any, row: any) => {
+          if (err) {
+            return next(err);
+          }
+          const newEventId = row.id;
+
+          if (from_date && to_date) {
+            db.run(
+              `INSERT INTO RepeatableEvents (from_date, to_date, event_id)
+                VALUES (?, ?, ?)`,
+              [from_date, to_date, newEventId],
+              (err: any) => {
+                if (err) {
+                  return next(err);
+                }
+
+                db.get(
+                  `SELECT Events.*, RepeatableEvents.from_date, RepeatableEvents.to_date
+                    FROM Events
+                    LEFT JOIN RepeatableEvents ON Events.id = RepeatableEvents.event_id
+                    WHERE Events.id = ?`,
+                  [newEventId],
+                  (err: any, eventRow: any) => {
+                    if (err) {
+                      return next(err);
+                    }
+                    return res.status(201).json({ event: eventRow });
+                  }
+                );
+              }
+            );
+          } else {
+            db.get(
+              "SELECT * FROM Events WHERE id = ?",
+              [newEventId],
+              (err: any, eventRow: any) => {
+                if (err) {
+                  return next(err);
+                }
+                return res.status(201).json({ event: eventRow });
+              }
+            );
+          }
+        });
+      }
+    );
   }
 );
 
 // @desc    Update an event
 // @route   PUT /api/events/:id
-// @access  Private/Admin
+// @access  Public - for now
 const updateEvent = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    console.log(
-      "updateEvent called with params and body:",
-      req.params,
-      req.body
+    const db = req.app.locals.db;
+    const { id } = req.params;
+    const { title, coordinator, description, start, from_date, to_date } =
+      req.body;
+
+    if (!title || !coordinator || !description || !start) {
+      res.status(400).json({
+        message:
+          "Missing required fields: title, coordinator, description, start.",
+      });
+    }
+
+    db.run(
+      `UPDATE Events SET title = ?, coordinator = ?, description = ?, start = ? WHERE id = ?`,
+      [title, coordinator, description, start, id],
+      (err: any) => {
+        if (err) {
+          return next(err);
+        }
+
+        if (from_date && to_date) {
+          db.get(
+            `SELECT * FROM RepeatableEvents WHERE event_id = ?`,
+            [id],
+            (err: any, row: any) => {
+              if (err) {
+                return next(err);
+              }
+              if (row) {
+                db.run(
+                  `UPDATE RepeatableEvents SET from_date = ?, to_date = ? WHERE event_id = ?`,
+                  [from_date, to_date, id],
+                  (err: any) => {
+                    if (err) {
+                      return next(err);
+                    }
+                    db.get(
+                      `SELECT Events.*, RepeatableEvents.from_date, RepeatableEvents.to_date
+                       FROM Events
+                       LEFT JOIN RepeatableEvents ON Events.id = RepeatableEvents.event_id
+                       WHERE Events.id = ?`,
+                      [id],
+                      (err: any, eventRow: any) => {
+                        if (err) {
+                          return next(err);
+                        }
+                        return res.status(200).json({ event: eventRow });
+                      }
+                    );
+                  }
+                );
+              } else {
+                db.run(
+                  `INSERT INTO RepeatableEvents (from_date, to_date, event_id) VALUES (?, ?, ?)`,
+                  [from_date, to_date, id],
+                  (err: any) => {
+                    if (err) {
+                      return next(err);
+                    }
+                    db.get(
+                      `SELECT Events.*, RepeatableEvents.from_date, RepeatableEvents.to_date
+                       FROM Events
+                       LEFT JOIN RepeatableEvents ON Events.id = RepeatableEvents.event_id
+                       WHERE Events.id = ?`,
+                      [id],
+                      (err: any, eventRow: any) => {
+                        if (err) {
+                          return next(err);
+                        }
+                        return res.status(200).json({ event: eventRow });
+                      }
+                    );
+                  }
+                );
+              }
+            }
+          );
+        } else {
+          db.get(
+            `SELECT Events.*, RepeatableEvents.from_date, RepeatableEvents.to_date
+             FROM Events
+             LEFT JOIN RepeatableEvents ON Events.id = RepeatableEvents.event_id
+             WHERE Events.id = ?`,
+            [id],
+            (err: any, eventRow: any) => {
+              if (err) {
+                return next(err);
+              }
+              return res.status(200).json({ event: eventRow });
+            }
+          );
+        }
+      }
     );
-    const dummyNext = next.toString();
-    res.json({
-      message: "updateEvent called",
-      params: req.params,
-      body: req.body,
-      dummyNext,
-    });
   }
 );
 
-// @desc    Delete an event with all of its appended files
+// @desc    Delete an event
 // @route   DELETE /api/events/:id
 // @access  Public
 const deleteEvent = asyncHandler(
@@ -125,38 +279,24 @@ const deleteEvent = asyncHandler(
     const db = req.app.locals.db;
     const { id } = req.params;
 
-    db.get(
-      "SELECT id FROM Events WHERE id = ?",
-      [id],
-      function (err: any, row: any) {
-        if (err) {
-          return next(err);
-        }
-        if (!row) {
-          return res.status(404).json({ message: "Event not found!" });
-        }
+    db.get("SELECT id FROM Events WHERE id = ?", [id], (err: any, row: any) => {
+      if (err) {
+        return next(err);
       }
-    );
+      if (!row) {
+        return res.status(404).json({ message: "Event not found!" });
+      }
 
-    db.run(
-      "DELETE FROM Files WHERE id IN (SELECT file_id FROM EventFiles WHERE event_id = ?)",
-      [id],
-      (err: any) => {
-        if (err) {
-          return next(err);
+      db.run("DELETE FROM Events WHERE id = ?", [id], (err2: any) => {
+        if (err2) {
+          return next(err2);
         }
 
-        db.run("DELETE FROM Events WHERE id = ?", [id], (err: any) => {
-          if (err) {
-            return next(err);
-          }
-
-          res.status(200).json({
-            message: "Event and its attached files are deleted successfully.",
-          });
+        res.status(200).json({
+          message: "Event successfully deleted.",
         });
-      }
-    );
+      });
+    });
   }
 );
 
