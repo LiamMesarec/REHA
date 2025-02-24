@@ -38,14 +38,31 @@ const getFileById = asyncHandler(
   }
 );
 
-// @desc    Create an event
-// @route   POST /api/events
+// @desc    Create a file
+// @route   POST /api/files
 // @access  Private/Admin
 const createFile = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    console.log("createFile called with body:", req.body);
-    const dummyNext = next.toString();
-    res.json({ message: "createFile called", body: req.body, dummyNext });
+    const db = req.app.locals.db;
+    const { name, path } = req.body;
+
+    if (!req.file) {
+      res.status(400).json({ message: "No file uploaded" });
+      return;
+    }
+
+    if (!name || !path) {
+      res.status(400).json({ message: "Name and path are required" });
+      return;
+    }
+
+    const query = `INSERT INTO Files (name, path) VALUES (?, ?)`;
+    db.run(query, [name, path], function (err: any) {
+      if (err) {
+        return next(err);
+      }
+      res.status(201).json({ id: this.lastID, name, path, date_uploaded: new Date() });
+    });
   }
 );
 

@@ -12,10 +12,12 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/multer": "^1.4.12",
     "@types/node": "^22.13.1",
     "typescript": "^5.7.3"
   }
