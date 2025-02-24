@@ -8,12 +8,16 @@ const getEvents = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
 
-    db.all("SELECT * FROM Events", [], (err: any, rows: any) => {
-      if (err) {
-        return next(err);
+    db.all(
+      "SELECT Events.*, RepeatableEvents.from_date, RepeatableEvents.to_date FROM Events LEFT JOIN RepeatableEvents ON Events.id = RepeatableEvents.event_id",
+      [],
+      (err: any, rows: any) => {
+        if (err) {
+          return next(err);
+        }
+        res.status(200).json({ events: rows });
       }
-      res.status(200).json({ events: rows });
-    });
+    );
   }
 );
 
@@ -27,11 +31,7 @@ const getEventById = asyncHandler(
 
     db.get(
       `SELECT 
-        Events.id,
-        Events.title,
-        Events.coordinator,
-        Events.description,
-        Events.start,
+        Events.*,
         RepeatableEvents.from_date,
         RepeatableEvents.to_date
       FROM Events  
@@ -44,7 +44,8 @@ const getEventById = asyncHandler(
         }
 
         if (!row) {
-          return res.status(404).json({ message: "Event not found" });
+          res.status(404).json({ message: "Event not found" });
+          return;
         }
 
         res.status(200).json({ event: row });
@@ -66,14 +67,13 @@ const getFilesByEventId = asyncHandler(
         return next(err);
       }
       if (!row) {
-        return res.status(404).json({ message: "Event not found!" });
+        res.status(404).json({ message: "Event not found!" });
+        return;
       }
 
       db.all(
         `SELECT 
-          Files.id,
-          Files.path,
-          Files.name
+          Files.*
         FROM Files 
          LEFT JOIN EventFiles ON Files.id = EventFiles.file_id
          WHERE EventFiles.event_id = ?`,
@@ -91,6 +91,61 @@ const getFilesByEventId = asyncHandler(
         }
       );
     });
+  }
+);
+
+// @desc    Attach a file to an event and return the updated file list
+// @route   POST /api/events/:id/files
+// @access  Public - for now
+const attachFileToEvent = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const db = req.app.locals.db;
+    const { id } = req.params;
+    const { fileId } = req.body;
+
+    if (!fileId) {
+      res.status(400).json({ message: "Missing required field: fileId" });
+      return;
+    }
+
+    db.get(
+      "SELECT id FROM Events WHERE id = ?",
+      [id],
+      (err: any, event: any) => {
+        if (err) {
+          return next(err);
+        }
+        if (!event) {
+          return res.status(404).json({ message: "Event not found" });
+        }
+
+        db.run(
+          "INSERT INTO EventFiles (event_id, file_id) VALUES (?, ?)",
+          [id, fileId],
+          (err: any) => {
+            if (err) {
+              return next(err);
+            }
+
+            db.all(
+              `SELECT Files.id, Files.path, Files.name
+           FROM Files 
+           INNER JOIN EventFiles ON Files.id = EventFiles.file_id
+           WHERE EventFiles.event_id = ?`,
+              [id],
+              (err: any, files: any) => {
+                if (err) {
+                  return next(err);
+                }
+                return res.status(201).json({
+                  files: files || [],
+                });
+              }
+            );
+          }
+        );
+      }
+    );
   }
 );
 
@@ -307,4 +362,5 @@ export {
   updateEvent,
   deleteEvent,
   getFilesByEventId,
+  attachFileToEvent,
 };

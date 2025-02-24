@@ -61,7 +61,9 @@ const createFile = asyncHandler(
       if (err) {
         return next(err);
       }
-      res.status(201).json({ id: this.lastID, name, path, date_uploaded: new Date() });
+      res
+        .status(201)
+        .json({ id: this.lastID, name, path, date_uploaded: new Date() });
     });
   }
 );
@@ -77,9 +79,4 @@ const deleteFile = asyncHandler(
   }
 );
 
-export {
-    createFile,
-  getFiles,
-  getFileById,
-  deleteFile,
-};
+export { createFile, getFiles, getFileById, deleteFile };
