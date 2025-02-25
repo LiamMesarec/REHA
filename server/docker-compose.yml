@@ -15,3 +15,12 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
+
+  test:
+    build: .
+    command: npm test
+    environment:
+      - NODE_ENV=test
+    volumes:
+      - .:/server
+    working_dir: /server

@@ -9,9 +9,10 @@ const getFiles = asyncHandler(
     const db = req.app.locals.db;
     db.all("SELECT * FROM Files", [], (err: any, rows: any) => {
       if (err) {
+        console.error("GET /api/files error:", err);
         return next(err);
       }
-      res.json({ events: rows }).status(200);
+      res.json({ files: rows }).status(200);
     });
   }
 );
