@@ -1,10 +1,10 @@
 import React from 'react';
 import { NavigationContainer, NavigationIndependentTree } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import FileList from './fileDisplay';  // The file display screen
-import MapList from './mapDisplay';   // The map screen
+import FileList from './fileDisplay';  
+import MapList from './mapDisplay';  
 
-import { RootStackParamList } from './types';  // Import the types file
+import { RootStackParamList } from './types';
 
 const Stack = createStackNavigator<RootStackParamList>();
 

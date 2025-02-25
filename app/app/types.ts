@@ -6,4 +6,5 @@ export type RootStackParamList = {
 export type FileNode = {
     name: string;
     type: number;
+    //parentName : string;
 }

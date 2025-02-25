@@ -5,35 +5,34 @@ export class Filesystem {
   FileSistem: TreeModel;
   root: any;
 
-  constructor(value: string) {
+  constructor() {
     this.FileSistem = new TreeModel();
-    this.root = this.FileSistem.parse({ name: 'root', index: -1 });
+    this.root = this.FileSistem.parse({ name: 'Root', type: -1 });
   }
 
   addPath(path: string) {
     const pathArray = path.split("\\");
     let treePointer = this.root;
-//
+
     for (let i = 0; i < pathArray.length; i++) {
-      const currentPathPart = pathArray[i];
+        const currentPathPart = pathArray[i];
 
-      let childNode = treePointer.children.find((child: { model: FileNode }) => child.model.name === currentPathPart);
+        let childNode = treePointer.children.find((child: { model: { name: string; }; }) => child.model.name === currentPathPart);
 
-      if (childNode) {
-        treePointer = childNode;
-      } else {
-        let newChild = this.FileSistem.parse({
-            name: currentPathPart,
-            type : (i === pathArray.length - 1) ? 1 : 0
-          });
-        treePointer.addChild(newChild);
+        if (childNode) {
+            treePointer = childNode;
+        } else {
+            let newChild = this.FileSistem.parse({
+                name: currentPathPart,
+                type: (i === pathArray.length - 1) ? 1 : 0,
+                //parentName: treePointer.model.name,
+            });
 
-        newChild.model = newChild.model as FileNode;
-
-        treePointer = newChild;
-      }
+            treePointer.addChild(newChild);
+            treePointer = newChild;
+        }
     }
-  }
+}
 
   getChildrenByName(name: string): FileNode[] | null {
     console.log("NAMEE:  ", name);
@@ -44,7 +43,7 @@ export class Filesystem {
     return []; 
   }
 
-  private findNodeByName(name: string): any {
+  findNodeByName(name: string): any {
     let nodesToVisit: any[] = [this.root];
 
     while (nodesToVisit.length > 0) {

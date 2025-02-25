@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Text, TouchableOpacity, View, Alert, StyleSheet, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { RouteProp } from '@react-navigation/native';
@@ -28,24 +28,39 @@ const FileList: React.FC<FileListProps> = ({ route }) => {
     mapNameBuffer = "";
   }
 
-  useEffect(() => {
-
-    fileSystemRef.current = new Filesystem('Root');
-
-    fileSystemRef.current?.addPath("Mapa1\\datoteka1.pdf");
-    fileSystemRef.current?.addPath("Mapa1\\datoteka2.pdf");
-    fileSystemRef.current?.addPath("Mapa1\\Mapa11\\datoteka3.pdf");
-    fileSystemRef.current?.addPath("Mapa1\\Mapa112\\datoteka4.pdf");
-    fileSystemRef.current?.addPath("Mapa2\\datoteka3.pdf");
-    fileSystemRef.current?.addPath("Mapa2\\Mapa21\\datoteka5.pdf");
-    fileSystemRef.current?.addPath("Mapa3\\Mapa21\\datoteka5.pdf");
-
+  fileSystemRef.current = useMemo(() => {
+    const fs = new Filesystem();
+    fs.addPath("Mapa1\\datoteka1.pdf");
+    fs.addPath("Mapa1\\datoteka2.pdf");
+    fs.addPath("Mapa1\\Mapa11\\datoteka3.pdf");
+    fs.addPath("Mapa1\\Mapa11\\Mapa12\\datoteka3.pdf");
+    fs.addPath("Mapa1\\Mapa112\\datoteka4.pdf");
+    fs.addPath("Mapa2\\datoteka3.pdf");
+    fs.addPath("Mapa1\\Mapa2\\Mapa11\\datoteka3.pdf");
+    fs.addPath("Mapa2\\Mapa21\\datoteka5.pdf");
+    fs.addPath("Mapa3\\Mapa21\\datoteka5.pdf");
+    return fs;
   }, []);
 
+  const goToParent = () => {
+    let currentNode = fileSystemRef.current?.findNodeByName(selectedMap ?? "root");
+
+    if (!currentNode) {
+        console.log("Node not found!");
+        return;
+    }
+
+    if (currentNode.parent) {
+        setSelectedMap(currentNode.parent.model.name);
+        console.log("NEW MAP: ", currentNode.parent.model.name);
+    } else {
+        console.log("Already at root.");
+    }
+  }
   useEffect(() => {
     console.log(fileSystemRef.current);
-    let childArray = fileSystemRef.current?.getChildrenByName(selectedMap ?? "root");
-    console.log("CHILD ARR:  ", childArray);
+    let childArray = fileSystemRef.current?.getChildrenByName(selectedMap ?? "Root");
+    //console.log("CHILD ARR:  ", childArray);
     let newFolders: string[] = [];
     let newFiles: string[] = [];
   
@@ -72,14 +87,17 @@ const FileList: React.FC<FileListProps> = ({ route }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <TouchableOpacity>
-        <Text>Back</Text>
-      </TouchableOpacity>
+      {selectedMap !== 'Root' && (
+              <TouchableOpacity onPress= {() => goToParent()}>
+              <Icon name="arrow-left" size={24} color="black" />
+            </TouchableOpacity>
+      )}
+
       <Text style={styles.text}>
-        {selectedMap ? `${selectedMap} Datoteke:` : 'Select a Map to View Files'}
+        {selectedMap ? `${selectedMap} Datoteke:` : 'Shranjene datoteke:'}
       </Text>
       
-      <MapList folderNames={folders} onFolderPress={handleFolderPress} />
+      <MapList folderNames={folders} onFolderPress={handleFolderPress}/>
 
       {selectedMap && files.map((file, index) => {
         const { name, color } = getFileIcon(file);
@@ -133,6 +151,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     borderRadius: 5,
     width: "100%",
+    alignItems: "flex-start",
   },
   fileRow: {
     flexDirection: "row",
@@ -143,6 +162,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginLeft: 10,
+    textAlignVertical: "center",
   },
 });
 

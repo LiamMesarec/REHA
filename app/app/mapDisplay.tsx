@@ -4,8 +4,8 @@ import { Text, TouchableOpacity, View, StyleSheet, ScrollView } from "react-nati
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 interface MapListProps {
-  folderNames: string[];  // Receive folder names as props
-  onFolderPress: (folderName: string) => void;  // Callback when a folder is clicked
+  folderNames: string[];
+  onFolderPress: (folderName: string) => void;
 }
 
 const MapList: React.FC<MapListProps> = ({ folderNames, onFolderPress }) => {
@@ -15,7 +15,7 @@ const MapList: React.FC<MapListProps> = ({ folderNames, onFolderPress }) => {
         <TouchableOpacity
           key={index}
           style={styles.fileButton}
-          onPress={() => onFolderPress(folder)} // Trigger callback when folder is clicked
+          onPress={() => onFolderPress(folder)}
         >
           <View style={styles.rowContainer}>
             <Icon name="folder" size={24} color="#F1C27D" />
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     backgroundColor: "#ffffff",
-    padding: 20,
+    padding: 0,
   },
   fileButton: {
     backgroundColor: "#ffff00",
@@ -40,6 +40,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     borderRadius: 5,
     width: "100%",
+    alignItems: "flex-start", 
   },
   rowContainer: {
     flexDirection: "row",
@@ -50,6 +51,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginLeft: 10,
+    textAlignVertical: "center",
   },
 });
 
