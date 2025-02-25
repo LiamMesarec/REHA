@@ -7,7 +7,7 @@ export class Filesystem {
 
   constructor() {
     this.FileSistem = new TreeModel();
-    this.root = this.FileSistem.parse({ name: 'Root', type: -1 });
+    this.root = this.FileSistem.parse({ name: 'Root', type: -1, filePath : 'Root' });
   }
 
   addPath(path: string) {
@@ -25,10 +25,12 @@ export class Filesystem {
             let newChild = this.FileSistem.parse({
                 name: currentPathPart,
                 type: (i === pathArray.length - 1) ? 1 : 0,
+                filePath : pathArray.slice(0, i + 1).join("\\")
                 //parentName: treePointer.model.name,
             });
 
             treePointer.addChild(newChild);
+            console.log("ADDED CHILD: ", newChild);
             treePointer = newChild;
         }
     }
@@ -55,5 +57,46 @@ export class Filesystem {
     }
 
     return null;
+  }
+
+  /*findNodeByPath(path : string) : any {
+    let nodesToVisit: any[] = [this.root];
+    while (nodesToVisit.length > 0){
+      let currentNode = nodesToVisit.pop();
+      if(currentNode.model.filePath === path){
+        return currentNode;
+      }
+      nodesToVisit.push(...currentNode.children);
+    }
+  }*/
+  findNodeByPath(path: string): any {
+    let current = this.root;
+    const pathArray = path.split("\\");
+    for (let i = 0; i < pathArray.length; i++) {
+        let found = false;
+        for (let child of current.children) {
+          const childPathArray = child.model.filePath.split("\\");
+            if (childPathArray[i] === pathArray[i]) {
+                current = child;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            return null;
+        }
+    }
+
+    return current;
+}
+
+  getChildrenByPath(path: string): FileNode[] | null {
+    //console.log("NAMEE:  ", name);
+    const node = this.findNodeByPath(path);
+    if (node) {
+      return node.children.map((child: { model: FileNode }) => child.model);
+    }
+    return []; 
   }
 }

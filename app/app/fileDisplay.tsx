@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Text, TouchableOpacity, View, Alert, StyleSheet, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from './types';
+import { FilesystemElement, RootStackParamList } from './types';
 import MapList from './mapDisplay';
 import { Filesystem } from "./filesystemParser";
+import FileUploadScreen from "./fileUpload";
+
 
 type FileListRouteProp = RouteProp<RootStackParamList, 'Files'>;
 
@@ -16,8 +18,10 @@ interface FileListProps {
 
 const FileList: React.FC<FileListProps> = ({ route }) => {
   const [files, setFiles] = useState<string[]>([]);
-  const [folders, setFolders] = useState<string[]>([]);
-  const [selectedMap, setSelectedMap] = useState<string | null>(null);
+  const [folders, setFolders] = useState<FilesystemElement[]>([]);
+  //const [selectedMap, setSelectedMap] = useState<string | null>(null);
+
+  const [currentMap, setCurrentMap] = useState<FilesystemElement | null> (null);
   const fileSystemRef = useRef<Filesystem | null>(null);
 
   let mapNameBuffer: string | undefined;
@@ -30,20 +34,20 @@ const FileList: React.FC<FileListProps> = ({ route }) => {
 
   fileSystemRef.current = useMemo(() => {
     const fs = new Filesystem();
-    fs.addPath("Mapa1\\datoteka1.pdf");
-    fs.addPath("Mapa1\\datoteka2.pdf");
-    fs.addPath("Mapa1\\Mapa11\\datoteka3.pdf");
-    fs.addPath("Mapa1\\Mapa11\\Mapa12\\datoteka3.pdf");
-    fs.addPath("Mapa1\\Mapa112\\datoteka4.pdf");
-    fs.addPath("Mapa2\\datoteka3.pdf");
-    fs.addPath("Mapa1\\Mapa2\\Mapa11\\datoteka3.pdf");
-    fs.addPath("Mapa2\\Mapa21\\datoteka5.pdf");
-    fs.addPath("Mapa3\\Mapa21\\datoteka5.pdf");
+    fs.addPath("Root\\Mapa1\\datoteka1.pdf");
+    fs.addPath("Root\\Mapa1\\datoteka2.pdf");
+    fs.addPath("Root\\Mapa1\\Mapa11\\datoteka3.pdf");
+    fs.addPath("Root\\Mapa1\\Mapa11\\Mapa12\\datoteka3.pdf");
+    fs.addPath("Root\\Mapa1\\Mapa112\\datoteka4.pdf");
+    fs.addPath("Root\\Mapa1\\Mapa2\\Mapa11\\datoteka3.pdf");
+    fs.addPath("Root\\Mapa2\\Mapa21\\datoteka5.pdf");
+    fs.addPath("Root\\Mapa2\\datoteka3.pdf");
+    fs.addPath("Root\\Mapa3\\datoteka3.pdf");
     return fs;
   }, []);
 
   const goToParent = () => {
-    let currentNode = fileSystemRef.current?.findNodeByName(selectedMap ?? "root");
+    let currentNode = fileSystemRef.current?.findNodeByPath(currentMap?.path ?? "Root");
 
     if (!currentNode) {
         console.log("Node not found!");
@@ -51,7 +55,10 @@ const FileList: React.FC<FileListProps> = ({ route }) => {
     }
 
     if (currentNode.parent) {
-        setSelectedMap(currentNode.parent.model.name);
+        setCurrentMap({ 
+          name: currentNode.parent.model.name, 
+          path: currentNode.parent.model.filePath 
+      });
         console.log("NEW MAP: ", currentNode.parent.model.name);
     } else {
         console.log("Already at root.");
@@ -59,14 +66,16 @@ const FileList: React.FC<FileListProps> = ({ route }) => {
   }
   useEffect(() => {
     console.log(fileSystemRef.current);
-    let childArray = fileSystemRef.current?.getChildrenByName(selectedMap ?? "Root");
+    let childArray = fileSystemRef.current?.getChildrenByPath(currentMap?.path ?? "Root");
     //console.log("CHILD ARR:  ", childArray);
-    let newFolders: string[] = [];
+    let newFolders: FilesystemElement[] = [];
     let newFiles: string[] = [];
   
     for (let i of childArray) {
       if (i.type === 0) {
-        newFolders.push(i.name);
+        newFolders.push({
+          name : i.name,
+          path : i.filePath});
       } else if (i.type === 1) {
         newFiles.push(i.name);
       }
@@ -74,32 +83,32 @@ const FileList: React.FC<FileListProps> = ({ route }) => {
     
     setFolders(newFolders)
     setFiles(newFiles);
-  }, [selectedMap]);
+  }, [currentMap]);
 
   const loadFile = (index: number): void => {
     Alert.alert('Loading: ', files[index]);
   };
 
-  const handleFolderPress = (folderName: string) => {
-    setSelectedMap(folderName);
+  const handleFolderPress = (folder: FilesystemElement) => {
+    setCurrentMap(folder);
 
   };
 
   return (
     <ScrollView style={styles.container}>
-      {selectedMap !== 'Root' && (
+      {currentMap?.name !== 'Root' && (
               <TouchableOpacity onPress= {() => goToParent()}>
               <Icon name="arrow-left" size={24} color="black" />
             </TouchableOpacity>
       )}
 
       <Text style={styles.text}>
-        {selectedMap ? `${selectedMap} Datoteke:` : 'Shranjene datoteke:'}
+        {currentMap ? `${currentMap.path}:` : 'Shranjene datoteke:'}
       </Text>
       
-      <MapList folderNames={folders} onFolderPress={handleFolderPress}/>
+      <MapList folders={folders} onFolderPress={handleFolderPress}/>
 
-      {selectedMap && files.map((file, index) => {
+      {currentMap && files.map((file, index) => {
         const { name, color } = getFileIcon(file);
         return (
           <TouchableOpacity key={index} onPress={() => loadFile(index)} style={styles.fileButton}>
@@ -110,6 +119,8 @@ const FileList: React.FC<FileListProps> = ({ route }) => {
           </TouchableOpacity>
         );
       })}
+
+    <FileUploadScreen/>
     </ScrollView>
   );
 };

@@ -11,7 +11,6 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 export default function Index() {
   return (
-
       <NavigationIndependentTree>
         <Stack.Navigator initialRouteName="Files">
           <Stack.Screen name="Files" component={FileList} />

@@ -2,16 +2,17 @@
 import React, { useState, useEffect } from "react";
 import { Text, TouchableOpacity, View, StyleSheet, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { FilesystemElement } from './types';
 
 interface MapListProps {
-  folderNames: string[];
-  onFolderPress: (folderName: string) => void;
+  folders: FilesystemElement[];
+  onFolderPress: (folder: FilesystemElement) => void;
 }
 
-const MapList: React.FC<MapListProps> = ({ folderNames, onFolderPress }) => {
+const MapList: React.FC<MapListProps> = ({ folders, onFolderPress }) => {
   return (
     <ScrollView style={styles.container}>
-      {folderNames.map((folder, index) => (
+      {folders.map((folder, index) => (
         <TouchableOpacity
           key={index}
           style={styles.fileButton}
@@ -19,7 +20,7 @@ const MapList: React.FC<MapListProps> = ({ folderNames, onFolderPress }) => {
         >
           <View style={styles.rowContainer}>
             <Icon name="folder" size={24} color="#F1C27D" />
-            <Text style={styles.text}>{folder}</Text>
+            <Text style={styles.text}>{folder.name}</Text>
           </View>
         </TouchableOpacity>
       ))}
