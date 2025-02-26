@@ -16,7 +16,7 @@ const FileUploadScreen: React.FC = () => {
   const selectFile = async () => {
     try {
       const res = await DocumentPicker.getDocumentAsync({
-        type: '*/*',  // This will allow picking all types of documents
+        type: '*/*',  
       });
 
       if (res.type === 'cancel') {
