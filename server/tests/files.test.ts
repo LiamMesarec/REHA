@@ -12,7 +12,7 @@ function generateRandomFile(directory: string, fileName?: string): string {
     }
 
     const file = fileName || `temp_testfile_${Math.random().toString(36).substring(7)}.txt`;
-    const filePath = path.join(`${process.env.TMPDIR}/${directory}`, file);
+    const filePath = path.join(directory, file);
 
     const content = `RANDOM TEXT: ${Math.random().toString(36).substring(7)}`;
 

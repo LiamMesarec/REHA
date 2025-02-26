@@ -23,4 +23,4 @@ services:
       - NODE_ENV=test
     volumes:
       - .:/server
-    working_dir: /server
+      - /server/node_modules
