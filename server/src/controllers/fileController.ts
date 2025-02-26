@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import asyncHandler from "../middleware/asyncHandler";
+import { Request, Response, NextFunction } from 'express';
+import asyncHandler from '../middleware/asyncHandler';
 
 // @desc    Fetch all files
 // @route   GET /api/files
@@ -7,14 +7,14 @@ import asyncHandler from "../middleware/asyncHandler";
 const getFiles = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
-    db.all("SELECT * FROM Files", [], (err: any, rows: any) => {
+    db.all('SELECT * FROM Files', [], (err: any, rows: any) => {
       if (err) {
-        console.error("GET /api/files error:", err);
+        console.error('GET /api/files error:', err);
         return next(err);
       }
       res.json({ files: rows }).status(200);
     });
-  }
+  },
 );
 
 // @desc    Fetch a file by id
@@ -34,9 +34,9 @@ const getFileById = asyncHandler(
           return next(err);
         }
         res.json({ events: rows });
-      }
+      },
     );
-  }
+  },
 );
 
 // @desc    Create a file
@@ -48,12 +48,12 @@ const createFile = asyncHandler(
     const { name, path } = req.body;
 
     if (!req.file) {
-      res.status(400).json({ message: "No file uploaded" });
+      res.status(400).json({ message: 'No file uploaded' });
       return;
     }
 
     if (!name || !path) {
-      res.status(400).json({ message: "Name and path are required" });
+      res.status(400).json({ message: 'Name and path are required' });
       return;
     }
 
@@ -62,11 +62,9 @@ const createFile = asyncHandler(
       if (err) {
         return next(err);
       }
-      res
-        .status(201)
-        .json({ id: this.lastID, name, path, date_uploaded: new Date() });
+      res.status(201).json({ id: this.lastID, name, path, date_uploaded: new Date() });
     });
-  }
+  },
 );
 
 // @desc    Delete an event
@@ -74,10 +72,10 @@ const createFile = asyncHandler(
 // @access  Private/Admin
 const deleteFile = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    console.log("deleteFile called with params:", req.params);
+    console.log('deleteFile called with params:', req.params);
     const dummyNext = next.toString();
-    res.json({ message: "deleteFile called", params: req.params, dummyNext });
-  }
+    res.json({ message: 'deleteFile called', params: req.params, dummyNext });
+  },
 );
 
 export { createFile, getFiles, getFileById, deleteFile };
