@@ -1,4 +1,5 @@
 import { Database } from 'sqlite3';
+import { v4 as uuidv4 } from 'uuid';
 
 export function testSeedDatabase(db: Database): void {
   db.serialize(() => {
@@ -22,10 +23,10 @@ export function testSeedDatabase(db: Database): void {
     );
 
     db.run(
-      `INSERT INTO Files (name, path) VALUES
-        ('presentation.pdf', '/files/presentation.pdf'),
-        ('schedule.docx', '/files/schedule.docx'),
-        ('brochure.png', '/files/brochure.png')`,
+      `INSERT INTO Files (name, path, uuid) VALUES
+        ('presentation.pdf', '/files/presentation.pdf', '${uuidv4()}'),
+        ('schedule.docx', '/files/schedule.docx', '${uuidv4()}'),
+        ('brochure.png', '/files/brochure.png', '${uuidv4()}')`,
       (err: Error | null) => handleError(err, 'Inserted test Files'),
     );
 
