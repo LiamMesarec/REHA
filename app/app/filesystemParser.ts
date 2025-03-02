@@ -59,6 +59,23 @@ export class Filesystem {
     return null;
   }
 
+  findNodesByName(name: string): any[] {
+    let nodesToVisit: any[] = [this.root];
+    let matchingNodes: any[] = [];
+  
+    while (nodesToVisit.length > 0) {
+      const currentNode = nodesToVisit.pop();
+      
+      if (currentNode.model.name.toLowerCase().includes(name.toLowerCase())) {
+        matchingNodes.push(currentNode);
+      }
+  
+      nodesToVisit.push(...currentNode.children);
+    }
+  
+    return matchingNodes;
+  }
+
   /*findNodeByPath(path : string) : any {
     let nodesToVisit: any[] = [this.root];
     while (nodesToVisit.length > 0){

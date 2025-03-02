@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from "react";
 import { Text, TouchableOpacity, View, StyleSheet, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { FilesystemElement } from './types';
+import { FileNode } from './types';
 
 interface MapListProps {
-  folders: FilesystemElement[];
-  onFolderPress: (folder: FilesystemElement) => void;
+  folders: FileNode[];
+  onFolderPress: (folder: FileNode) => void;
 }
 
 const MapList: React.FC<MapListProps> = ({ folders, onFolderPress }) => {
