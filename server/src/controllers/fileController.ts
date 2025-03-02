@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import asyncHandler from '../middleware/asyncHandler';
 import path from 'path';
 import fs from 'fs';
+import mime from 'mime-types';
 
 // @desc    Fetch all files
 // @route   GET /api/files
@@ -100,7 +101,6 @@ const deleteFile = asyncHandler(
         });
 
         res.json({ message: 'File deleted successfully' });
-        res.status(200);
       });
     });
   },
@@ -112,30 +112,32 @@ const deleteFile = asyncHandler(
 const getFileContentsById = asyncHandler(
   async (req: Request, res: Response, _: NextFunction): Promise<void> => {
     const { uuid } = req.params;
-    const filePath = path.join('files', `${uuid}`);
+    if (uuid) {
+      const filePath = path.join('files', path.basename(uuid));
 
-    try {
-      if (fs.existsSync(filePath)) {
-        const stats = fs.statSync(filePath);
+      try {
+        if (fs.existsSync(filePath)) {
+          const stats = fs.statSync(filePath);
 
-        if (stats.isFile()) {
-          const fileStream = fs.createReadStream(filePath);
-          const mimeType = 'application/octet-stream';
-
-          res.setHeader('Content-Type', mimeType);
-          fileStream.on('error', (err) => {
-            res.status(500).json({ err });
-          });
-          fileStream.pipe(res);
+          if (stats.isFile()) {
+            const fileStream = fs.createReadStream(filePath);
+            const mimeType = mime.lookup(filePath) || 'application/octet-stream';
+            res.setHeader('Content-Type', mimeType);
+            res.setHeader('Content-Type', mimeType);
+            fileStream.on('error', (err) => {
+              res.status(500).json({ err });
+            });
+            fileStream.pipe(res);
+          } else {
+            res.status(404).send('File not found');
+          }
         } else {
           res.status(404).send('File not found');
         }
-      } else {
-        res.status(404).send('File not found');
+      } catch (error) {
+        console.error('Error serving file:', error);
+        res.status(500).send('Internal Server Error');
       }
-    } catch (error) {
-      console.error('Error serving file:', error);
-      res.status(500).send('Internal Server Error');
     }
   },
 );

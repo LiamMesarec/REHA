@@ -5,6 +5,7 @@ import { Database } from 'sqlite3';
 import { connectDB, runMigrations } from '../database/db';
 import { App } from '../app';
 import path from 'path';
+import mime from 'mime-types';
 
 function generateRandomFile(directory: string, fileName?: string): string {
   if (!fs.existsSync(directory)) {
@@ -146,6 +147,32 @@ describe('Files Unit Test', () => {
       expect(getResponse.status).toBe(404);
 
       expect(fs.existsSync(path.join('files', postResponse.body.uuid))).toBe(false);
+    });
+  });
+
+  describe('POST /files MIME Type', () => {
+    it('should return the correct MIME type for a file', async () => {
+      const fileName = 'test_mime.txt';
+      const filePath = path.join('test_files', fileName);
+
+      fs.writeFileSync(filePath, 'test');
+
+      const postResponse = await request(app)
+        .post('/api/files')
+        .set('Content-Type', 'multipart/form-data')
+        .field('name', fileName)
+        .field('path', filePath)
+        .attach('file', filePath);
+
+      expect(postResponse.status).toBe(201);
+
+      const uuid = postResponse.body.uuid;
+      const expectedMimeType = mime.lookup(filePath) || 'application/octet-stream';
+
+      const contentResponse = await request(app).get(`/api/files/${uuid}/content`);
+
+      expect(contentResponse.status).toBe(200);
+      expect(contentResponse.headers['content-type']).toBe(expectedMimeType);
     });
   });
 
