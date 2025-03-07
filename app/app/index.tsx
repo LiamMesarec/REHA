@@ -7,6 +7,25 @@ import { useNavigation, NavigationProp } from "@react-navigation/native";
 import {displayEventDetails, EventPage} from "./event_detailed";
 import FileDisplay from './fileDisplay';  
 import MapList from './mapList';  
+import axios from "axios";
+
+
+const api = axios.create({
+  baseURL: "http://localhost:3000/api",
+  timeout: 10000, 
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+export const fetchData = async (): Promise<any> => {
+  try {
+    const response = await api.get("/files");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    throw error;
+  }
+};
 
 import { RootStackParamList } from './types';
 //import { RootStackParamList } from "./types"; // Create and import this type
@@ -33,6 +52,7 @@ function RootStack() {
 
 
 export default function Index() {
+  console.log(fetchData());
   return (
     <NavigationIndependentTree>
       <RootStack />
