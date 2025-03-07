@@ -2,22 +2,29 @@ import { ScrollView, FlatList, View, Text, TouchableOpacity, StyleSheet } from "
 import { getMonthEvents, MonthHeader, DayEvent, monthNames } from "./calendar";
 import { NavigationContainer, NavigationIndependentTree } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import {displayEventDetails} from "./event_detailed";
+import FileDisplay from './fileDisplay';  
+import MapList from './mapList';  
+
+import { RootStackParamList } from './types';
 //import { RootStackParamList } from "./types"; // Create and import this type
 
 
-const Stack = createNativeStackNavigator();
+//const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator<RootStackParamList>();
 
 function RootStack() {
   return (
     <Stack.Navigator
       initialRouteName="Calendar">
       <Stack.Screen name="Calendar" component={Calendar} />
+      <Stack.Screen name="Files" component={FileDisplay} />
 
       <Stack.Screen name="EventPage" component={EventPage}>
-
       </Stack.Screen>
+
     </Stack.Navigator>
   );
 }
@@ -34,6 +41,11 @@ function Calendar() {
         flex: 1,
       }}
     >
+      <TouchableOpacity onPress={() => navigation.navigate('Files', { })}>
+        <Text>
+          Files
+        </Text>
+      </TouchableOpacity>
       <FlatList
         data={events}
         keyExtractor={(item, index) => index.toString()}
@@ -85,6 +97,8 @@ function EventPage({ route }) {
     </View>
   );
 }
+
+
 export default function Index() {
   return (
     <NavigationIndependentTree>
