@@ -1,4 +1,8 @@
-import { Text, View, StyleSheet } from "react-native";
+import { ScrollView, FlatList, View, Text, TouchableOpacity, StyleSheet  } from "react-native";
+import { NavigationContainer, NavigationIndependentTree } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator } from '@react-navigation/stack';
+import { useNavigation, NavigationProp } from "@react-navigation/native";
 import React from "react";
 
 
@@ -100,6 +104,61 @@ export const getMonthEvents = (month: number, year: number): DayEventProps[] => 
     return events;
 };
 
+export function Calendar() {
+    let dateDisplayed: Date = new Date();
+    let events = getMonthEvents(dateDisplayed.getMonth(), dateDisplayed.getFullYear());
+    const navigation = useNavigation();
+    return (
+  
+      <View
+        style={{
+          flex: 1,
+        }}
+      >
+        <TouchableOpacity onPress={() => navigation.navigate('Files', { })}>
+          <Text>
+            Files
+          </Text>
+        </TouchableOpacity>
+        <FlatList
+          data={events}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => {
+            if (item.header === false) {
+              if (item.event !== "No event") {
+                return (
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => navigation.navigate('EventPage', { eventId: item.id })}
+                  >
+                    <DayEvent {...item} />
+                  </TouchableOpacity>
+                );
+              } else {
+                return <DayEvent {...item} />;
+              }
+            }
+  
+            return <MonthHeader month={item.month} year={item.year} />;
+          }}
+          contentContainerStyle={{ alignItems: 'center', padding: 10 }}
+          onEndReached={() => {
+            dateDisplayed.setMonth((dateDisplayed.getMonth() + 1));
+            const newEvents = getMonthEvents(dateDisplayed.getMonth(), dateDisplayed.getFullYear());
+            events.push(...newEvents);
+          }
+  
+            /*onScroll={({ nativeEvent }) => {
+              if (nativeEvent.contentOffset.y <= 0) {
+                events = getMonthEvents(dateDisplayed.getMonth(), dateDisplayed.getFullYear());
+              }
+            }*/
+          }
+        />
+      </View>
+  
+    );
+  }
 
 const styles = StyleSheet.create({
     dayEventContainer: {

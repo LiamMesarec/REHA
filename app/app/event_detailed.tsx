@@ -72,6 +72,19 @@ export function displayEventDetails(id: number) {
     );
 }
 
+
+
+export function EventPage({ route }) {
+  const { eventId } = route.params;
+
+  return (
+    <View>
+      <Text>Event id: {eventId}</Text>
+      {displayEventDetails(eventId)}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
     eventTitle: {
         fontSize: 30,
