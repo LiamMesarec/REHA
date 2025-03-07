@@ -11,7 +11,7 @@ interface MapListProps {
 
 const MapList: React.FC<MapListProps> = ({ folders, onFolderPress }) => {
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       {folders.map((folder, index) => (
         <TouchableOpacity
           key={index}
@@ -24,7 +24,7 @@ const MapList: React.FC<MapListProps> = ({ folders, onFolderPress }) => {
           </View>
         </TouchableOpacity>
       ))}
-    </ScrollView>
+    </View>
   );
 };
 

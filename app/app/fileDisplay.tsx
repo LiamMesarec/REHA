@@ -33,7 +33,7 @@ const FileDisplay: React.FC<FileListProps> = ({ route }) => {
   const [modaleFolders, setModalFolders] = useState<FileNode[]>();
   const [modaleVisible, setModaleVisible] = useState<boolean>(false);
 
-  fileSystemRef.current = useMemo(() => {
+  fileSystemRef.current = useMemo(() => { //TEST - NADOMESTI Z API KO BO OPCIJA
     const fs = new Filesystem();
     fs.addPath("Root\\Mapa1\\podatkiBolniki.pdf");
     fs.addPath("Root\\Mapa1\\PodatkiBolnice.pdf");
@@ -143,7 +143,7 @@ const FileDisplay: React.FC<FileListProps> = ({ route }) => {
     <ScrollView style={styles.container}>
 
       {currentMap?.name !== 'Root' && (
-              <TouchableOpacity onPress= {() => goToParent()}>
+            <TouchableOpacity onPress= {() => goToParent()}>
               <Icon name="arrow-left" size={24} color="black" />
             </TouchableOpacity>
       )}
