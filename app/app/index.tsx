@@ -3,6 +3,7 @@ import { getMonthEvents, MonthHeader, DayEvent, monthNames } from "./calendar";
 import { NavigationContainer, NavigationIndependentTree } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation, NavigationProp } from "@react-navigation/native";
+import {displayEventDetails} from "./event_detailed";
 //import { RootStackParamList } from "./types"; // Create and import this type
 
 
@@ -80,6 +81,7 @@ function EventPage({ route }) {
   return (
     <View>
       <Text>Event id: {eventId}</Text>
+      {displayEventDetails(eventId)}
     </View>
   );
 }
