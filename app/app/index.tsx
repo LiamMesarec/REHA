@@ -4,15 +4,15 @@ import { NavigationContainer, NavigationIndependentTree } from '@react-navigatio
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation, NavigationProp } from "@react-navigation/native";
-import {displayEventDetails, EventPage} from "./event_detailed";
-import FileDisplay from './fileDisplay';  
-import MapList from './mapList';  
+import { displayEventDetails, EventPage } from "./event_detailed";
+import FileDisplay from './fileDisplay';
+import MapList from './mapList';
 import axios from "axios";
 
 
 const api = axios.create({
   baseURL: "http://localhost:3000/api",
-  timeout: 10000, 
+  timeout: 10000,
   headers: {
     "Content-Type": "application/json",
   },
