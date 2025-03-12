@@ -31,7 +31,8 @@ export const LoginButton = () => {
     'https://login.microsoftonline.com/common/v2.0',
   );
   const redirectUri = makeRedirectUri({
-    scheme: undefined,
+    scheme: 'exp://127.0.0.1:8081',
+    preferLocalhost: true,
     path: 'login',
   });
   const clientId = '21bd0147-4d70-40b6-b482-8f63a0cb6e44';
