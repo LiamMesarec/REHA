@@ -20,22 +20,20 @@ router.get('/', async (_req:any, res:any) => {
                 Authorization: `Bearer ${token}`,
             },
         });
-        console.log(response.status);
         if (response.status === 200) {
             const resJson = await response.json();
-            console.log(resJson.mail);
-            if (dummyMails.includes(resJson)) {
-                res.status(200).send('Authorized');
+            if (dummyMails.includes(resJson.mail)) {
+                res.status(200).send({"message": "Authorized"});
             }
             else{
-                res.status(401).send('Unauthorized');
+                res.status(401).send({"message": "Unauthorized"});
             }
         }
         else{
             res.status(401).send(await response.json().then((data:any) => {return data.error}));
         }
     } else {
-        res.status(401).send('Unauthorized');
+        res.status(401).send({"message": "Unauthorized"});
     }
 });
 export default router;
