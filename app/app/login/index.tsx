@@ -32,7 +32,7 @@ export const LoginButton = () => {
   );
   const redirectUri = makeRedirectUri({
     scheme: 'exp://127.0.0.1:8081',
-    preferLocalhost: true,
+    preferLocalhost: true, // če ti da bluescreen na telefonu komentiraj to ven in mi pošlji tvoj expo url
     path: 'login',
   });
   const clientId = '21bd0147-4d70-40b6-b482-8f63a0cb6e44';

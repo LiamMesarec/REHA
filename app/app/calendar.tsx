@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import React from "react";
 import { Link } from 'expo-router';
+import { LoginButton } from "./login";
 
 
 export const monthNames = ["January", "February", "March", "April", "May", "June", 
@@ -121,7 +122,7 @@ export function Calendar() {
             Files
           </Text>
         </TouchableOpacity>
-        <Link href="./login">Login</Link>
+        <LoginButton />
         <FlatList
           data={events}
           keyExtractor={(item, index) => index.toString()}
