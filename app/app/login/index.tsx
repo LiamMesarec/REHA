@@ -13,19 +13,9 @@ import { RootStackParamList } from '../types';
 import { router } from 'expo-router';
 
 
+// POGLEJ SPODAJ KJE JE TREBA VPISATI SVOJ NASLOV ZA SERVER
+
 WebBrowser.maybeCompleteAuthSession();
-
-
-// to bo na backendu za preverjanje ujemanja tokena
-const getDataFomToken = async () => {
-  const token = await SecureStore.getItemAsync('token');
-  const response = await fetch('https://graph.microsoft.com/v1.0/me', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.json();
-}
 
 export const LoginButton = () => {
   const discovery = useAutoDiscovery(
@@ -33,7 +23,7 @@ export const LoginButton = () => {
   );
   const redirectUri = makeRedirectUri({
     scheme: 'exp://127.0.0.1:8081',
-    //preferLocalhost: true, // če ti da bluescreen na telefonu komentiraj to ven in mi pošlji tvoj expo url
+    preferLocalhost: true, // če ti da bluescreen na telefonu komentiraj to ven in mi pošlji tvoj expo url
     path: 'login',
   });
   const clientId = '21bd0147-4d70-40b6-b482-8f63a0cb6e44';
