@@ -108,7 +108,7 @@ export default function Login() {
       const token = await SecureStore.getItemAsync('token');
       if (token) {
         console.log("Token found");
-          const response = await fetch("http://192.168.50.170:3000/api/login", {
+          const response = await fetch("http://192.168.50.170:3000/api/login", { // TUKAJ VPIŠI SVOJ NASLOV ZA SERVER
             method: 'GET',
             headers: {
               Authorization: `Bearer ${token}`,
