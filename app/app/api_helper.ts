@@ -17,3 +17,21 @@ const api = axios.create({
       throw error;
     }
   };
+
+
+
+  export const submitEvent = async (title: string, description: string, coordinator: string, date: string) => {
+    try {
+        const response = await api.post("/events", {
+            title: title,
+            coordinator: coordinator,
+            description: description,
+            start: date
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error("Error submitting Event creation data:", error);
+        throw error;
+    }
+};

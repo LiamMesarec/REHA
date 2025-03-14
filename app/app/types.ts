@@ -2,7 +2,8 @@ export type RootStackParamList = {
     Map: undefined;
     Files: { mapNameBuffer: string }; 
     Calendar: undefined;
-    EventPage: { eventId: number };
+    EventPage: { eventId: number }; 
+    EventForm: {eventId: number | null};
   };
 
 export type FileNode = {

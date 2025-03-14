@@ -147,6 +147,13 @@ export function Calendar() {
             Files
           </Text>
         </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('EventForm', { eventId: null})}>
+          <Text>
+            Event Creation
+          </Text>
+        </TouchableOpacity>
+
         <FlatList
           data={events}
           keyExtractor={(item, index) => index.toString()}

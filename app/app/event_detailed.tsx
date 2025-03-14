@@ -26,8 +26,13 @@ async function getEventDetails(id: number): Promise<ParagraphProps[]> {
     let eventDetails: ParagraphProps[] = [];
     let eventDataObject = await fetchData(`/events/${id}`);
     let eventData = eventDataObject.event;
+    let eventFilesObject = await fetchData(`/events/${id}/files`);
+    let eventFiles = eventFilesObject.files;
+    let filesContent = eventFiles.map((file: any) => file.name).join(",\n");
+
     eventDetails.push({ title: "Opis", content: `${eventData.description}` });
     eventDetails.push({ title: "Podatki", content: `Dogodek se začne: ${eventData.start}. Dogodek bo koordiniral: ${eventData.coordinator}. \nIme dogodka: ${eventData.title}` });
+    eventDetails.push({title: "Datoteke", content: `${filesContent}`});
     return eventDetails;
 }
 /*
