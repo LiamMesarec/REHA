@@ -61,15 +61,15 @@ const getDaysInMonth = (year: number, month: number): number => {
 export const getEvents = async(): Promise<DayEventProps[]> => {
     let events: DayEventProps[] = [];
     let eventsData = await fetchData("/events");
-    //console.log("Fetched events data:", eventsData);
+    console.log("Fetched events data:", eventsData);
     eventsData.events.forEach((event: any) => {
-      //console.log(event.from_date);
-      let date = new Date(event.from_date);
-      //console.log(date);
+      //console.log(event.start);
+      let date = new Date(event.start);
+      console.log(date);
         events.push({
           event: event.title,
           day: getDayOfWeekName(date),
-          dayNum: date.getDay(),
+          dayNum: date.getDate(),
           month: monthNames[date.getMonth()],
           year: date.getFullYear(),
           header: false,
