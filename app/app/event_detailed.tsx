@@ -1,9 +1,10 @@
 import { Text, View, StyleSheet } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { fetchData } from "./api_helper";
 
 
 const TITLE_IMAGE_SECTION = "Image Section";
-const DISPLAY_TITLE = "Event Details";
+const DISPLAY_TITLE = "Podrobnosti Dogodka";
 
 
 
@@ -21,10 +22,12 @@ interface ImageSectionProps {
 
 }
 
-function getEventDetails(): ParagraphProps[] {
+async function getEventDetails(id: number): Promise<ParagraphProps[]> {
     let eventDetails: ParagraphProps[] = [];
-    eventDetails.push({ title: "Event Description", content: "The event consists of 3 parts: the introduction, yoga and lunch. Please prepaire some sports clothes!!" });
-    eventDetails.push({ title: "Event Date and Location", content: "21.3.2025, FZSV" });
+    let eventDataObject = await fetchData(`/events/${id}`);
+    let eventData = eventDataObject.event;
+    eventDetails.push({ title: "Opis", content: `${eventData.description}` });
+    eventDetails.push({ title: "Podatki", content: `Dogodek se začne: ${eventData.start}. Dogodek bo koordiniral: ${eventData.coordinator}. \nIme dogodka: ${eventData.title}` });
     return eventDetails;
 }
 /*
@@ -59,8 +62,8 @@ export const ImageSection = (props: ImageSectionProps) => {
 
 };
 
-export function displayEventDetails(id: number) {
-    let eventDetails: ParagraphProps[] = getEventDetails();
+export function displayEventDetails(eventDetails: ParagraphProps[]) {
+    //let eventDetails:  = await getEventDetails(id);
     //let imageSectionProps: ImageSectionProps = getImages();
     return (
         <View>
@@ -76,11 +79,20 @@ export function displayEventDetails(id: number) {
 
 export function EventPage({ route }) {
   const { eventId } = route.params;
+  const [eventDetails, setEventDetails] = useState<ParagraphProps[]>([]);
+
+  useEffect(() => {
+    const fetchEventDetails = async () => {
+      const details = await getEventDetails(eventId);
+      setEventDetails(details);
+    };
+    fetchEventDetails();
+  }, [eventId]);
 
   return (
     <View>
       <Text>Event id: {eventId}</Text>
-      {displayEventDetails(eventId)}
+      {displayEventDetails(eventDetails)}
     </View>
   );
 }
