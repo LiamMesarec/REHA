@@ -3,8 +3,8 @@ import { NavigationContainer, NavigationIndependentTree } from '@react-navigatio
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation, NavigationProp } from "@react-navigation/native";
-import React from "react";
-
+import React, { useEffect, useState } from "react";
+import { fetchData } from "./api_helper";
 
 export const monthNames = ["January", "February", "March", "April", "May", "June", 
     "July", "August", "September", "October", "November", "December"];
@@ -58,27 +58,29 @@ const getDaysInMonth = (year: number, month: number): number => {
     return new Date(year, month + 1, 0).getDate();
 }
 
-export const getEvents = (): DayEventProps[] => {
+export const getEvents = async(): Promise<DayEventProps[]> => {
     let events: DayEventProps[] = [];
-    let dateDisplayed:Date = new Date();
+    let eventsData = await fetchData("/events");
+    //console.log("Fetched events data:", eventsData);
+    eventsData.events.forEach((event: any) => {
+      //console.log(event.from_date);
+      let date = new Date(event.from_date);
+      //console.log(date);
+        events.push({
+          event: event.title,
+          day: getDayOfWeekName(date),
+          dayNum: date.getDay(),
+          month: monthNames[date.getMonth()],
+          year: date.getFullYear(),
+          header: false,
+          id: event.id
+        });
+    });
     
-        //dateDisplayed.setMonth(i);
-        for (let i = 1; i <= getDaysInMonth(dateDisplayed.getFullYear(), dateDisplayed.getMonth()); i++) {
-            let date:Date = new Date(dateDisplayed.getFullYear(), dateDisplayed.getMonth(), i);
-            events.push({
-                event: eventNames[i]?.toString() || "No event",
-                day: getDayOfWeekName(date),
-                dayNum: i,
-                month: monthNames[dateDisplayed.getMonth()],
-                year: dateDisplayed.getFullYear(),
-                header: false,
-                id: i+dateDisplayed.getMonth()
-            });
-        }
     return events;
 };//<MonthHeader month={monthNames[dateDisplayed.getMonth() + 1]} year={dateDisplayed.getFullYear()} />
 
-export const getMonthEvents = (month: number, year: number): DayEventProps[] => {
+export const getMonthEvents = (month: number, year: number, events2: DayEventProps[]): DayEventProps[] => {
     let events: DayEventProps[] = [];
     events.push({
         event: "",
@@ -89,16 +91,28 @@ export const getMonthEvents = (month: number, year: number): DayEventProps[] => 
         header: true,
         id: 0
     });
+    let monthName = monthNames[month];
+    let noEvent: bool = true;
     for (let i = 1; i <= getDaysInMonth(year, month); i++) {
         let date:Date = new Date(year, month, i);
+        noEvent = true;
+        for (let j = 0; j < events2.length; j++) { // Could remove them after used and get them for each month from db
+            let event = events2[j];
+            if (event.year == year && event.month == monthName && event.dayNum == i) {
+                events.push(event);
+                noEvent = false;
+                break; // PRINTS 1 EVENT PER DAY MAX
+            }
+        }
+        if (!noEvent) continue;
         events.push({
-            event: eventNames[i]?.toString() || "No event",
+            event: "No event",
             day: getDayOfWeekName(date),
             dayNum: i,
-            month: monthNames[month],
+            month: monthName,
             year: year,
             header: false,
-            id: i+month
+            id: 0
         });
     }
     return events;
@@ -106,8 +120,21 @@ export const getMonthEvents = (month: number, year: number): DayEventProps[] => 
 
 export function Calendar() {
     let dateDisplayed: Date = new Date();
-    let events = getMonthEvents(dateDisplayed.getMonth(), dateDisplayed.getFullYear());
     const navigation = useNavigation();
+    const [events2, setEvents2] = useState<DayEventProps[]>([]);
+    useEffect(() => {
+      const fetchEvents = async () => {
+          const eventsData = await getEvents();
+          setEvents2(eventsData);
+      };
+
+      fetchEvents();
+  }, []);
+  
+    console.log(events2);
+    let events = getMonthEvents(dateDisplayed.getMonth(), dateDisplayed.getFullYear(), events2);
+
+
     return (
   
       <View
@@ -144,7 +171,7 @@ export function Calendar() {
           contentContainerStyle={{ alignItems: 'center', padding: 10 }}
           onEndReached={() => {
             dateDisplayed.setMonth((dateDisplayed.getMonth() + 1));
-            const newEvents = getMonthEvents(dateDisplayed.getMonth(), dateDisplayed.getFullYear());
+            const newEvents = getMonthEvents(dateDisplayed.getMonth(), dateDisplayed.getFullYear(), events2);
             events.push(...newEvents);
           }
   

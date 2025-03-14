@@ -1,0 +1,19 @@
+import axios from "axios";
+
+const api = axios.create({
+    baseURL: "http://localhost:3000/api",
+    timeout: 10000, 
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  export const fetchData = async (path: string): Promise<any> => {
+    try {
+      const response = await api.get(path);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      throw error;
+    }
+  };
