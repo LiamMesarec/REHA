@@ -24,9 +24,9 @@ export function testSeedDatabase(db: Database): void {
 
     db.run(
       `INSERT INTO Files (name, path, uuid) VALUES
-        ('presentation.pdf', '/files/presentation.pdf', '${uuidv4()}'),
-        ('schedule.docx', '/files/schedule.docx', '${uuidv4()}'),
-        ('brochure.png', '/files/brochure.png', '${uuidv4()}')`,
+        ('presentation.pdf', 'files\\presentation.pdf', '${uuidv4()}'),
+        ('schedule.docx', 'files\\schedule.docx', '${uuidv4()}'),
+        ('brochure.png', 'files\\brochure.png', '${uuidv4()}')`,
       (err: Error | null) => handleError(err, 'Inserted test Files'),
     );
 

@@ -8,6 +8,7 @@ import { Filesystem } from "./filesystemParser";
 import FileUploadScreen from "./fileUpload";
 import SearchResoults from "./searchResModal";
 import FileList from "./fileList";
+import api from "./api_helper";
 
 
 type FileListRouteProp = RouteProp<RootStackParamList, 'Files'>;
@@ -16,40 +17,72 @@ interface FileListProps {
   route: FileListRouteProp;
 }
 
+let defaultMap = {
+  name: "files",
+  type: 0,
+  filePath : "files",
+  date : ""
+}
 
 
-const FileDisplay: React.FC<FileListProps> = ({ route }) => {
-  const [files, setFiles] = useState<FileNode[]>([]); //TO SPREMENI V VOZLIŠČA NASLEDNJIČ! NVM KAJ SI SE ŠPILO TO NEUMNOSTI
+const FileSystem: React.FC<FileListProps> = ({ route }) => {
+  const [files, setFiles] = useState<FileNode[]>([]); //TO SPREMENI V VOZLIŠČA NASLEDNJIČ! NVM KAJ SM SE ŠPILO TO NEUMNOSTI
   const [folders, setFolders] = useState<FileNode[]>([]);
   const [searchBarText, setSearchBarText] = useState<string> ('');
 
 
   //const [selectedMap, setSelectedMap] = useState<string | null>(null);
 
-  const [currentMap, setCurrentMap] = useState<FileNode | null> (null);
+  const [currentMap, setCurrentMap] = useState<FileNode> (defaultMap);
   const fileSystemRef = useRef<Filesystem | null>(null);
 
   const [modaleFiles, setModalFiles] = useState<FileNode[]>();
   const [modaleFolders, setModalFolders] = useState<FileNode[]>();
   const [modaleVisible, setModaleVisible] = useState<boolean>(false);
 
-  fileSystemRef.current = useMemo(() => { //TEST - NADOMESTI Z API KO BO OPCIJA
-    const fs = new Filesystem();
-    fs.addPath("Root\\Mapa1\\podatkiBolniki.pdf");
-    fs.addPath("Root\\Mapa1\\PodatkiBolnice.pdf");
-    fs.addPath("Root\\Mapa1\\Test\\nekaj.pdf");
-    fs.addPath("Root\\Mapa1\\Mapa11\\hrana.pdf");
-    fs.addPath("Root\\Mapa1\\Mapa11\\Mapa12\\sladkarije.pdf");
-    fs.addPath("Root\\Mapa1\\Mapa112\\upokojenci.pdf");
-    fs.addPath("Root\\Mapa1\\Mapa2\\Mapa11\\zdravstveniDom.pdf");
-    fs.addPath("Root\\Mapa2\\Mapa21\\testnaDatoteka.pdf");
-    fs.addPath("Root\\Mapa2\\ankete.pdf");
-    fs.addPath("Root\\Mapa3\\test.pdf");
-    return fs;
+  const loadFromSystem = () => {
+    console.log(fileSystemRef.current);
+    let childArray = fileSystemRef.current?.getChildrenByPath(currentMap?.filePath ?? "files");
+    //console.log("CHILD ARR:  ", childArray);
+    let newFolders: FileNode[] = [];
+    let newFiles: FileNode[] = [];
+  
+    for (let i of childArray) {
+      if (i.type === 0) {
+        newFolders.push(i)
+      } else if (i.type === 1) {
+        newFiles.push(i);
+      }
+    }
+    
+    setFolders(newFolders)
+    setFiles(newFiles);
+  }
+
+  useEffect(() => {
+    fileSystemRef.current = new Filesystem(); // Only set it once
+    fileSystemRef.current?.addPath("files/Mapa1/podatkiBolniki.pdf");
+    const fetchFiles = async () => {
+      try {
+        const response = await api.get("/files");
+        console.log("DATOTEKE IZ SERVERJA: ", response.data.files);
+        for (let file of response.data.files) {
+
+          let pathBuff = file.path.slice(1); //tu porihtaj pol kr zgublamo procesor za brezveze slice je menda O(n)
+
+          fileSystemRef.current?.addPath(pathBuff, file.date_uploaded); // Populate the filesystem
+          loadFromSystem();
+        }
+      } catch (error) {
+        console.error("Error fetching files:", error);
+      }
+    };
+    fetchFiles();
+    
   }, []);
 
   const goToParent = () => {
-    let currentNode = fileSystemRef.current?.findNodeByPath(currentMap?.filePath ?? "Root");
+    let currentNode = fileSystemRef.current?.findNodeByPath(currentMap?.filePath ?? "files");
 
     if (!currentNode) {
         console.log("Node not found!");
@@ -60,7 +93,8 @@ const FileDisplay: React.FC<FileListProps> = ({ route }) => {
       setCurrentMap({ 
         name: currentNode.parent.model.name, 
         type: -1,
-        filePath: currentNode.parent.model.filePath 
+        filePath: currentNode.parent.model.filePath,
+        date : currentNode.parent.model.date 
     });
       console.log("NEW MAP: ", currentNode.parent.model.name);
     } else {
@@ -79,7 +113,8 @@ const FileDisplay: React.FC<FileListProps> = ({ route }) => {
           {
             name:  i.model.name,
             type: i.model.type,
-            filePath : i.model.filePath
+            filePath : i.model.filePath,
+            date : i.model.date 
           }
         );
       }else if(i.model.type == 1) {
@@ -87,7 +122,8 @@ const FileDisplay: React.FC<FileListProps> = ({ route }) => {
           {
             name:  i.model.name,
             type: i.model.type,
-            filePath : i.model.filePath
+            filePath : i.model.filePath,
+            date : i.model.date 
           }
         );
       }
@@ -95,9 +131,6 @@ const FileDisplay: React.FC<FileListProps> = ({ route }) => {
 
     setModalFiles(modalFilesBuffer);
     setModalFolders(modalFoldersBuffer);
-    console.log("MODAL FILES: ", modalFilesBuffer);
-    console.log("MODAL FOLDERS: ", modalFoldersBuffer);
-    console.log("MATCHES: ", matches);
     showFoundFiles();
 
   }
@@ -112,22 +145,8 @@ const FileDisplay: React.FC<FileListProps> = ({ route }) => {
 
 
   useEffect(() => {
-    console.log(fileSystemRef.current);
-    let childArray = fileSystemRef.current?.getChildrenByPath(currentMap?.filePath ?? "Root");
-    //console.log("CHILD ARR:  ", childArray);
-    let newFolders: FileNode[] = [];
-    let newFiles: FileNode[] = [];
-  
-    for (let i of childArray) {
-      if (i.type === 0) {
-        newFolders.push(i)
-      } else if (i.type === 1) {
-        newFiles.push(i);
-      }
-    }
-    
-    setFolders(newFolders)
-    setFiles(newFiles);
+    loadFromSystem();
+
   }, [currentMap]);
 
   const loadFile = (index: number): void => {
@@ -142,7 +161,7 @@ const FileDisplay: React.FC<FileListProps> = ({ route }) => {
   return (
     <ScrollView style={styles.container}>
 
-      {currentMap?.name !== 'Root' && (
+      {currentMap?.name !== 'files' && (
             <TouchableOpacity onPress= {() => goToParent()}>
               <Icon name="arrow-left" size={24} color="black" />
             </TouchableOpacity>
@@ -225,4 +244,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default FileDisplay;
+export default FileSystem;

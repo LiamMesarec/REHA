@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import {displayEventDetails, EventPage} from "./event_detailed";
-import FileDisplay from './fileDisplay'; 
+import FileSystem from './fileSystem'; 
 import { EventForm } from "./eventForm"; 
 import MapList from './mapList';  
 import { fetchData } from "./api_helper";
@@ -24,7 +24,7 @@ function RootStack() {
     <Stack.Navigator
       initialRouteName="Calendar">
       <Stack.Screen name="Calendar" component={Calendar} />
-      <Stack.Screen name="Files" component={FileDisplay} />
+      <Stack.Screen name="Files" component={FileSystem} />
       <Stack.Screen name ="EventForm" component={EventForm}/>
       <Stack.Screen name="EventPage" component={EventPage}>
       </Stack.Screen>
