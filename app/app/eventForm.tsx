@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, TouchableOpacity } from "react-native"
+import { Text, View, StyleSheet, TouchableOpacity, Alert } from "react-native"
 import { TextInput } from "react-native-gesture-handler";
 import React, {useState} from "react";
 import { submitEvent } from "./api_helper";
@@ -30,6 +30,15 @@ export const EventForm = ({ route }) => {
     const [CoordinatorValue, setCoordinatorValue] = useState("");
     const [Date, setDate] = useState("2025-03-14 13:50:33");
 
+    const submitFn = async () => {
+        let res;
+        try{
+           res = await submitEvent(TitleValue, DescriptionValue, CoordinatorValue, Date );
+            Alert.alert("Uspešno ustvarjen dogodek: ", TitleValue);
+        }catch (error){
+            Alert.alert("Napaka pri ustvarjanju dogodka: ");
+        }
+    };
 
     return(
     <View>
@@ -40,7 +49,7 @@ export const EventForm = ({ route }) => {
         <Field title = {"Koordinator"} data= {CoordinatorValue} onChange={setCoordinatorValue}/>
         <Field title = {"Datum"} data= {Date} onChange={setDate}/>
     </View>
-    <TouchableOpacity style={styles.button} onPress={() => submitEvent(TitleValue,DescriptionValue, CoordinatorValue, Date )}>Nastavi</TouchableOpacity>
+    <TouchableOpacity style={styles.button} onPress={submitFn}><Text>Nastavi</Text></TouchableOpacity>
     </View>
     );
 };
