@@ -61,11 +61,10 @@ const getDaysInMonth = (year: number, month: number): number => {
 export const getEvents = async(): Promise<DayEventProps[]> => {
     let events: DayEventProps[] = [];
     let eventsData = await fetchData("/events");
-    console.log("Fetched events data:", eventsData);
+    //console.log("Fetched events data:", eventsData);
     eventsData.events.forEach((event: any) => {
       //console.log(event.start);
       let date = new Date(event.start);
-      console.log(date);
         events.push({
           event: event.title,
           day: getDayOfWeekName(date),
@@ -131,7 +130,7 @@ export function Calendar() {
       fetchEvents();
   }, []);
   
-    console.log(events2);
+
     let events = getMonthEvents(dateDisplayed.getMonth(), dateDisplayed.getFullYear(), events2);
 
 
@@ -162,7 +161,7 @@ export function Calendar() {
               if (item.event !== "No event") {
                 return (
                   <TouchableOpacity
-                    style={styles.button}
+                    
                     onPress={() => navigation.navigate('EventPage', { eventId: item.id })}
                   >
                     <DayEvent {...item} />
@@ -181,13 +180,13 @@ export function Calendar() {
             const newEvents = getMonthEvents(dateDisplayed.getMonth(), dateDisplayed.getFullYear(), events2);
             events.push(...newEvents);
           }
-  
+          }
             /*onScroll={({ nativeEvent }) => {
               if (nativeEvent.contentOffset.y <= 0) {
                 events = getMonthEvents(dateDisplayed.getMonth(), dateDisplayed.getFullYear());
               }
-            }*/
-          }
+            }
+          }*/
         />
       </View>
   

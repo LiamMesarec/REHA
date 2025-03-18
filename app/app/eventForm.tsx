@@ -1,7 +1,12 @@
-import { Text, View, StyleSheet, TouchableOpacity, Alert } from "react-native"
+import { Text, View, StyleSheet, TouchableOpacity, Alert, Button, SafeAreaView, Platform } from "react-native"
 import { TextInput } from "react-native-gesture-handler";
 import React, {useState} from "react";
 import { submitEvent } from "./api_helper";
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { createElement } from "react";
+import { formToJSON } from "axios";
+import DatePicker from "react-datepicker";
+
 
 interface FieldProps {
     title: string,
@@ -23,22 +28,65 @@ const Field = (props: FieldProps) => {
     );
 }
 
+const formatDate = (dateIn: Date) => {
+    let date: string = dateIn.toISOString().split('T')[0] + " ";
+    date += dateIn.toISOString().split('T')[1].split('.')[0];
+    return date;
+}
+
 export const EventForm = ({ route }) => {
     const { eventId } = route.params;
     const [TitleValue, setTitleValue] = useState(""); //set default here
     const [DescriptionValue, setDescriptionValue] = useState("");
     const [CoordinatorValue, setCoordinatorValue] = useState("");
-    const [Date, setDate] = useState("2025-03-14 13:50:33");
+    const [Date2, setDate2] = useState("2025-03-14 13:50:33");
+    const [show, setShow] = useState(false);
+    const [mode, setMode] = useState<'date' | 'time'>('date');
+    const [date, setDate] = useState(new Date());
+
+    const onChange = (event, selectedDate) => {
+        const currentDate = selectedDate;
+        setShow(false);
+        setDate(currentDate);
+      };
+
+    const showMode = (currentMode) => {
+        setShow(true);
+        setMode(currentMode);
+      };
+    
+    const showDatepicker = () => {
+        showMode('date');
+    };
+
+    const showTimepicker = () => {
+        showMode('time');
+    };
 
     const submitFn = async () => {
         let res;
         try{
-           res = await submitEvent(TitleValue, DescriptionValue, CoordinatorValue, Date );
+           res = await submitEvent(TitleValue, DescriptionValue, CoordinatorValue, formatDate(date) );
             Alert.alert("Uspešno ustvarjen dogodek: ", TitleValue);
         }catch (error){
             Alert.alert("Napaka pri ustvarjanju dogodka: ");
         }
     };
+
+    interface Props {
+        value: string;
+        type: string
+        onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+        
+    }
+
+    function DateTimePicker2({ value, type, onChange }: Props) {  
+        return createElement('input', {
+          type: type,
+          value: value,
+          onInput: onChange,
+        })
+      }
 
     return(
     <View>
@@ -47,7 +95,34 @@ export const EventForm = ({ route }) => {
         <Field title = {"Ime dogodga"} data= {TitleValue} onChange={setTitleValue}/>
         <Field title = {"Opis"} data= {DescriptionValue} onChange={setDescriptionValue}/>
         <Field title = {"Koordinator"} data= {CoordinatorValue} onChange={setCoordinatorValue}/>
-        <Field title = {"Datum"} data= {Date} onChange={setDate}/>
+        
+      {Platform.OS != 'web' ? (
+        <SafeAreaView>
+        <Button onPress={showDatepicker} title="Show date picker!" />
+      <Button onPress={showTimepicker} title="Show time picker!" />
+      
+      {show && (
+        <DateTimePicker
+          testID="dateTimePicker"
+          value={date}
+          mode={mode}
+          is24Hour={true}
+          onChange={onChange}
+        />
+      )}
+    </SafeAreaView>
+      ): (
+        <View>
+            <DateTimePicker2 value={date.toISOString().split('T')[0]} type={'date'} onChange={(e) => setDate(new Date(e.target.value))} />
+            
+            
+        </View>
+        
+        
+      )
+      }
+      <Text>selected: {date.toLocaleString()}</Text>
+      <Text>selected2: {formatDate(date)}</Text>
     </View>
     <TouchableOpacity style={styles.button} onPress={submitFn}><Text>Nastavi</Text></TouchableOpacity>
     </View>
