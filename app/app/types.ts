@@ -1,3 +1,5 @@
+import RootLayout from "./_layout";
+
 export type RootStackParamList = {
     Map: undefined;
     Files: { mapNameBuffer: string }; 
@@ -17,3 +19,5 @@ export type FilesystemElement = {
   name : string;
   path : string;
 }
+
+export default {RootLayout};

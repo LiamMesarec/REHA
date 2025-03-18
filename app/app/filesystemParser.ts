@@ -117,3 +117,5 @@ export class Filesystem {
     return []; 
   }
 }
+
+export default Filesystem;

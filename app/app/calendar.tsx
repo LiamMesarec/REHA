@@ -91,7 +91,7 @@ export const getMonthEvents = (month: number, year: number, events2: DayEventPro
         id: 0
     });
     let monthName = monthNames[month];
-    let noEvent: bool = true;
+    let noEvent: boolean = true;
     for (let i = 1; i <= getDaysInMonth(year, month); i++) {
         let date:Date = new Date(year, month, i);
         noEvent = true;
@@ -227,3 +227,5 @@ const styles = StyleSheet.create({
         fontSize: 24
     }
 });
+
+export default {Calendar};

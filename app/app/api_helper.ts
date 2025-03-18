@@ -35,3 +35,5 @@ const api = axios.create({
         throw error;
     }
 };
+
+export default {fetchData, submitEvent};

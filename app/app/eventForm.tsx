@@ -6,7 +6,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { createElement } from "react";
 import { formToJSON } from "axios";
 import DatePicker from "react-datepicker";
-
+import "react-datepicker/dist/react-datepicker.css";
+import alert from "./alert";
 
 interface FieldProps {
     title: string,
@@ -67,7 +68,10 @@ export const EventForm = ({ route }) => {
         let res;
         try{
            res = await submitEvent(TitleValue, DescriptionValue, CoordinatorValue, formatDate(date) );
-            Alert.alert("Uspešno ustvarjen dogodek: ", TitleValue);
+           
+           alert("Uspešno ustvarjen dogodek: ", TitleValue,  [
+            { text: "OK", onPress: () => {} }
+        ]);
         }catch (error){
             Alert.alert("Napaka pri ustvarjanju dogodka: ");
         }
@@ -110,19 +114,27 @@ export const EventForm = ({ route }) => {
           onChange={onChange}
         />
       )}
+        <Text>Izbrano: {date.toLocaleString()}</Text>
     </SafeAreaView>
+
       ): (
         <View>
-            <DateTimePicker2 value={date.toISOString().split('T')[0]} type={'date'} onChange={(e) => setDate(new Date(e.target.value))} />
-            
+
+            <DatePicker
+            selected={date}
+            onChange={(dateIn) => dateIn && setDate(dateIn)}
+            timeInputLabel="Time:"
+            dateFormat="MM-dd-yyyy h:mm:ss"
+            showTimeInput
+            />
+        
             
         </View>
         
         
       )
       }
-      <Text>selected: {date.toLocaleString()}</Text>
-      <Text>selected2: {formatDate(date)}</Text>
+
     </View>
     <TouchableOpacity style={styles.button} onPress={submitFn}><Text>Nastavi</Text></TouchableOpacity>
     </View>
