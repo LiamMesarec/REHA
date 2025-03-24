@@ -11,6 +11,7 @@ import FileList from "./fileList";
 import api from "./api_helper";
 import {deleteFileById} from "./api_helper";
 import CreateFolder from "./createFolder";
+import SideMenu from "./sideMenuFiles";
 
 
 type FileListRouteProp = RouteProp<RootStackParamList, 'Files'>;
@@ -20,9 +21,9 @@ interface FileListProps {
 }
 
 let defaultMap = {
-  name: "files",
+  name: "Files",
   type: 0,
-  filePath : "files",
+  filePath : "Files",
   date : ""
 }
 
@@ -44,11 +45,16 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
   const [filesToDelete, setFilesToDelete] = useState<number[]>([]); //tu se hranijo id-ji datotek ki jih brišemo
   const [foldersToDelete, setFoldersToDelete] = useState<string[]>([]); //tu se hranijo pathi do folderjev ki jih brišemo
   const [editActive, setEditActive] = useState<boolean>(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [newFolderVisible, setNewFolderVisible] = useState(false)
 
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
 
   const loadFromSystem = () => { //skrbi za prikaz datotek shranjenih v podatkovni strukturio filesystem
     console.log(fileSystemRef.current);
-    let childArray = fileSystemRef.current?.getChildrenByPath(currentMap?.filePath ?? "files");
+    let childArray = fileSystemRef.current?.getChildrenByPath(currentMap?.filePath ?? "Files");
     //console.log("CHILD ARR:  ", childArray);
     let newFolders: FileNode[] = [];
     let newFiles: FileNode[] = [];
@@ -68,7 +74,7 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
 
   const loadFromServer = () =>{ //potegne datoteke iz serverj. Služi lahko kot REFRESH
     fileSystemRef.current = new Filesystem(); 
-    fileSystemRef.current?.addPath("files/Mapa1/podatkiBolniki.pdf", 999, "testuuid");
+    fileSystemRef.current?.addPath("Files/Mapa1/podatkiBolniki.pdf", 999, "testuuid");
     const fetchFiles = async () => {
       try {
         const response = await api.get("/files");
@@ -98,7 +104,7 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
   }, [currentMap]);
 
   const goToParent = () => {
-    let currentNode = fileSystemRef.current?.findNodeByPath(currentMap?.filePath ?? "files");
+    let currentNode = fileSystemRef.current?.findNodeByPath(currentMap?.filePath ?? "Files");
 
     if (!currentNode) {
         console.log("Node not found!");
@@ -121,6 +127,7 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
 }
 
   const findFile = (fileName : string) => {
+    console.log("TO IŠČEM: ", fileName);
     let matches = fileSystemRef.current?.findNodesByName(fileName);
     let modalFilesBuffer: FileNode[] = [];
     let modalFoldersBuffer: FileNode[] = [];
@@ -209,6 +216,7 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
     setFilesToDelete([]);
     setFoldersToDelete([]);
     loadFromServer();  
+    setEditActive(false);
   }
 
   const handleFolderPress = (folder: FileNode) => {
@@ -223,48 +231,101 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
   }
 
   return (
-    <ScrollView style={styles.container}>
-
-      {currentMap?.name !== 'files' && (
-            <TouchableOpacity onPress= {() => goToParent()}>
-              <Icon name="arrow-left" size={24} color="black" />
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.headerRow}>
+            {/*Nazaj*/}
+            <TouchableOpacity onPress={() => goToParent()} style={styles.rowContainer}>
+                  <Icon name="arrow-left" size={24} color="black" />
+                  <Text>Nazaj</Text>
             </TouchableOpacity>
-      )}
-    <Text style={styles.text}>
-        {currentMap ? `${currentMap.filePath}:` : 'Shranjene datoteke:'}
-    </Text>
+                
+                {/*Trenutna mapa*/}
+            <Text style={styles.headerText}>
+                {currentMap ? `${currentMap.name}:` : 'Shranjene datoteke:'}
+            </Text>
+                
+                {/*Menu*/}
+            <TouchableOpacity onPress={toggleMenu}>
+                <Icon name="menu" size={30} color="black" />
+            </TouchableOpacity>
+            
+        </View>
 
-    <View style = {styles.searchContainer}>
-        <TextInput
-        style = {styles.searchBar}
-        placeholder="Išči datoteko"
-        value = {searchBarText}
-        onChangeText={setSearchBarText}
-        />
-        <TouchableOpacity onPress={() =>findFile(searchBarText)}> 
-        <Icon name="magnify" size={24} color="black" />
-        </TouchableOpacity>
+        <View style={styles.searchContainer}>
+          {/*ISKALNIK*/}
+          <TextInput
+            style={styles.searchBar}
+            placeholder="Išči datoteko"
+            placeholderTextColor="gray"
+            value={searchBarText}
+            onChangeText={setSearchBarText}
+            onSubmitEditing={() => findFile(searchBarText)}
+            returnKeyType="search"
+          />
+          {/*Ikona z povečevalnim steklom*/}
+          <TouchableOpacity onPress={() => findFile(searchBarText)}>
+            <Icon name="magnify" size={24} color="black" />
+          </TouchableOpacity>
+        </View>
       </View>
+      <ScrollView style={styles.scrollView}>
+      <SideMenu 
+        menuOpen={menuOpen} 
+        toggleMenu={toggleMenu} 
+        refresh={loadFromServer} 
+        currentPath={currentMap.filePath}
+        setNewFolderVisible = {setNewFolderVisible}
+        />
+
+        <SearchResoults
+          files={modaleFiles || []}
+          folders={modaleFolders || []}
+          modalVisible={modaleVisible}
+          onClose={hideFoundFiles}
+          onFolderPress={handleFolderPress}
+        />
+        <CreateFolder 
+          createFolder={createFolder} 
+          refresh={loadFromSystem} 
+          visible = {newFolderVisible}
+          setVisible={setNewFolderVisible}
+          />
+
+          <MapList
+            folders={folders}
+            onFolderPress={handleFolderPress}
+            selectedFolders={foldersToDelete}
+            toggleSelectedFolder={toggleSelectFolder}
+            editVisible = {editActive}
+          />
+          <FileList
+            files={files}
+            toggleSelectFile={toggleSelectFile}
+            selectedFiles={filesToDelete}
+            editVisible = {editActive}
+          />
+          <View style={styles.nekiForcedPadding}> {/*NEVEM ZAKAJ NE DELA BREZ TEGA! PUSTI NOT ČE NE NUCAŠ */}
+          </View>                                 {/*Če tega ni: ne gre uploadat v prazno mapo */}
 
 
-    <SearchResoults 
-      files={modaleFiles || [] } 
-      folders={modaleFolders || []}
-      modalVisible={modaleVisible} 
-      onClose={hideFoundFiles}
-      onFolderPress={handleFolderPress}
-    />
-    <MapList folders={folders} onFolderPress={handleFolderPress} selectedFolders={foldersToDelete} toggleSelectedFolder={toggleSelectFolder}/>
-    <FileList files = {files} toggleSelectFile={toggleSelectFile} selectedFiles={filesToDelete}/>
-    <TouchableOpacity onPress={deleteSelected}>
-    <Icon name="delete" size={30} color="gray" />
-    </TouchableOpacity>
 
-    <FileUploadScreen refresh={loadFromServer} currentPath={currentMap.filePath}/>
-    <CreateFolder createFolder={createFolder} refresh={loadFromSystem}/>
+        
+      </ScrollView>
 
-  
-  </ScrollView>
+      <View style={styles.footer}>
+        <View style={styles.headerRow}>
+
+          {!editActive && <TouchableOpacity onPress={() => setEditActive(true)}>
+              <Text>UREDI</Text>
+          </TouchableOpacity>}
+
+          {editActive && <TouchableOpacity onPress={deleteSelected}>
+            <Icon name="delete" size={30} color="gray" />
+          </TouchableOpacity>}
+        </View>
+      </View>
+    </View>
   );
 };
 
@@ -272,45 +333,79 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: "100%",
-    backgroundColor: "#ffffff",
-    padding: 20,
+    backgroundColor: 'white',
+  },
+  header: {
+    position: 'absolute', 
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'white', 
+    padding: 10,
+    flexDirection: "column",
+    zIndex: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  headerRow:{
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerText: {
+    flex: 1, 
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  scrollView: {
+    marginTop: 100,
+    marginBottom : 50,
+    paddingRight : 10
   },
   searchContainer: {
-    flex: 1,
-    width: "100%",
-    flexDirection: "row", 
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  fileButton: {
-    backgroundColor: "#ffff00",
-    padding: 15,
-    marginVertical: 5,
-    borderRadius: 5,
-    width: "100%",
-    alignItems: "flex-start",
-  },
-  fileRow: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  text: {
-    color: "black",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginLeft: 10,
-    textAlignVertical: "center",
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    height: 40,
+    width: "100%",
+    position: "relative",
   },
   searchBar: {
-    height: 40,
-    width: 250,
-    borderColor: 'gray',
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    marginTop: 10,
-    borderRadius: 5,
+    flex: 1,
+    paddingLeft: 10,
+    height: "100%",
+  },
+  searchIcon: {
+    position: "absolute",
+    left: 10,
+  },
+  rowContainer: {
+    flexDirection: "row",
+    alignItems : "center"
+  }, 
+  footer : {
+    position : "absolute", 
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+  }, 
+  nekiForcedPadding: {
+    minHeight: 300, 
+    flexDirection: "column",
+    justifyContent: "flex-end", 
+    alignItems: "flex-start",
+    paddingTop: 10, 
   }
 });
+
 
 export default FileSystem;

@@ -37,9 +37,10 @@ const getFileIcon = (fileName: string) => {
     files: FileNode[];
     toggleSelectFile : (id : number) => void;
     selectedFiles : number[];
+    editVisible : boolean;
   }
 
-const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFiles}) => {
+const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFiles, editVisible}) => {
 
 
   const loadFile = (index: number): void => {
@@ -62,10 +63,10 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
   
         return (
           <View key = {file.id} style = {styles.fileContainer}>
-             <Checkbox
+             {editVisible &&<Checkbox
               value={selectedFiles.includes(file.id)}
               onValueChange={() => toggleSelectFile(file.id)}
-            />
+            />}
             <TouchableOpacity key={index} onPress={() => loadFile(index)} style={styles.fileButton}>
               <View style={styles.fileRow}>
                 <Icon name={name} size={24} color={color} />

@@ -3,11 +3,12 @@ import { Text, TouchableOpacity, View, Alert, StyleSheet, ScrollView, TextInput 
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 interface createProps{
     createFolder :  (name : string) => void,
-    refresh : () => void,
+    refresh : () => void;
+    visible : boolean;
+    setVisible : (val : boolean) => void;
 }
-const CreateFolder: React.FC<createProps> = ({createFolder, refresh}) =>{
+const CreateFolder: React.FC<createProps> = ({createFolder, refresh, visible, setVisible}) =>{
     const [name, setName] = useState("");
-    const [visible, setVisible] = useState(false);
 
     const submit = () =>{
         createFolder(name);
@@ -20,6 +21,7 @@ const CreateFolder: React.FC<createProps> = ({createFolder, refresh}) =>{
                 <TextInput
                     style = {styles.input}
                     placeholder="Vnesite ime"
+                    placeholderTextColor="gray"
                     value={name}
                     onChangeText={(newText) => setName(newText)}
                 />
@@ -28,10 +30,7 @@ const CreateFolder: React.FC<createProps> = ({createFolder, refresh}) =>{
                 </TouchableOpacity>
               </View>
               }
-              {!visible&&<TouchableOpacity onPress={() => {setVisible(true)}}>
-                  <Text> Ustvari mapo</Text>
-              </TouchableOpacity>
-              }
+
         </View>
     )
 }
@@ -41,7 +40,8 @@ const styles = StyleSheet.create({
       padding: 0,
       flex: 1,
       flexDirection: "row",
-      width : "100%"
+      width : "100%",
+      marginLeft : 5
 
     },
     label: { fontSize: 16, marginBottom: 5 },

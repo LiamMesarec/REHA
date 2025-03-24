@@ -7,7 +7,7 @@ export class Filesystem {
 
   constructor() {
     this.FileSistem = new TreeModel();
-    this.root = this.FileSistem.parse({ name: 'files', type: -1, filePath : 'files' });
+    this.root = this.FileSistem.parse({ name: 'Files', type: -1, filePath : 'Files' });
   }
 
   addPath(path: string, id : number , uuid : string, date : string = "") {

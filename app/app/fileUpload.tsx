@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Button, Alert, Text } from 'react-native';
+import { View, Button, Alert, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import {uploadFile } from "./api_helper";
 
@@ -51,11 +51,23 @@ const FileUploadScreen: React.FC<UploadProps> = ({refresh, currentPath}) => {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Button title="Naloži datoteko" onPress={selectFile} />
-
-    </View>
+    <TouchableOpacity onPress={selectFile} style={styles.uploadButtonContainer}>
+      <Text style={styles.uploadButtonText}>Naloži</Text>
+  </TouchableOpacity>
   );
 };
 
+const styles = StyleSheet.create({
+  uploadButtonContainer: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    marginLeft: 10,  
+  },
+  uploadButtonText: {
+    marginRight: 10, 
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+});
 export default FileUploadScreen;

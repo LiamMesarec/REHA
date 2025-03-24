@@ -10,17 +10,18 @@ interface MapListProps {
   onFolderPress: (folder: FileNode) => void;
   selectedFolders : string[];
   toggleSelectedFolder : (folderName : string) => void;
+  editVisible : boolean;
 }
 
-const MapList: React.FC<MapListProps> = ({ folders, onFolderPress, selectedFolders, toggleSelectedFolder }) => {
+const MapList: React.FC<MapListProps> = ({ folders, onFolderPress, selectedFolders, toggleSelectedFolder, editVisible }) => {
   return (
     <View style={styles.container}>
       {folders.map((folder, index) => (
         <View key={folder.filePath} style={styles.fileContainer}>
-            <Checkbox
+            {editVisible && <Checkbox
             value={selectedFolders.includes(folder.filePath)}
             onValueChange={() => toggleSelectedFolder(folder.filePath)}
-            />
+            />}
           <TouchableOpacity
             key={index}
             style={styles.fileButton}
