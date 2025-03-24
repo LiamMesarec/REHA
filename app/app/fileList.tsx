@@ -1,17 +1,17 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+
+import { View, Text, TouchableOpacity, Alert, StyleSheet} from 'react-native';
+import { Checkbox } from 'expo-checkbox';
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {FileNode } from './types';
 import {fetchAndOpenFile } from "./api_helper";
+import {deleteFileById} from "./api_helper";
 
-interface FileListProps { //mby bomo rabli kaj več
-  files: FileNode[];
-}
 
 
 const getFileIcon = (fileName: string) => {
     if (fileName.endsWith(".pdf")) {
-      return { name: "file-pdf-box", color: "red" };
+      return { name: "file-pdf-box", color: "red"};
     } else if (fileName.endsWith(".png") || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
       return { name: "file-image", color: "blue" };
     } else if (fileName.endsWith(".xlsx") || fileName.endsWith(".xls")) {
@@ -33,24 +33,48 @@ const getFileIcon = (fileName: string) => {
     }
   };
 
-const FileList: React.FC<FileListProps> = ({ files}) => {
+  interface FileListProps { //mby bomo rabli kaj več
+    files: FileNode[];
+    toggleSelectFile : (id : number) => void;
+    selectedFiles : number[];
+  }
+
+const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFiles}) => {
+
+
   const loadFile = (index: number): void => {
     //Alert.alert('Loading: ', files[index].uuid.toString());
     fetchAndOpenFile(files[index].uuid, files[index].name);
 
   };
 
+
+
+
   return (
     <View style={styles.container}>
       {files.map((file, index) => {
         const { name, color } = getFileIcon(file.name);
+  
+        if (file.name.endsWith(".folder")) {
+          return null; // Skip rendering this file
+        }
+  
         return (
-          <TouchableOpacity key={index} onPress={() => loadFile(index)} style={styles.fileButton}>
-            <View style={styles.fileRow}>
-              <Icon name={name} size={24} color={color} />
-              <Text style={styles.text}>{file.name}</Text>
-            </View>
-          </TouchableOpacity>
+          <View key = {file.id} style = {styles.fileContainer}>
+             <Checkbox
+              value={selectedFiles.includes(file.id)}
+              onValueChange={() => toggleSelectFile(file.id)}
+            />
+            <TouchableOpacity key={index} onPress={() => loadFile(index)} style={styles.fileButton}>
+              <View style={styles.fileRow}>
+                <Icon name={name} size={24} color={color} />
+                <Text style={styles.text}>{file.name}</Text>
+              </View>
+            </TouchableOpacity>
+           
+          </View>
+          
         );
       })}
     </View>
@@ -71,6 +95,7 @@ const styles = StyleSheet.create({
       borderRadius: 5,
       width: "100%",
       alignItems: "flex-start",
+      marginLeft : 5
     },
     fileRow: {
       flexDirection: "row",
@@ -83,6 +108,11 @@ const styles = StyleSheet.create({
       marginLeft: 10,
       textAlignVertical: "center",
     },
+    fileContainer: {
+      flex : 1,
+      flexDirection : "row",
+      alignItems : "center"
+    }
 
   });
 

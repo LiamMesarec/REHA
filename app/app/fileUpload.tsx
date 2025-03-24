@@ -5,10 +5,10 @@ import {uploadFile } from "./api_helper";
 
 
 
-const uploadToServer = async (file: any) => {
+const uploadToServer = async (file: any, path : string) => {
   if (file) {
     try {
-      const result = await uploadFile(file, file.name, `/files/${file.name}`);
+      const result = await uploadFile(file, file.name, `${path}/${file.name}`);
       console.log("Upload result:", result);
       Alert.alert('Upload Successful', `File ${file.name} uploaded successfully!`);
     } catch (error) {
@@ -20,9 +20,10 @@ const uploadToServer = async (file: any) => {
 
 interface UploadProps{
   refresh : () => void,
+  currentPath : string,
 }
 
-const FileUploadScreen: React.FC<UploadProps> = ({refresh}) => {
+const FileUploadScreen: React.FC<UploadProps> = ({refresh, currentPath}) => {
   const [file, setFile] = useState<any>(null);
 
 
@@ -41,24 +42,18 @@ const FileUploadScreen: React.FC<UploadProps> = ({refresh}) => {
 
       const selectedFile = res.assets[0];
       setFile(selectedFile);
-      let tmp = await uploadToServer(selectedFile);
+      let tmp = await uploadToServer(selectedFile, currentPath);
       refresh();
       console.log("SERVER RESPONSE: ", tmp);
     } catch (err) {
-      console.error('Error picking document:', err);
+      //console.error('Error picking document:', err);
     }
   };
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Button title="Select File" onPress={selectFile} />
+      <Button title="Naloži datoteko" onPress={selectFile} />
 
-      {file && (
-        <View style={{ marginTop: 20 }}>
-          <Text>Selected File:</Text>
-          <Text>Name: {file.name}</Text>
-        </View>
-      )}
     </View>
   );
 };

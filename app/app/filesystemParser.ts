@@ -111,6 +111,20 @@ export class Filesystem {
     return current;
 }
 
+findLeafNodes(node: any): any[] {
+  const leafNodes: any[] = [];
+
+  if (!node.children || node.children.length === 0) {
+      leafNodes.push(node);
+  } else {
+      for (let child of node.children) {
+          leafNodes.push(...this.findLeafNodes(child));
+      }
+  }
+
+  return leafNodes;
+}
+
   getChildrenByPath(path: string): FileNode[] | null {
     //console.log("NAMEE:  ", name);
     const node = this.findNodeByPath(path);

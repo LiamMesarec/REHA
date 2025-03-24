@@ -4,11 +4,13 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { RouteProp } from '@react-navigation/native';
 import { FilesystemElement, RootStackParamList, FileNode } from './types';
 import MapList from './mapList';
-import { Filesystem } from "./filesystemParser";
+import { Filesystem} from "./filesystemParser";
 import FileUploadScreen from "./fileUpload";
 import SearchResoults from "./searchResModal";
 import FileList from "./fileList";
 import api from "./api_helper";
+import {deleteFileById} from "./api_helper";
+import CreateFolder from "./createFolder";
 
 
 type FileListRouteProp = RouteProp<RootStackParamList, 'Files'>;
@@ -30,17 +32,21 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
   const [folders, setFolders] = useState<FileNode[]>([]);
   const [searchBarText, setSearchBarText] = useState<string> ('');
 
-
   //const [selectedMap, setSelectedMap] = useState<string | null>(null);
 
   const [currentMap, setCurrentMap] = useState<FileNode> (defaultMap);
   const fileSystemRef = useRef<Filesystem | null>(null);
 
-  const [modaleFiles, setModalFiles] = useState<FileNode[]>();
-  const [modaleFolders, setModalFolders] = useState<FileNode[]>();
+  const [modaleFiles, setModalFiles] = useState<FileNode[]>(); // datoteke ki jih prikaže search
+  const [modaleFolders, setModalFolders] = useState<FileNode[]>(); // mape ki jih prikaže search
   const [modaleVisible, setModaleVisible] = useState<boolean>(false);
 
-  const loadFromSystem = () => {
+  const [filesToDelete, setFilesToDelete] = useState<number[]>([]); //tu se hranijo id-ji datotek ki jih brišemo
+  const [foldersToDelete, setFoldersToDelete] = useState<string[]>([]); //tu se hranijo pathi do folderjev ki jih brišemo
+  const [editActive, setEditActive] = useState<boolean>(false);
+
+
+  const loadFromSystem = () => { //skrbi za prikaz datotek shranjenih v podatkovni strukturio filesystem
     console.log(fileSystemRef.current);
     let childArray = fileSystemRef.current?.getChildrenByPath(currentMap?.filePath ?? "files");
     //console.log("CHILD ARR:  ", childArray);
@@ -60,8 +66,8 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
     console.log("Nareto");
   }
 
-  useEffect(() => {
-    fileSystemRef.current = new Filesystem(); // Only set it once
+  const loadFromServer = () =>{ //potegne datoteke iz serverj. Služi lahko kot REFRESH
+    fileSystemRef.current = new Filesystem(); 
     fileSystemRef.current?.addPath("files/Mapa1/podatkiBolniki.pdf", 999, "testuuid");
     const fetchFiles = async () => {
       try {
@@ -69,9 +75,9 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
         console.log("DATOTEKE IZ SERVERJA: ", response.data.files);
         for (let file of response.data.files) {
 
-          let pathBuff = file.path.slice(1); //tu porihtaj pol kr zgublamo procesor za brezveze slice je menda O(n)
+          //let pathBuff = file.path.slice(1); //tu porihtaj pol kr zgublamo procesor za brezveze slice je menda O(n)
 
-          fileSystemRef.current?.addPath(pathBuff,file.id ,file.uuid, file.date_uploaded); // Populate the filesystem
+          fileSystemRef.current?.addPath(file.path,file.id ,file.uuid, file.date_uploaded);
           loadFromSystem();
         }
       } catch (error) {
@@ -79,8 +85,17 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
       }
     };
     fetchFiles();
+  }
+
+  useEffect(() => {
+    loadFromServer();
     
   }, []);
+
+  useEffect(() => {
+    loadFromSystem();
+    
+  }, [currentMap]);
 
   const goToParent = () => {
     let currentNode = fileSystemRef.current?.findNodeByPath(currentMap?.filePath ?? "files");
@@ -151,19 +166,61 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
   }
 
 
-  useEffect(() => {
-    loadFromSystem();
 
-  }, [currentMap]);
 
   const loadFile = (index: number): void => {
     Alert.alert('Loading: ', files[index].name);
   };
 
+  const toggleSelectFile = (id: number) => {
+    setFilesToDelete(prevFilesToDelete => {
+        if (prevFilesToDelete.includes(id)) { //unselct file
+          return prevFilesToDelete.filter(fileIndex => fileIndex !== id);
+        } else { //select file
+          return [...prevFilesToDelete, id];
+        }
+      });
+  };
+  const toggleSelectFolder = (name : string) => {
+    setFoldersToDelete(prevFoldersToDelete => {
+        if(prevFoldersToDelete.includes(name)){
+          return prevFoldersToDelete.filter(folderName => folderName !== name);
+        }else{
+          return [...prevFoldersToDelete, name];
+        }
+    })
+  }
+
+  const deleteSelected = () => {
+    for(let id of filesToDelete){
+      deleteFileById(id);
+    }
+
+    for(let path of foldersToDelete){
+      let node = fileSystemRef.current?.findNodeByPath(path);
+      let fileNodes = fileSystemRef.current?.findLeafNodes(node);
+      console.log("LEEF NODES:   ", fileNodes);
+      for(let file of fileNodes){
+          if(!file.model.name.endsWith(".folder")){
+            deleteFileById(file.model.id);
+          }
+      }
+    }
+    setFilesToDelete([]);
+    setFoldersToDelete([]);
+    loadFromServer();  
+  }
+
   const handleFolderPress = (folder: FileNode) => {
     setCurrentMap(folder);
     setModaleVisible(false);
   };
+
+  const createFolder = (name : string) =>{
+      let path = `${currentMap.filePath}/${name}/placeholder.folder`
+      fileSystemRef.current?.addPath(path, 999, "uuid");
+      
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -197,11 +254,16 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
       onClose={hideFoundFiles}
       onFolderPress={handleFolderPress}
     />
-    <MapList folders={folders} onFolderPress={handleFolderPress}/>
-    <FileList files = {files}/>
+    <MapList folders={folders} onFolderPress={handleFolderPress} selectedFolders={foldersToDelete} toggleSelectedFolder={toggleSelectFolder}/>
+    <FileList files = {files} toggleSelectFile={toggleSelectFile} selectedFiles={filesToDelete}/>
+    <TouchableOpacity onPress={deleteSelected}>
+    <Icon name="delete" size={30} color="gray" />
+    </TouchableOpacity>
 
+    <FileUploadScreen refresh={loadFromServer} currentPath={currentMap.filePath}/>
+    <CreateFolder createFolder={createFolder} refresh={loadFromSystem}/>
 
-  <FileUploadScreen refresh={loadFromSystem}/>
+  
   </ScrollView>
   );
 };

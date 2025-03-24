@@ -6,7 +6,7 @@ import * as Sharing from 'expo-sharing';
 
 
 
-const ip = "164.8.31.40"
+const ip = "164.8.31.103"
 const api = axios.create({
     baseURL:  `http://${ip}:3000/api`,
     timeout: 10000, 
@@ -106,6 +106,23 @@ export const fetchAndOpenFile = async (uuid: string, fileName: string) => {
   } catch (error) {
     console.error('Error downloading or opening file:', error);
     Alert.alert('Error', 'Failed to open file.');
+  }
+};
+
+export const deleteFileById = async (fileId: number) => {
+  try {
+    const response = await api.delete(`/files/${fileId}`);
+    
+    console.log("File deleted successfully:", response.data);
+  } catch (error) {
+    if (error.response) {
+      //console.error("Error deleting file:", error.response.data);
+
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error:", error.message);
+    }
   }
 };
 export default api;
