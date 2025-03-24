@@ -57,11 +57,12 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
     
     setFolders(newFolders)
     setFiles(newFiles);
+    console.log("Nareto");
   }
 
   useEffect(() => {
     fileSystemRef.current = new Filesystem(); // Only set it once
-    fileSystemRef.current?.addPath("files/Mapa1/podatkiBolniki.pdf");
+    fileSystemRef.current?.addPath("files/Mapa1/podatkiBolniki.pdf", 999, "testuuid");
     const fetchFiles = async () => {
       try {
         const response = await api.get("/files");
@@ -70,7 +71,7 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
 
           let pathBuff = file.path.slice(1); //tu porihtaj pol kr zgublamo procesor za brezveze slice je menda O(n)
 
-          fileSystemRef.current?.addPath(pathBuff, file.date_uploaded); // Populate the filesystem
+          fileSystemRef.current?.addPath(pathBuff,file.id ,file.uuid, file.date_uploaded); // Populate the filesystem
           loadFromSystem();
         }
       } catch (error) {
@@ -94,7 +95,9 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
         name: currentNode.parent.model.name, 
         type: -1,
         filePath: currentNode.parent.model.filePath,
-        date : currentNode.parent.model.date 
+        date : currentNode.parent.model.date,
+        id: currentNode.parent.model.id,
+        uuid : currentNode.parent.model.uuid
     });
       console.log("NEW MAP: ", currentNode.parent.model.name);
     } else {
@@ -114,7 +117,9 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
             name:  i.model.name,
             type: i.model.type,
             filePath : i.model.filePath,
-            date : i.model.date 
+            date : i.model.date,
+            id : i.model.id,
+            uuid : i.model.uuid,
           }
         );
       }else if(i.model.type == 1) {
@@ -123,7 +128,9 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
             name:  i.model.name,
             type: i.model.type,
             filePath : i.model.filePath,
-            date : i.model.date 
+            date : i.model.date,
+            id: i.model.id,
+            uuid : i.model.uuid,
           }
         );
       }
@@ -194,7 +201,7 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
     <FileList files = {files}/>
 
 
-  <FileUploadScreen/>
+  <FileUploadScreen refresh={loadFromSystem}/>
   </ScrollView>
   );
 };

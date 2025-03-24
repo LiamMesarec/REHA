@@ -10,7 +10,7 @@ export class Filesystem {
     this.root = this.FileSistem.parse({ name: 'files', type: -1, filePath : 'files' });
   }
 
-  addPath(path: string, date : string = "") {
+  addPath(path: string, id : number , uuid : string, date : string = "") {
     const pathArray = path.split("/");
     let treePointer = this.root;
     console.log("PATH ARRAY:", pathArray);
@@ -26,7 +26,9 @@ export class Filesystem {
                 name: currentPathPart,
                 type: (i === pathArray.length - 1) ? 1 : 0,
                 filePath : pathArray.slice(0, i + 1).join("/"),
-                date : date
+                date : date,
+                id : id,
+                uuid : uuid
                 //parentName: treePointer.model.name,
             });
 

@@ -8,7 +8,7 @@ import {uploadFile } from "./api_helper";
 const uploadToServer = async (file: any) => {
   if (file) {
     try {
-      const result = await uploadFile(file, file.name, `files/${file.name}`);
+      const result = await uploadFile(file, file.name, `/files/${file.name}`);
       console.log("Upload result:", result);
       Alert.alert('Upload Successful', `File ${file.name} uploaded successfully!`);
     } catch (error) {
@@ -18,8 +18,11 @@ const uploadToServer = async (file: any) => {
   }
 };
 
+interface UploadProps{
+  refresh : () => void,
+}
 
-const FileUploadScreen: React.FC = () => {
+const FileUploadScreen: React.FC<UploadProps> = ({refresh}) => {
   const [file, setFile] = useState<any>(null);
 
 
@@ -38,7 +41,8 @@ const FileUploadScreen: React.FC = () => {
 
       const selectedFile = res.assets[0];
       setFile(selectedFile);
-      let tmp = uploadToServer(selectedFile);
+      let tmp = await uploadToServer(selectedFile);
+      refresh();
       console.log("SERVER RESPONSE: ", tmp);
     } catch (err) {
       console.error('Error picking document:', err);

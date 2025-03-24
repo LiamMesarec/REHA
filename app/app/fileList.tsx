@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {FileNode } from './types';
+import {fetchAndOpenFile } from "./api_helper";
 
 interface FileListProps { //mby bomo rabli kaj več
   files: FileNode[];
@@ -34,7 +35,9 @@ const getFileIcon = (fileName: string) => {
 
 const FileList: React.FC<FileListProps> = ({ files}) => {
   const loadFile = (index: number): void => {
-    Alert.alert('Loading: ', files[index].name);
+    //Alert.alert('Loading: ', files[index].uuid.toString());
+    fetchAndOpenFile(files[index].uuid, files[index].name);
+
   };
 
   return (

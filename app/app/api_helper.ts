@@ -1,8 +1,14 @@
 import axios from "axios";
-import * as FileSystem from 'expo-file-system';
 
+import { Alert, Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+
+
+
+const ip = "164.8.31.40"
 const api = axios.create({
-    baseURL: "http://164.8.31.21:3000/api",
+    baseURL:  `http://${ip}:3000/api`,
     timeout: 10000, 
     headers: {
       "Content-Type": "application/json",
@@ -36,7 +42,7 @@ const api = axios.create({
         type: file.type
       } as any); 
   
-      const UPLOAD_URL = "http://164.8.31.21:3000/api/files";
+      const UPLOAD_URL = `http://${ip}:3000/api/files`;
   
       const response = await fetch(UPLOAD_URL, {
         method: 'POST',
@@ -72,5 +78,34 @@ const api = axios.create({
         console.error("Error submitting Event creation data:", error);
         throw error;
     }
+};
+
+export const fetchAndOpenFile = async (uuid: string, fileName: string) => {
+  try {
+    const fileExtension = fileName.split('.').pop() || 'pdf'; 
+    const fileUri = `${FileSystem.documentDirectory}${fileName}.${fileExtension}`;
+
+    // Download file
+    const downloadResumable = FileSystem.createDownloadResumable(
+      `http://${ip}:3000/api/files/${uuid}/content`,
+      fileUri
+    );
+
+    const { uri } = await downloadResumable.downloadAsync();
+
+    if (uri) {
+      console.log('File downloaded to:', uri);
+
+      // Check if sharing is available
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri);
+      } else {
+        Alert.alert('Error', 'File sharing is not available on this device.');
+      }
+    }
+  } catch (error) {
+    console.error('Error downloading or opening file:', error);
+    Alert.alert('Error', 'Failed to open file.');
+  }
 };
 export default api;

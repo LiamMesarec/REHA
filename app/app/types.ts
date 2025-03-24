@@ -11,10 +11,12 @@ export type FileNode = {
     type: number; //folder = 0, file = 1
     filePath : string;
     date : string;
+    id : number;
+    uuid : string;
     //parentName : string;
 }
 
-export type FilesystemElement = {
+export type FilesystemElement = { //neuporabno se mi zdi
   name : string;
   path : string;
 }
