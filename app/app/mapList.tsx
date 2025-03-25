@@ -28,8 +28,11 @@ const MapList: React.FC<MapListProps> = ({ folders, onFolderPress, selectedFolde
             onPress={() => onFolderPress(folder)}
           >
             <View style={styles.rowContainer}>
-              <Icon name="folder" size={24} color="#F1C27D" />
-              <Text style={styles.text}>{folder.name}</Text>
+              <Icon name="folder" size={40} color="#F1C27D" />
+              <View style= {styles.mapNameContainer}>
+                <Text style={styles.text}>{folder.name}</Text>
+                <Text style={styles.dateText}>{folder.date}</Text>
+              </View>
             </View>
           </TouchableOpacity>
         </View>
@@ -43,13 +46,16 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     backgroundColor: "#ffffff",
-    padding: 0,
+    padding: 5,
+    paddingRight: "5%",
   },
   fileButton: {
-    backgroundColor: "#ffff00",
-    padding: 15,
+    backgroundColor: "#ffffff",
+    padding: 5,
     marginVertical: 5,
     borderRadius: 5,
+    borderColor: "black",
+    borderWidth: 1,
     width: "100%",
     alignItems: "flex-start", 
     marginLeft : 5,
@@ -64,12 +70,23 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
     textAlignVertical: "center",
-  },   
+  },  
+  dateText: {
+    color: "black",
+    fontSize: 10,
+    fontWeight: "bold",
+    marginLeft: 10,
+    textAlignVertical: "center",
+  }, 
   fileContainer: {
     flex : 1,
     flexDirection : "row",
     alignItems : "center"
-  }
+  },   
+  mapNameContainer : {
+    flex: 1,
+    flexDirection: "column",
+  },
 });
 
 export default MapList;

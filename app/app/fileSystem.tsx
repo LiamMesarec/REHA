@@ -74,7 +74,7 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
 
   const loadFromServer = () =>{ //potegne datoteke iz serverj. Služi lahko kot REFRESH
     fileSystemRef.current = new Filesystem(); 
-    fileSystemRef.current?.addPath("Files/Mapa1/podatkiBolniki.pdf", 999, "testuuid");
+    fileSystemRef.current?.addPath("Files/Mapa1/podatkiBolniki.pdf", 999, "testuuid", new Date().toString());
     const fetchFiles = async () => {
       try {
         const response = await api.get("/files");
@@ -246,6 +246,7 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
             </Text>
                 
                 {/*Menu*/}
+
             <TouchableOpacity onPress={toggleMenu}>
                 <Icon name="menu" size={30} color="black" />
             </TouchableOpacity>
@@ -284,6 +285,8 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
           modalVisible={modaleVisible}
           onClose={hideFoundFiles}
           onFolderPress={handleFolderPress}
+          refresh={loadFromServer}
+          fileSystemRef={fileSystemRef}
         />
         <CreateFolder 
           createFolder={createFolder} 
@@ -317,7 +320,7 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
         <View style={styles.headerRow}>
 
           {!editActive && <TouchableOpacity onPress={() => setEditActive(true)}>
-              <Text>UREDI</Text>
+              <Text style={styles.editText}>UREDI</Text>
           </TouchableOpacity>}
 
           {editActive && <TouchableOpacity onPress={deleteSelected}>
@@ -335,6 +338,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
+
   header: {
     position: 'absolute', 
     top: 0,
@@ -359,6 +363,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  editText: {
+    fontSize: 20,
   },
   scrollView: {
     marginTop: 100,

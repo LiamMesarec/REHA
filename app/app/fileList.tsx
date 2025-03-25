@@ -37,7 +37,7 @@ const getFileIcon = (fileName: string) => {
     files: FileNode[];
     toggleSelectFile : (id : number) => void;
     selectedFiles : number[];
-    editVisible : boolean;
+    editVisible : boolean; 
   }
 
 const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFiles, editVisible}) => {
@@ -69,8 +69,11 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
             />}
             <TouchableOpacity key={index} onPress={() => loadFile(index)} style={styles.fileButton}>
               <View style={styles.fileRow}>
-                <Icon name={name} size={24} color={color} />
+                <Icon name={name} size={40} color={color} />
+                <View style= {styles.mapNameContainer}>
                 <Text style={styles.text}>{file.name}</Text>
+                <Text style={styles.dateText}>{file.date}</Text>
+                </View>
               </View>
             </TouchableOpacity>
            
@@ -87,16 +90,19 @@ const styles = StyleSheet.create({
       flex: 1,
       width: "100%",
       backgroundColor: "#ffffff",
-      padding: 0,
+      padding: 5,
+      paddingRight: "5%",
     },
     fileButton: {
-      backgroundColor: "#ffff00",
-      padding: 15,
+      backgroundColor: "#ffffff",
+      padding: 5,
       marginVertical: 5,
       borderRadius: 5,
+      borderColor: "black",
+      borderWidth: 1,
       width: "100%",
-      alignItems: "flex-start",
-      marginLeft : 5
+      alignItems: "flex-start", 
+      marginLeft : 5,
     },
     fileRow: {
       flexDirection: "row",
@@ -109,11 +115,22 @@ const styles = StyleSheet.create({
       marginLeft: 10,
       textAlignVertical: "center",
     },
+    dateText: {
+      color: "black",
+      fontSize: 10,
+      fontWeight: "bold",
+      marginLeft: 10,
+      textAlignVertical: "center",
+    }, 
     fileContainer: {
       flex : 1,
       flexDirection : "row",
       alignItems : "center"
-    }
+    }, 
+    mapNameContainer : {
+      flex: 1,
+      flexDirection: "column",
+    },
 
   });
 

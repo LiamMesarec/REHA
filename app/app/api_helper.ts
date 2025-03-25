@@ -6,7 +6,7 @@ import * as Sharing from 'expo-sharing';
 
 
 
-const ip = "164.8.31.103"
+const ip = "164.8.31.90"
 const api = axios.create({
     baseURL:  `http://${ip}:3000/api`,
     timeout: 10000, 
@@ -24,7 +24,6 @@ const api = axios.create({
       throw error;
     }
   };
-
   export const uploadFile = async (fileInput: any, filename: string, path: string) => {
     try {
       const file = {
