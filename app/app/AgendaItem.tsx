@@ -1,6 +1,7 @@
 import isEmpty from 'lodash/isEmpty';
 import React, {useCallback} from 'react';
 import {StyleSheet, Alert, View, Text, TouchableOpacity, Button} from 'react-native';
+import { useNavigation, NavigationProp } from "@react-navigation/native";
 
 
 interface ItemProps {
@@ -8,15 +9,8 @@ interface ItemProps {
 }
 
 const AgendaItem = (props: ItemProps) => {
+  const navigation = useNavigation();
   const {item} = props;
-
-  const buttonPressed = useCallback(() => {
-    Alert.alert('Show me more');
-  }, []);
-
-  const itemPressed = useCallback(() => {
-    Alert.alert(item.title);
-  }, []);
 
   if (isEmpty(item)) {
     return (
@@ -27,13 +21,13 @@ const AgendaItem = (props: ItemProps) => {
   }
 
   return (
-    <TouchableOpacity onPress={itemPressed} style={styles.item} testID='item'>
+    <TouchableOpacity  onPress={() => navigation.navigate('EventPage', { eventId: item.id })} style={styles.item} testID='item'>
       <View>
         <Text style={styles.itemHourText}>{item.time}</Text>
       </View>
       <Text style={styles.itemTitleText}>{item.title}</Text>
       <View style={styles.itemButtonContainer}>
-        <Button color={'grey'} title={'Info'} onPress={buttonPressed}/>
+        <Button color={'grey'} title={'Info'}  onPress={() => navigation.navigate('EventPage', { eventId: item.id })}/>
       </View>
     </TouchableOpacity>
   );

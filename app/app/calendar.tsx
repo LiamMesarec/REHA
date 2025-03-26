@@ -147,6 +147,7 @@ interface GroupedEvent {
 
 interface EventEntry {
   time: string;
+  id: number;
   title: string;
 }
 
@@ -159,6 +160,7 @@ function groupEventsByDate(events: DayEventProps[]): GroupedEvent[] {
     if (existingGroup) {
       existingGroup.data.push({
         time: event.time,
+        id: event.id,
         title: event.event
       });
     } else {
@@ -166,6 +168,7 @@ function groupEventsByDate(events: DayEventProps[]): GroupedEvent[] {
         title: isoDate,
         data: [{
           time: event.time,
+          id: event.id,
           title: event.event
         }]
       });
