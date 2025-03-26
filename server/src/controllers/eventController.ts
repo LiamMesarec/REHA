@@ -15,6 +15,7 @@ const getEvents = asyncHandler(
         if (err) {
           return next(err);
         }
+        console.log(rows);
         res.status(200).json({ events: rows });
       },
     );

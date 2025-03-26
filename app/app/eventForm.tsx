@@ -45,13 +45,13 @@ export const EventForm = ({ route }) => {
     const [mode, setMode] = useState<'date' | 'time'>('date');
     const [date, setDate] = useState(new Date());
 
-    const onChange = (event, selectedDate) => {
+    const onChange = (event:any, selectedDate:any) => {
         const currentDate = selectedDate;
         setShow(false);
         setDate(currentDate);
       };
 
-    const showMode = (currentMode) => {
+    const showMode = (currentMode:any) => {
         setShow(true);
         setMode(currentMode);
       };
