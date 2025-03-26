@@ -287,6 +287,17 @@ export function Calendar() {
       // closeOnDayPress={false}
       />
       <Text style={{fontSize:3}}></Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Files', { })}>
+          <Text>
+            Files
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('EventForm', { eventId: null})}>
+          <Text>
+            Event Creation
+          </Text>
+        </TouchableOpacity>
       <AgendaList
         sections={events3}
         renderItem={renderItem}
