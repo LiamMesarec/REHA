@@ -235,10 +235,11 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
       <View style={styles.header}>
         <View style={styles.headerRow}>
             {/*Nazaj*/}
-            <TouchableOpacity onPress={() => goToParent()} style={styles.rowContainer}>
+            {(currentMap.name != "Files") &&
+              <TouchableOpacity onPress={() => goToParent()} style={styles.rowContainer}>
                   <Icon name="arrow-left" size={24} color="black" />
                   <Text>Nazaj</Text>
-            </TouchableOpacity>
+            </TouchableOpacity>}
                 
                 {/*Trenutna mapa*/}
             <Text style={styles.headerText}>

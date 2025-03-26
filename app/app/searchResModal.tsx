@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 20,
         alignItems: "center",
-        paddingRight: "10%",
+        paddingRight: "10 %",
     },
     text: {
         fontSize: 18,
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
         backgroundColor: "lightcoral",
         borderRadius: 5,
         marginTop: "-10%",
-        marginRight: "-10%"
+        marginRight: "-11.5 %"
     },
     editButton: {
         padding: 5,

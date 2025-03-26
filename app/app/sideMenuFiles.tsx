@@ -15,7 +15,7 @@ const SideMenu: React.FC<MenuProps> = ({ menuOpen, toggleMenu , refresh, current
 
 React.useEffect(() => {
   Animated.timing(slideAnim, {
-    toValue: menuOpen ? 250 :500,
+    toValue: menuOpen ? 0 :250,
     duration: 300,
     useNativeDriver: true,
   }).start();
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
       },
     sideMenu: {
         position: "absolute",  
-        left: 0,
+        right: 0,
         top: 0,
         bottom: 0,
         width: 250,

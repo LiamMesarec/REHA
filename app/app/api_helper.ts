@@ -6,7 +6,7 @@ import * as Sharing from 'expo-sharing';
 
 
 
-const ip = "164.8.31.90"
+const ip = "127.0.0.1"
 const api = axios.create({
     baseURL:  `http://${ip}:3000/api`,
     timeout: 10000, 

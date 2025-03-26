@@ -15,18 +15,27 @@ const CreateFolder: React.FC<createProps> = ({createFolder, refresh, visible, se
         setVisible(false);
         refresh();
     }
+    const reject = () =>{
+        setVisible(false);
+        setName("");
+    }
     return(
         <View>
-              {visible && <View style = {styles.nameContainer}>
+              {visible && 
+              <View style = {styles.nameContainer}>
+                <Icon name="folder" size={40} color="#F1C27D" />
                 <TextInput
                     style = {styles.input}
-                    placeholder="Vnesite ime"
+                    placeholder="Vnesite ime mape"
                     placeholderTextColor="gray"
                     value={name}
                     onChangeText={(newText) => setName(newText)}
                 />
                 <TouchableOpacity onPress={() => submit()}>
-                    <Icon name="send" size={30} color="green" />
+                    <Icon name="check-bold" size={30} color="green" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => reject()}>
+                <Icon name="close" size={30} color="red" />
                 </TouchableOpacity>
               </View>
               }
@@ -37,19 +46,24 @@ const CreateFolder: React.FC<createProps> = ({createFolder, refresh, visible, se
 
 const styles = StyleSheet.create({
     nameContainer: {
-      padding: 0,
       flex: 1,
       flexDirection: "row",
-      width : "100%",
-      marginLeft : 5
-
+      backgroundColor: "#ffffff",
+      padding: 5,
+      marginVertical: 5,
+      borderRadius: 5,
+      borderColor: "black",
+      borderWidth: 1,
+      width: "94%",
+      alignItems: "flex-start", 
+      marginLeft : 10,
     },
     label: { fontSize: 16, marginBottom: 5 },
     input: {
         flex: 1, 
         height: 40,
         borderColor: "gray",
-        borderWidth: 1,
+        borderWidth: 0,
         paddingHorizontal: 10,
         borderRadius: 5,
     },
