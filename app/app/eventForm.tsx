@@ -21,9 +21,9 @@ const Field = (props: FieldProps) => {
         {props.title}
     </Text>
     <TextInput
-    style={styles.input}
-    value={props.data}
-    onChangeText={props.onChange}
+        style={styles.input}
+        value={props.data}
+        onChangeText={props.onChange}
     />
     </View>
     );

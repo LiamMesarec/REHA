@@ -7,31 +7,34 @@ export class Filesystem {
 
   constructor() {
     this.FileSistem = new TreeModel();
-    this.root = this.FileSistem.parse({ name: 'Root', type: -1, filePath : 'Root' });
+    this.root = this.FileSistem.parse({ name: 'Files', type: -1, filePath : 'Files' });
   }
 
-  addPath(path: string) {
-    const pathArray = path.split("\\");
+  addPath(path: string, id : number , uuid : string, date : string = "") {
+    const pathArray = path.split("/");
     let treePointer = this.root;
-
+    console.log("PATH ARRAY:", pathArray);
     for (let i = 0; i < pathArray.length; i++) {
         const currentPathPart = pathArray[i];
 
         let childNode = treePointer.children.find((child: { model: { name: string; }; }) => child.model.name === currentPathPart);
-
+        console.log("CHILD:", childNode)
         if (childNode) {
             treePointer = childNode;
         } else {
             let newChild = this.FileSistem.parse({
                 name: currentPathPart,
                 type: (i === pathArray.length - 1) ? 1 : 0,
-                filePath : pathArray.slice(0, i + 1).join("\\")
+                filePath : pathArray.slice(0, i + 1).join("/"),
+                date : date,
+                id : id,
+                uuid : uuid
                 //parentName: treePointer.model.name,
             });
 
             treePointer.addChild(newChild);
-            console.log("ADDED CHILD: ", newChild);
             treePointer = newChild;
+            console.log("CHILD:", newChild)
         }
     }
 }
@@ -88,11 +91,11 @@ export class Filesystem {
   }*/
   findNodeByPath(path: string): any {
     let current = this.root;
-    const pathArray = path.split("\\");
+    const pathArray = path.split("/");
     for (let i = 0; i < pathArray.length; i++) {
         let found = false;
         for (let child of current.children) {
-          const childPathArray = child.model.filePath.split("\\");
+          const childPathArray = child.model.filePath.split("/");
             if (childPathArray[i] === pathArray[i]) {
                 current = child;
                 found = true;
@@ -106,6 +109,20 @@ export class Filesystem {
     }
 
     return current;
+}
+
+findLeafNodes(node: any): any[] {
+  const leafNodes: any[] = [];
+
+  if (!node.children || node.children.length === 0) {
+      leafNodes.push(node);
+  } else {
+      for (let child of node.children) {
+          leafNodes.push(...this.findLeafNodes(child));
+      }
+  }
+
+  return leafNodes;
 }
 
   getChildrenByPath(path: string): FileNode[] | null {

@@ -22,6 +22,42 @@ const api = axios.create({
       throw error;
     }
   };
+  export const uploadFile = async (fileInput: any, filename: string, path: string) => {
+    try {
+      const file = {
+        uri: fileInput.uri,
+        name: filename,
+        type: fileInput.mimeType
+      };
+  
+      const formData = new FormData();
+      formData.append('name', filename);
+      formData.append('path', path)
+      formData.append('file', {
+        uri: file.uri, 
+        name: file.name, 
+        type: file.type
+      } as any); 
+  
+      const UPLOAD_URL = `http://${ip}:3000/api/files`;
+  
+      const response = await fetch(UPLOAD_URL, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
+      });
+  
+      const result = await response.json();
+      console.log("Upload success:", result);
+      
+      return result;
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      throw error;
+    }
+  };
 
 
   export const uploadFile = async (fileInput: any, filename: string, path: string) => {
@@ -122,5 +158,20 @@ export const fetchAndOpenFile = async (uuid: string, fileName: string) => {
   }
 };
 
+export const deleteFileById = async (fileId: number) => {
+  try {
+    const response = await api.delete(`/files/${fileId}`);
+    
+    console.log("File deleted successfully:", response.data);
+  } catch (error) {
+    if (error.response) {
+      //console.error("Error deleting file:", error.response.data);
 
-export default {fetchData, submitEvent};
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error:", error.message);
+    }
+  }
+};
+export default api;
