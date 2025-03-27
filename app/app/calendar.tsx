@@ -143,7 +143,7 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
         }}
       >
         
-            <Link href="/eventForm?eventId=1">
+            <Link href="/eventForm">
                 <Text>Event Creation</Text>
             </Link>
 

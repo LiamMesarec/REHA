@@ -1,7 +1,7 @@
 import { Text, View, StyleSheet, TouchableOpacity, Alert, Button, SafeAreaView, Platform } from "react-native"
 import { ScrollView, TextInput } from "react-native-gesture-handler";
 import React, {useState} from "react";
-import { submitEvent, fetchAndOpenFile } from "./api_helper";
+import { submitEvent, fetchAndOpenFile, fetchData, submitUpdateEvent } from "./api_helper";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { createElement } from "react";
 import { formToJSON } from "axios";
@@ -45,9 +45,30 @@ export const EventForm = () => {
     const [show, setShow] = useState(false);
     const [mode, setMode] = useState<'date' | 'time'>('date');
     const [date, setDate] = useState(new Date());
-    const [toDate, setToDate] = useState("2025-03-14 13:50:33");
-    const [fromDate, setFromDate] = useState("2025-03-14 13:50:33");
+    const [toDate, setToDate] = useState("2025-03-14");
+    const [fromDate, setFromDate] = useState("2025-03-14");
+    if (eventId && eventId !== "null"){
+        React.useEffect(() => {
+            const fetchEventData = async () => {
+                const eventDataObject = await fetchData(`/events/${eventId}`);
+                let eventData = eventDataObject.event;
+                console.log(eventData)
+                setToDate(eventData.to_date);
+                setFromDate(eventData.from_date);
+                setDescriptionValue(eventData.description);
+                setCoordinatorValue(eventData.coordinator);
+                setTitleValue(eventData.title);
+                setDate(new Date(eventData.start));
 
+            };
+            try{
+            fetchEventData();
+            }catch(error){
+              console.warn(error);
+            }
+        }, [eventId]);
+        
+      }
     //fetchAndOpenFile("0bc784d5-8e72-4433-83da-dfcca30561e9", "presentation.pdf");
 
     const onChange = (event, selectedDate) => {
@@ -72,11 +93,16 @@ export const EventForm = () => {
     const submitFn = async () => {
         let res;
         try{
+          if (eventId && eventId != "null"){
+            res = await submitUpdateEvent(Array.isArray(eventId) ? eventId[0] : eventId, TitleValue, DescriptionValue, CoordinatorValue, formatDate(date), fromDate, toDate );
+            alert("Uspešno posodobljen dogodek: ", TitleValue);
+          }else {
            res = await submitEvent(TitleValue, DescriptionValue, CoordinatorValue, formatDate(date), fromDate, toDate );
            
            alert("Uspešno ustvarjen dogodek: ", TitleValue,  [
             { text: "OK", onPress: () => {} }
         ]);
+          }
         }catch (error){
             if (error == 1){
               alert("Prosim izpolni vse nujne podatke");

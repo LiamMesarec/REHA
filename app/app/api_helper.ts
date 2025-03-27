@@ -87,10 +87,43 @@ const api = axios.create({
       }
         return response.data;
     } catch (error) {
-        console.error("Error submitting Event creation data:", error);
+        console.error("Error submitting Event creation data: ", error);
         alert("Napaka pri posiljanju podatkov za ustvarjanje dogodka", "Opozorilo");
         throw error;
     }
+};
+
+export const submitUpdateEvent = async (id: string, title: string, description: string, coordinator: string, date: string, from:string, to: string) => {
+  try{
+    let response = await api.put(`/events/${id}`,{
+            title: title,
+            coordinator: coordinator,
+            description: description,
+            start: date,
+            from_date: from,
+            to_date: to
+    })
+    console.log(response.data);
+
+  }catch(error){
+    console.error("Error when updating event: ", error)
+  }
+}
+
+export const deleteEventById = async (id: number) => {
+  try {
+    const response = await api.delete(`/events/${id}`);
+    
+    console.log("Event deleted successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error:", error.message);
+    }
+    throw error;
+  }
 };
 
 export const fetchAndOpenFile = async (uuid: string, fileName: string) => {

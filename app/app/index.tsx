@@ -36,7 +36,7 @@ const HomePage: React.FC = () => {
           <Text style={{ fontSize: 24 }}>Home Screen</Text>
           <Button title="FILES" onPress={() => router.push("/fileSystem")} />
           <Button title="CALENDAR" onPress={() => router.push("/calendar")} />
-          <Button title="EVENT FORM" onPress={() => router.push("/eventForm?eventId=1")} />
+          <Button title="EVENT FORM" onPress={() => router.push("/eventForm")} />
           </View>
   )
 }

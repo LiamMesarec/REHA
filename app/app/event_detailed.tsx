@@ -1,7 +1,8 @@
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
-import { fetchData } from "./api_helper";
-import { useLocalSearchParams } from "expo-router";
+import { deleteEventById, fetchData } from "./api_helper";
+import { Link, router, useLocalSearchParams } from "expo-router";
+import alert from "./alert";
 
 
 const TITLE_IMAGE_SECTION = "Image Section";
@@ -12,6 +13,10 @@ const DISPLAY_TITLE = "Podrobnosti Dogodka";
 interface ParagraphProps {
     title: string;
     content: string;
+}
+
+interface BtnProps {
+    id: string
 }
 
 interface ImageSectionProps {
@@ -77,10 +82,27 @@ export function displayEventDetails(eventDetails: ParagraphProps[]) {
             {eventDetails.map((eventDetail, index) => {
                 return <Paragraph key={index} title={eventDetail.title} content={eventDetail.content} />;
             })}
+            
         </View>
     );
 }
 
+export const DeleteEventButton = (props: BtnProps) => {
+    return (
+        <TouchableOpacity onPress={()=> {
+            try{
+            deleteEventById(Number(props.id));
+            alert("Brisanje","Znebil si se dogodka");
+            // should use back (if only used in event detailed), but this causes the calendar to be updated
+            router.push("/calendar");
+            } catch(_error){
+                alert("Brisanje","Brisanje dogodka ni uspelo");
+            }
+            }} >
+            <Text  style={styles.deleteBtn}>Izbriši dogodek</Text>
+        </TouchableOpacity>
+    );
+};
 
 
 export function EventPage() {
@@ -99,6 +121,10 @@ export function EventPage() {
     <View>
       <Text>Event id: {eventId}</Text>
       {displayEventDetails(eventDetails)}
+      <Link href={`/eventForm?eventId=${eventId}`} style={styles.editLink}>
+            <Text>Spremeni dogodek</Text>
+        </Link>
+        <DeleteEventButton id={Array.isArray(eventId) ? eventId[0] : eventId}/>
     </View>
   );
 }
@@ -118,6 +144,18 @@ const styles = StyleSheet.create({
     content: {
         fontSize: 15,
         marginBottom: 15
+    },
+    editLink: {
+        backgroundColor: "grey",
+        fontWeight: "bold",
+        fontSize: 20,
+        marginBottom:25 
+    },
+    deleteBtn: {
+        backgroundColor: "red",
+        fontWeight: "bold",
+        fontSize: 20,
+        width: "auto"
     }
     
 
