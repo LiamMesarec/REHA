@@ -1,7 +1,7 @@
 import { Text, View, StyleSheet, TouchableOpacity, Alert, Button, SafeAreaView, Platform } from "react-native"
-import { TextInput } from "react-native-gesture-handler";
+import { ScrollView, TextInput } from "react-native-gesture-handler";
 import React, {useState} from "react";
-import { submitEvent } from "./api_helper";
+import { submitEvent, fetchAndOpenFile } from "./api_helper";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { createElement } from "react";
 import { formToJSON } from "axios";
@@ -44,6 +44,10 @@ export const EventForm = ({ route }) => {
     const [show, setShow] = useState(false);
     const [mode, setMode] = useState<'date' | 'time'>('date');
     const [date, setDate] = useState(new Date());
+    const [toDate, setToDate] = useState("2025-03-14 13:50:33");
+    const [fromDate, setFromDate] = useState("2025-03-14 13:50:33");
+
+    fetchAndOpenFile("0bc784d5-8e72-4433-83da-dfcca30561e9", "presentation.pdf");
 
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate;
@@ -67,13 +71,16 @@ export const EventForm = ({ route }) => {
     const submitFn = async () => {
         let res;
         try{
-           res = await submitEvent(TitleValue, DescriptionValue, CoordinatorValue, formatDate(date) );
+           res = await submitEvent(TitleValue, DescriptionValue, CoordinatorValue, formatDate(date), fromDate, toDate );
            
            alert("Uspešno ustvarjen dogodek: ", TitleValue,  [
             { text: "OK", onPress: () => {} }
         ]);
         }catch (error){
-            Alert.alert("Napaka pri ustvarjanju dogodka: ");
+            if (error == 1){
+              alert("Prosim izpolni vse nujne podatke");
+            }else
+            alert("Napaka pri ustvarjanju dogodka");
         }
     };
 
@@ -93,12 +100,14 @@ export const EventForm = ({ route }) => {
       }
 
     return(
-    <View>
+    <ScrollView>
     <Text style = {styles.title}>Forma za dogodek: {eventId}</Text>
     <View>
         <Field title = {"Ime dogodga"} data= {TitleValue} onChange={setTitleValue}/>
         <Field title = {"Opis"} data= {DescriptionValue} onChange={setDescriptionValue}/>
         <Field title = {"Koordinator"} data= {CoordinatorValue} onChange={setCoordinatorValue}/>
+        <Field title = {"Od datum"} data= {fromDate} onChange={setFromDate}/>
+        <Field title = {"Do datum"} data= {toDate} onChange={setToDate}/>
         
       {Platform.OS != 'web' ? (
         <SafeAreaView>
@@ -137,7 +146,7 @@ export const EventForm = ({ route }) => {
 
     </View>
     <TouchableOpacity style={styles.button} onPress={submitFn}><Text>Nastavi</Text></TouchableOpacity>
-    </View>
+    </ScrollView>
     );
 };
 

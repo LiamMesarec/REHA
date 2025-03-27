@@ -1,13 +1,13 @@
 import { Alert, Platform } from 'react-native'
 
 const alertPolyfill = (
-    title: string,
-    description: string,
+    title: string = "Opozorilo",
+    description: string = "",
     options: Array<{
         text: string,
         onPress: () => void,
         style?: string
-    }>) => {
+    }>  = [{ text: 'OK', onPress: () => {} }] ) => {
     const result = window.confirm([title, description].filter(Boolean).join('\n'))
 
     if (result) {
