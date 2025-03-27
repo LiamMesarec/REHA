@@ -5,7 +5,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { fetchData } from "./api_helper";
-
+import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 export const monthNames = ["January", "February", "March", "April", "May", "June", 
     "July", "August", "September", "October", "November", "December"];
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -117,7 +118,7 @@ export const getMonthEvents = (month: number, year: number, events2: DayEventPro
     return events;
 };
 
-export function Calendar() {
+export const Calendar: React.FC<{ route: any }> = ({ route }) => {
     let dateDisplayed: Date = new Date();
     const navigation = useNavigation();
     const [events2, setEvents2] = useState<DayEventProps[]>([]);
@@ -133,7 +134,7 @@ export function Calendar() {
 
     let events = getMonthEvents(dateDisplayed.getMonth(), dateDisplayed.getFullYear(), events2);
 
-
+    const router = useRouter();
     return (
   
       <View
@@ -141,17 +142,11 @@ export function Calendar() {
           flex: 1,
         }}
       >
-        <TouchableOpacity onPress={() => navigation.navigate('Files', { })}>
-          <Text>
-            Files
-          </Text>
-        </TouchableOpacity>
+        
+            <Link href="/eventForm?eventId=1">
+                <Text>Event Creation</Text>
+            </Link>
 
-        <TouchableOpacity onPress={() => navigation.navigate('EventForm', { eventId: null})}>
-          <Text>
-            Event Creation
-          </Text>
-        </TouchableOpacity>
 
         <FlatList
           data={events}
@@ -162,7 +157,7 @@ export function Calendar() {
                 return (
                   <TouchableOpacity
                     
-                    onPress={() => navigation.navigate('EventPage', { eventId: item.id })}
+                    onPress={() => router.push(`/event_detailed?eventId=${item.id}`)}
                   >
                     <DayEvent {...item} />
                   </TouchableOpacity>
@@ -228,4 +223,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default {Calendar};
+export default Calendar;

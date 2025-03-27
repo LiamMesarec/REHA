@@ -8,6 +8,7 @@ import { formToJSON } from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import alert from "./alert";
+import { useLocalSearchParams } from "expo-router";
 
 interface FieldProps {
     title: string,
@@ -35,8 +36,8 @@ const formatDate = (dateIn: Date) => {
     return date;
 }
 
-export const EventForm = ({ route }) => {
-    const { eventId } = route.params;
+export const EventForm = () => {
+    const { eventId } = useLocalSearchParams();
     const [TitleValue, setTitleValue] = useState(""); //set default here
     const [DescriptionValue, setDescriptionValue] = useState("");
     const [CoordinatorValue, setCoordinatorValue] = useState("");
@@ -47,7 +48,7 @@ export const EventForm = ({ route }) => {
     const [toDate, setToDate] = useState("2025-03-14 13:50:33");
     const [fromDate, setFromDate] = useState("2025-03-14 13:50:33");
 
-    fetchAndOpenFile("0bc784d5-8e72-4433-83da-dfcca30561e9", "presentation.pdf");
+    //fetchAndOpenFile("0bc784d5-8e72-4433-83da-dfcca30561e9", "presentation.pdf");
 
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate;

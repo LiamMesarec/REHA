@@ -1,5 +1,5 @@
 
-import { Calendar } from "./calendar";
+import Calendar from "./calendar";
 import { NavigationIndependentTree } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import {EventPage} from "./event_detailed";
@@ -34,8 +34,10 @@ const HomePage: React.FC = () => {
   return(
       <View>
           <Text style={{ fontSize: 24 }}>Home Screen</Text>
-          <Button title="Go to Details" onPress={() => router.push("/fileSystem")} />
-      </View>
+          <Button title="FILES" onPress={() => router.push("/fileSystem")} />
+          <Button title="CALENDAR" onPress={() => router.push("/calendar")} />
+          <Button title="EVENT FORM" onPress={() => router.push("/eventForm?eventId=1")} />
+          </View>
   )
 }
 

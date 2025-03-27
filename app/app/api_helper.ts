@@ -4,7 +4,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import alert from "./alert";
 
-const ip = "164.8.162.184";
+const ip = "192.168.31.210";
 const api = axios.create({
     baseURL: `http://${ip}:3000/api`,
     timeout: 10000, 
@@ -60,42 +60,7 @@ const api = axios.create({
   };
 
 
-  export const uploadFile = async (fileInput: any, filename: string, path: string) => {
-    try {
-      const file = {
-        uri: fileInput.uri,
-        name: filename,
-        type: fileInput.mimeType
-      };
-  
-      const formData = new FormData();
-      formData.append('name', filename);
-      formData.append('path', path)
-      formData.append('file', {
-        uri: file.uri, 
-        name: file.name, 
-        type: file.type
-      } as any); 
-  
-      const UPLOAD_URL = `http://${ip}:3000/api/files`;
-  
-      const response = await fetch(UPLOAD_URL, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        }
-      });
-  
-      const result = await response.json();
-      console.log("Upload success:", result);
-      
-      return result;
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      throw error;
-    }
-  };
+
 
   export const submitEvent = async (title: string, description: string, coordinator: string, date: string, from:string | null, to: string | null) => {
     if (!title || !description || !coordinator || !date) {

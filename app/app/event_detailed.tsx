@@ -1,6 +1,7 @@
 import { Text, View, StyleSheet } from "react-native";
 import React, { useEffect, useState } from "react";
 import { fetchData } from "./api_helper";
+import { useLocalSearchParams } from "expo-router";
 
 
 const TITLE_IMAGE_SECTION = "Image Section";
@@ -82,9 +83,9 @@ export function displayEventDetails(eventDetails: ParagraphProps[]) {
 
 
 
-export function EventPage({ route }) {
-  const { eventId } = route.params;
-  const [eventDetails, setEventDetails] = useState<ParagraphProps[]>([]);
+export function EventPage() {
+    const { eventId } = useLocalSearchParams();
+    const [eventDetails, setEventDetails] = useState<ParagraphProps[]>([]);
 
   useEffect(() => {
     const fetchEventDetails = async () => {
