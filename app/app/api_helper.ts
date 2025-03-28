@@ -4,7 +4,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import alert from "./alert";
 
-const ip = "164.8.161.120";
+const ip = "192.168.31.210";
 const api = axios.create({
     baseURL: `http://${ip}:3000/api`,
     timeout: 10000, 
@@ -18,7 +18,7 @@ const api = axios.create({
       const response = await api.get(path);
       return response.data;
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching data with path:",path," ---- Error: ", error);
       throw error;
     }
   };

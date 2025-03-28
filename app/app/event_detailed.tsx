@@ -45,8 +45,13 @@ const FilesParagraph = ({ id }: { id: number }) => {
 
   useEffect(() => {
     const fetchFiles = async () => {
+        try{
       const eventFilesObject = await fetchData(`/events/${id}/files`);
       setEventFiles(eventFilesObject.files);
+    }catch (error){
+        console.log("No response 4 files 4 specific events");
+    }
+      
     };
     fetchFiles();
   }, [id]);
@@ -113,10 +118,14 @@ export const DeleteEventButton = (props: BtnProps) => {
     return (
         <TouchableOpacity onPress={()=> {
             try{
-            deleteEventById(Number(props.id));
-            alert("Brisanje","Znebil si se dogodka");
-            // should use back (if only used in event detailed), but this causes the calendar to be updated
-            router.push("/calendar");
+            alert("Brisanje", "Želiš izbrisati dogodek?", [{ text: 'Da', onPress: () => {
+                deleteEventById(Number(props.id));
+                alert("Brisanje","Znebil si se dogodka");
+                // should use back (if only used in event detailed), but this causes the calendar to be updated
+                router.push("/calendar");
+            } }, { text: 'Ne', onPress: () => {} }])
+            
+            
             } catch(_error){
                 alert("Brisanje","Brisanje dogodka ni uspelo");
             }
@@ -137,7 +146,7 @@ export function EventPage() {
       setEventDetails(details);
     };
     fetchEventDetails();
-    });
+    }, [eventId]);
 
 
   return (

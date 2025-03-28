@@ -6,7 +6,7 @@ import {EventPage} from "./event_detailed";
 import FileSystem from './fileSystem'; 
 import { EventForm } from "./eventForm"; 
 import { useRouter } from "expo-router";
-
+import EventSearch from "./eventSearch"
 import { Text, TouchableOpacity, View, Alert, StyleSheet, ScrollView, TextInput, Button } from "react-native";
 import { RootStackParamList } from './types';
 //import { RootStackParamList } from "./types"; // Create and import this type
@@ -37,6 +37,7 @@ const HomePage: React.FC = () => {
           <Button title="FILES" onPress={() => router.push("/fileSystem")} />
           <Button title="CALENDAR" onPress={() => router.push("/calendar")} />
           <Button title="EVENT FORM" onPress={() => router.push("/eventForm")} />
+          <Button title="SEARCH EVENTS" onPress={() => router.push("/eventSearch")} />
           </View>
   )
 }
