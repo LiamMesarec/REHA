@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 import { View, Button, Alert, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import {uploadFile } from "./api_helper";
+import {uploadFile, uploadFileEvent } from "./api_helper";
+import alert from './alert';
 
 
-
-const uploadToServer = async (file: any, path : string) => {
+const uploadToServer = async (file: any, path : string, event: string | null) => {
   if (file) {
     try {
-      const result = await uploadFile(file, file.name, `${path}/${file.name}`);
+      let result;
+      if (event){
+        result = await uploadFileEvent(file, file.name, `${path}/${file.name}`, event);
+      }else
+      result = await uploadFile(file, file.name, `${path}/${file.name}`);
       console.log("Upload result:", result);
-      Alert.alert('Upload Successful', `File ${file.name} uploaded successfully!`);
+      alert('Upload Successful', `File ${file.name} uploaded successfully!`);
     } catch (error) {
       console.error("Upload failed:", error);
-      Alert.alert('Upload Failed', 'There was an error uploading the file.');
+      alert('Upload Failed', 'There was an error uploading the file.');
     }
   }
 };
@@ -21,9 +25,10 @@ const uploadToServer = async (file: any, path : string) => {
 interface UploadProps{
   refresh : () => void,
   currentPath : string,
+  event: string | null
 }
 
-const FileUploadScreen: React.FC<UploadProps> = ({refresh, currentPath}) => {
+const FileUploadScreen: React.FC<UploadProps> = ({refresh, currentPath, event}) => {
   const [file, setFile] = useState<any>(null);
 
 
@@ -42,7 +47,7 @@ const FileUploadScreen: React.FC<UploadProps> = ({refresh, currentPath}) => {
 
       const selectedFile = res.assets[0];
       setFile(selectedFile);
-      let tmp = await uploadToServer(selectedFile, currentPath);
+      let tmp = await uploadToServer(selectedFile, currentPath, event);
       refresh();
       console.log("SERVER RESPONSE: ", tmp);
     } catch (err) {

@@ -1,5 +1,5 @@
 import { Text, View, StyleSheet, TouchableOpacity, Alert, Button, SafeAreaView, Platform } from "react-native"
-import { ScrollView, TextInput } from "react-native-gesture-handler";
+import { GestureHandlerRootView, ScrollView, TextInput } from "react-native-gesture-handler";
 import React, {useState} from "react";
 import { submitEvent, fetchAndOpenFile, fetchData, submitUpdateEvent } from "./api_helper";
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -8,7 +8,8 @@ import { formToJSON } from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import alert from "./alert";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import FileUploadScreen from "./fileUpload";
 
 interface FieldProps {
     title: string,
@@ -96,13 +97,16 @@ export const EventForm = () => {
           if (eventId && eventId != "null"){
             res = await submitUpdateEvent(Array.isArray(eventId) ? eventId[0] : eventId, TitleValue, DescriptionValue, CoordinatorValue, formatDate(date), fromDate, toDate );
             alert("Uspešno posodobljen dogodek: ", TitleValue);
+            
           }else {
            res = await submitEvent(TitleValue, DescriptionValue, CoordinatorValue, formatDate(date), fromDate, toDate );
            
            alert("Uspešno ustvarjen dogodek: ", TitleValue,  [
             { text: "OK", onPress: () => {} }
         ]);
+        
           }
+          router.push("/calendar");
         }catch (error){
             if (error == 1){
               alert("Prosim izpolni vse nujne podatke");
@@ -127,6 +131,7 @@ export const EventForm = () => {
       }
 
     return(
+      <GestureHandlerRootView style={{ flex: 1 }}>
     <ScrollView>
     <Text style = {styles.title}>Forma za dogodek: {eventId}</Text>
     <View>
@@ -173,7 +178,11 @@ export const EventForm = () => {
 
     </View>
     <TouchableOpacity style={styles.button} onPress={submitFn}><Text>Nastavi</Text></TouchableOpacity>
+  {eventId && eventId != "null" && (
+    <FileUploadScreen refresh={() => {}} currentPath={"files/"} event={Array.isArray(eventId) ? eventId[0] : eventId} />
+  )}
     </ScrollView>
+    </GestureHandlerRootView>
     );
 };
 

@@ -1,6 +1,6 @@
-import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
-import { deleteEventById, fetchData } from "./api_helper";
+import { deleteEventById, fetchAndOpenFile, fetchData } from "./api_helper";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import alert from "./alert";
 
@@ -32,16 +32,40 @@ async function getEventDetails(id: number): Promise<ParagraphProps[]> {
     let eventDetails: ParagraphProps[] = [];
     let eventDataObject = await fetchData(`/events/${id}`);
     let eventData = eventDataObject.event;
-    let eventFilesObject = await fetchData(`/events/${id}/files`);
-    let eventFiles = eventFilesObject.files;
-    let filesContent = eventFiles.map((file: any) => file.name).join(",\n");
+ -
 
     eventDetails.push({ title: "Opis", content: `${eventData.description}` });
     eventDetails.push({ title: "Podatki", content: `Dogodek se začne: ${eventData.start}. Dogodek bo koordiniral: ${eventData.coordinator}. \nIme dogodka: ${eventData.title}` });
-    eventDetails.push({title: "Datoteke", content: `${filesContent}`});
     return eventDetails;
 }
-/*
+
+
+const FilesParagraph = ({ id }: { id: number }) => {
+  const [eventFiles, setEventFiles] = useState<{ uuid: string; name: string }[]>([]);
+
+  useEffect(() => {
+    const fetchFiles = async () => {
+      const eventFilesObject = await fetchData(`/events/${id}/files`);
+      setEventFiles(eventFilesObject.files);
+    };
+    fetchFiles();
+  }, [id]);
+
+  return (
+    <View>
+      <Text style={styles.title}>Datoteke</Text>
+      {eventFiles.map((file, index) => (
+        <TouchableOpacity
+          key={index}
+          onPress={() => fetchAndOpenFile(file.uuid, file.name)}
+        >
+          <Text style={styles.content}>{file.name}</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+};
+/* 
 function getImages(): ImageSectionProps[] {
     let images: [
     {imageUri: "https://legacy.reactjs.org/logo-og.png", width: 100, height: 100},
@@ -66,8 +90,6 @@ export const ImageSection = (props: ImageSectionProps) => {
         <View>
             <Text style = {styles.title}>{TITLE_IMAGE_SECTION}</Text>
         
-            
-       
         </View>
     );
 
@@ -115,17 +137,19 @@ export function EventPage() {
       setEventDetails(details);
     };
     fetchEventDetails();
-  }, [eventId]);
+    });
+
 
   return (
-    <View>
+    <ScrollView>
       <Text>Event id: {eventId}</Text>
       {displayEventDetails(eventDetails)}
+      <FilesParagraph id = {Number(eventId)}/>
       <Link href={`/eventForm?eventId=${eventId}`} style={styles.editLink}>
             <Text>Spremeni dogodek</Text>
         </Link>
         <DeleteEventButton id={Array.isArray(eventId) ? eventId[0] : eventId}/>
-    </View>
+    </ScrollView>
   );
 }
 

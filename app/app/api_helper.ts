@@ -4,7 +4,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import alert from "./alert";
 
-const ip = "192.168.31.210";
+const ip = "164.8.161.120";
 const api = axios.create({
     baseURL: `http://${ip}:3000/api`,
     timeout: 10000, 
@@ -22,6 +22,7 @@ const api = axios.create({
       throw error;
     }
   };
+
   export const uploadFile = async (fileInput: any, filename: string, path: string) => {
     try {
       const file = {
@@ -29,7 +30,7 @@ const api = axios.create({
         name: filename,
         type: fileInput.mimeType
       };
-  
+
       const formData = new FormData();
       formData.append('name', filename);
       formData.append('path', path)
@@ -57,6 +58,19 @@ const api = axios.create({
       console.error("Error uploading file:", error);
       throw error;
     }
+  };
+
+
+  
+  export const uploadFileEvent = async (fileInput: any, filename: string, path: string, eventId: string) => {
+    try {
+      const response = await uploadFile(fileInput, filename, path);
+      console.log(response);
+      //addFileToEvent(2, 1);
+    }catch(error){
+
+    }
+
   };
 
 
@@ -155,6 +169,12 @@ export const fetchAndOpenFile = async (uuid: string, fileName: string) => {
     Alert.alert('Error', 'Failed to open file.');
   }
 };
+
+export const addFileToEvent = async (id: number, fileId: number) => {
+  const response = await axios.post(`/events/${id}/files`, {
+    fileId: fileId
+  });
+}
 
 export const deleteFileById = async (fileId: number) => {
   try {

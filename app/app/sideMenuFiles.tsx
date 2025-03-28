@@ -33,7 +33,7 @@ React.useEffect(() => {
 
       <TouchableOpacity style={styles.menuItem} onPress={toggleMenu}>
         <Icon name="upload" size={24} color="black" />
-        <FileUploadScreen refresh={refresh} currentPath={currentPath} />
+        <FileUploadScreen refresh={refresh} currentPath={currentPath} event={null}/>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.menuItem} onPress={() => event1()}>
