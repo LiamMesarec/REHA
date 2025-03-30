@@ -24,7 +24,7 @@ const MapList: React.FC<MapListProps> = ({ folders, onFolderPress, selectedFolde
             />}
           <TouchableOpacity
             key={index}
-            style={styles.fileButton}
+            style={[styles.fileButton, editVisible?{width: "94.8%"}: {width: "100%"}]}
             onPress={() => onFolderPress(folder)}
           >
             <View style={styles.rowContainer}>
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#ffffff",
     padding: 5,
-    paddingRight: "5%",
+    paddingRight: "4%",
   },
   fileButton: {
     backgroundColor: "#ffffff",
@@ -56,7 +56,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderColor: "black",
     borderWidth: 1,
-    width: "100%",
     alignItems: "flex-start", 
     marginLeft : 5,
   },

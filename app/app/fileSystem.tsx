@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, forwardRef } from "react";
 import { Text, TouchableOpacity, View, Alert, StyleSheet, ScrollView, TextInput } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { RouteProp } from '@react-navigation/native';
@@ -339,7 +339,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
-
   header: {
     position: 'absolute', 
     top: 0,
@@ -371,7 +370,6 @@ const styles = StyleSheet.create({
   scrollView: {
     marginTop: 100,
     marginBottom : 50,
-    paddingRight : 10
   },
   searchContainer: {
     flexDirection: "row",

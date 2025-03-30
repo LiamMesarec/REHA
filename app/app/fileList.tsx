@@ -67,7 +67,7 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
               value={selectedFiles.includes(file.id)}
               onValueChange={() => toggleSelectFile(file.id)}
             />}
-            <TouchableOpacity key={index} onPress={() => loadFile(index)} style={styles.fileButton}>
+            <TouchableOpacity key={index} onPress={() => loadFile(index)} style={[styles.fileButton, editVisible?{width: "94.8%"}: {width: "100%"}]}>
               <View style={styles.fileRow}>
                 <Icon name={name} size={40} color={color} />
                 <View style= {styles.mapNameContainer}>
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
       width: "100%",
       backgroundColor: "#ffffff",
       padding: 5,
-      paddingRight: "5%",
+      paddingRight: "4%",
     },
     fileButton: {
       backgroundColor: "#ffffff",
@@ -100,7 +100,6 @@ const styles = StyleSheet.create({
       borderRadius: 5,
       borderColor: "black",
       borderWidth: 1,
-      width: "100%",
       alignItems: "flex-start", 
       marginLeft : 5,
     },
