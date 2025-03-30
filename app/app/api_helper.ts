@@ -4,7 +4,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import alert from "./alert";
 
-const ip = "192.168.31.210";
+const ip = "172.26.112.1";
 const api = axios.create({
     baseURL: `http://${ip}:3000/api`,
     timeout: 10000, 
@@ -130,7 +130,7 @@ export const deleteEventById = async (id: number) => {
     
     console.log("Event deleted successfully:", response.data);
     return response.data;
-  } catch (error) {
+  } catch (error:any) {
     if (error.request) {
       console.error("No response received:", error.request);
     } else {
@@ -181,7 +181,7 @@ export const deleteFileById = async (fileId: number) => {
     const response = await api.delete(`/files/${fileId}`);
     
     console.log("File deleted successfully:", response.data);
-  } catch (error) {
+  } catch (error:any) {
     if (error.response) {
       //console.error("Error deleting file:", error.response.data);
 
