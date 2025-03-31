@@ -151,6 +151,9 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
   useEffect(() => {
     const fetchEvents = async () => {
       const eventsData = await getEvents();
+      //console.log(eventsData);
+      setEvents3(groupEventsByDate(eventsData));
+      //console.log(events3[0].title);
       setEvents2(eventsData);
     };
 

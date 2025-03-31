@@ -132,7 +132,7 @@ export const EventForm = () => {
 
     return(
       <GestureHandlerRootView style={{ flex: 1 }}>
-    <ScrollView>
+    <ScrollView style={styles.mainView}>
     <Text style = {styles.title}>Forma za dogodek: {eventId}</Text>
     <View>
         <Field title = {"Ime dogodga"} data= {TitleValue} onChange={setTitleValue}/>
@@ -178,9 +178,11 @@ export const EventForm = () => {
 
     </View>
     <TouchableOpacity style={styles.button} onPress={submitFn}><Text>Nastavi</Text></TouchableOpacity>
+  <View style={styles.uploadScreen}>
   {eventId && eventId != "null" && (
-    <FileUploadScreen refresh={() => {}} currentPath={"files/"} event={Array.isArray(eventId) ? eventId[0] : eventId} />
+    <FileUploadScreen  refresh={() => {}} currentPath={"files/"} event={Array.isArray(eventId) ? eventId[0] : eventId} />
   )}
+  </View>
     </ScrollView>
     </GestureHandlerRootView>
     );
@@ -209,7 +211,15 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         width: '25%',
         padding: 20,
-        color: 'white'
+        color: 'white',
+        marginBottom: 20,
+        marginTop: 20
+    },
+    mainView: {
+      paddingLeft: 15
+    }, 
+    uploadScreen: {
+      marginBottom:20
     }
   });
   

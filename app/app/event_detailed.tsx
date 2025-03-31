@@ -116,7 +116,9 @@ export function displayEventDetails(eventDetails: ParagraphProps[]) {
 
 export const DeleteEventButton = (props: BtnProps) => {
     return (
-        <TouchableOpacity onPress={()=> {
+        <TouchableOpacity
+        style={styles.deleteButton} 
+        onPress={()=> {
             try{
             alert("Brisanje", "Želiš izbrisati dogodek?", [{ text: 'Da', onPress: () => {
                 deleteEventById(Number(props.id));
@@ -140,26 +142,27 @@ export function EventPage() {
     const { eventId } = useLocalSearchParams();
     const [eventDetails, setEventDetails] = useState<ParagraphProps[]>([]);
 
-  useEffect(() => {
-    const fetchEventDetails = async () => {
-      const details = await getEventDetails(eventId);
-      setEventDetails(details);
-    };
-    fetchEventDetails();
+    useEffect(() => {
+        const fetchEventDetails = async () => {
+            const details = await getEventDetails(eventId);
+            setEventDetails(details);
+        };
+        fetchEventDetails();
     }, [eventId]);
 
-
-  return (
-    <ScrollView>
-      <Text>Event id: {eventId}</Text>
-      {displayEventDetails(eventDetails)}
-      <FilesParagraph id = {Number(eventId)}/>
-      <Link href={`/eventForm?eventId=${eventId}`} style={styles.editLink}>
-            <Text>Spremeni dogodek</Text>
-        </Link>
-        <DeleteEventButton id={Array.isArray(eventId) ? eventId[0] : eventId}/>
-    </ScrollView>
-  );
+    return (
+        <ScrollView style={styles.mainView}>
+            <Text>Event id: {eventId}</Text>
+            {displayEventDetails(eventDetails)}
+            <FilesParagraph id={Number(eventId)} />
+            <View style={styles.editButton}>
+                <Link href={`/eventForm?eventId=${eventId}`}>
+                    <Text style={styles.editButtonText}>Spremeni dogodek</Text>
+                </Link>
+            </View>
+            <DeleteEventButton id={Array.isArray(eventId) ? eventId[0] : eventId} />
+        </ScrollView>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -178,20 +181,36 @@ const styles = StyleSheet.create({
         fontSize: 15,
         marginBottom: 15
     },
-    editLink: {
-        backgroundColor: "grey",
-        fontWeight: "bold",
-        fontSize: 20,
-        marginBottom:25 
+    editButton: {
+        backgroundColor: "#007BFF",
+        padding: 15,
+        borderRadius: 8,
+        alignItems: "center",
+        marginBottom: 20,
     },
-    deleteBtn: {
-        backgroundColor: "red",
+    editButtonText: {
+        color: "#FFFFFF",
         fontWeight: "bold",
-        fontSize: 20,
-        width: "auto"
+        fontSize: 16,
+        textAlign: "center",
+    },
+    deleteButton: {
+        backgroundColor: "#FF4D4D",
+        padding: 15,
+        borderRadius: 8,
+        alignItems: "center",
+        marginBottom: 20,
+    },
+    deleteButtonText: {
+        color: "#FFFFFF",
+        fontWeight: "bold",
+        fontSize: 16,
+    },
+    mainView: {
+        paddingLeft: 15,
+        paddingRight: 15,
+        paddingTop: 10,
     }
-    
-
 });
 
 export default EventPage;

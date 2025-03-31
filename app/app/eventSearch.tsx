@@ -4,12 +4,19 @@ import { Text, TextInput, TouchableOpacity, View, StyleSheet } from "react-nativ
 import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { fetchData } from "./api_helper";
+import DropDownPicker from 'react-native-dropdown-picker';
 
 interface EventSimpleProps {
   id: number | string;
   title: string;
   coordinator: string;
   start: string;
+}
+
+enum SearchType{
+    Title,
+    Coordinator,
+    Description
 }
 
 const EventSimple = (props: EventSimpleProps) => {
@@ -38,6 +45,13 @@ export const EventSearch = () => {
   const [matchingEventProps, setMatchingEventProps] = useState<
     EventSimpleProps[]
   >([]);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(SearchType.Title);
+  const dropdownItems = [
+    { label: "Naslov", value: SearchType.Title },
+    { label: "Koordinator", value: SearchType.Coordinator },
+    { label: "Opis", value: SearchType.Description },
+  ];
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -48,10 +62,30 @@ export const EventSearch = () => {
     fetchEvents();
   }, []);
 
-  const findMatchingEvents = () => {
-    let matchingEvents = events.filter((event) =>
-      event.title.toLowerCase().includes(searchBarText.toLowerCase())
-    );
+  const findMatchingEvents = (type: SearchType) => {
+    let matchingEvents;
+    switch (type){
+        case SearchType.Title:
+            matchingEvents = events.filter((event) =>
+                event.title.toLowerCase().includes(searchBarText.toLowerCase())
+            );
+            break;
+        case SearchType.Coordinator:
+            matchingEvents = events.filter((event) =>
+                event.coordinator.toLowerCase().includes(searchBarText.toLowerCase())
+            );
+            break;
+        case SearchType.Description:
+            matchingEvents = events.filter((event) =>
+                event.description.toLowerCase().includes(searchBarText.toLowerCase())
+            );
+            break;
+        default:
+            alert("Napaka, ni izbran tip iskanja");
+            return;
+    }
+
+
 
     // Remove if not needed
     matchingEvents.sort((a, b) => {
@@ -73,7 +107,6 @@ export const EventSearch = () => {
   return (
     <GestureHandlerRootView>
     <View>
-      <Text>Najdi dogodke</Text>
       <View style={styles.searchContainer}>
         {/* ISKALNIK */}
         <TextInput
@@ -82,14 +115,22 @@ export const EventSearch = () => {
           placeholderTextColor="gray"
           value={searchBarText}
           onChangeText={setSearchBarText}
-          onSubmitEditing={findMatchingEvents}
+          onSubmitEditing={() => findMatchingEvents(value)}
           returnKeyType="search"
         />
         {/* Ikona z povečevalnim steklom */}
-        <TouchableOpacity onPress={findMatchingEvents}>
+        <TouchableOpacity onPress={() => findMatchingEvents(value)}>
           <Icon name="magnify" size={24} color="black" />
         </TouchableOpacity>
       </View>
+      <DropDownPicker
+      open={open}
+      value={value}
+      items={dropdownItems}
+      setOpen={setOpen}
+      setValue={setValue}
+      
+        />
       <MatchingEvents matchingEventProps={matchingEventProps} />
     </View>
     </GestureHandlerRootView>
