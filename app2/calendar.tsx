@@ -1,61 +1,18 @@
-import {
-  ScrollView,
-  FlatList,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Platform
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { ScrollView, FlatList, View, Text, TouchableOpacity, StyleSheet, Platform } from "react-native";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
+import { ExpandableCalendar, AgendaList, CalendarProvider, WeekCalendar } from 'react-native-calendars';
+import React, { useEffect, useState, useCallback, useRef } from "react";;
 import { fetchData } from "./api_helper";
-import { useRouter } from "expo-router";
 import AgendaItem from "./AgendaItem";
 import isEmpty from 'lodash/isEmpty';
 import { get } from "lodash";
-import { ExpandableCalendar, AgendaList, CalendarProvider, LocaleConfig } from 'react-native-calendars';
-import React, { useEffect, useState, useCallback, useRef } from "react";;
+
 
 const leftArrowIcon = require('./previous.png');
 const rightArrowIcon = require('./next.png');
 
-LocaleConfig.locales['si'] = {
-  formatAccessibilityLabel: "dddd d 'of' MMMM 'of' yyyy",
-  monthNames: [
-    'Januar',
-    'Februar',
-    'Marec',
-    'April',
-    'Maj',
-    'Junij',
-    'Julij',
-    'August',
-    'September',
-    'Oktober',
-    'November',
-    'December'
-  ],
-  monthNamesShort: ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'],
-  dayNames: ['Nedelja', 'Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota'],
-  dayNamesShort: ['N', 'P', 'T', 'S', 'Č', 'P', 'S'],
-};
-
-LocaleConfig.defaultLocale = 'si';
-
-export const monthNames = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+export const monthNames = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"];
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 interface DayEventProps {
@@ -107,6 +64,9 @@ export const MonthHeader = (props: { month: string, year: number }) => {
   );
 }
 
+const getDaysInMonth = (year: number, month: number): number => {
+  return new Date(year, month + 1, 0).getDate();
+};
 
 export const getEvents = async (): Promise<DayEventProps[]> => {
   let events: DayEventProps[] = [];
@@ -119,7 +79,7 @@ export const getEvents = async (): Promise<DayEventProps[]> => {
     if (dateEnd === null) {
       events.push({
         event: event.title,
-        time: dateStart.getHours().toString() + ":" + (dateStart.getMinutes().toString().length == 1 ? "0" : "") + dateStart.getMinutes().toString(),
+        time: dateStart.getHours().toString() + ":" + (dateStart.getMinutes().toString().length == 1 ? "0" : "") + date.getMinutes().toString(),
         day: getDayOfWeekName(dateStart),
         dayNum: dateStart.getDate(),
         month: dateStart.getMonth(),
@@ -148,6 +108,36 @@ export const getEvents = async (): Promise<DayEventProps[]> => {
 
   return events;
 };//<MonthHeader month={monthNames[dateDisplayed.getMonth() + 1]} year={dateDisplayed.getFullYear()} />
+
+export const getMonthEvents = (month: number, year: number, events2: DayEventProps[]): DayEventProps[] => {
+  let events: DayEventProps[] = [];
+  events.push({
+    event: "",
+    time: "0",
+    day: "",
+    dayNum: 0,
+    month: month,
+    year: year,
+    header: true,
+    id: 0
+  });
+  let monthName = monthNames[month];
+  let noEvent: boolean = true;
+  for (let i = 1; i <= getDaysInMonth(year, month); i++) {
+    let date: Date = new Date(year, month, i);
+    noEvent = true;
+    for (let j = 0; j < events2.length; j++) { // Could remove them after used and get them for each month from db
+      let event = events2[j];
+      if (event.year == year && event.month == monthName && event.dayNum == i) {
+        events.push(event);
+        noEvent = false;
+        break; // PRINTS 1 EVENT PER DAY MAX
+      }
+    }
+    if (!noEvent) continue;
+  }
+  return events;
+};
 
 interface GroupedEvent {
   title: string;  // YYYY-MM-DD format
@@ -240,7 +230,6 @@ export function getTheme() {
 }
 
 export const Calendar: React.FC<{ route: any }> = ({ route }) => {
-  const router = useRouter();
   let dateDisplayed: Date = new Date();
   const theme = useRef(getTheme());
   const todayBtnTheme = useRef({
@@ -259,7 +248,7 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
       const eventsData = await getEvents();
       //console.log(eventsData);
       setEvents3(groupEventsByDate(eventsData));
-      //console.log(events3[0].title);
+      console.log(events3[0].title);
       setEvents2(eventsData);
     };
 
@@ -305,6 +294,17 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
       // closeOnDayPress={false}
       />
       <Text style={{fontSize:3}}></Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Files', { })}>
+          <Text>
+            Files
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('EventForm', { eventId: null})}>
+          <Text>
+            Event Creation
+          </Text>
+        </TouchableOpacity>
       <AgendaList
         sections={events3}
         renderItem={renderItem}
@@ -357,18 +357,7 @@ const styles = StyleSheet.create({
   monthHeaderT: {
     fontWeight: 'bold',
     fontSize: 24
-  },
-  refreshButton: {
-    backgroundColor: "#007BFF",
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    marginVertical: 10,
-  },
-  refreshButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
+  }
 });
-export default Calendar;
+
+export default { Calendar };

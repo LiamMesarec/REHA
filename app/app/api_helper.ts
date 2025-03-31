@@ -130,7 +130,7 @@ export const deleteEventById = async (id: number) => {
     
     console.log("Event deleted successfully:", response.data);
     return response.data;
-  } catch (error) {
+  } catch (error:any) {
     if (error.request) {
       console.error("No response received:", error.request);
     } else {
@@ -181,7 +181,7 @@ export const deleteFileById = async (fileId: number) => {
     const response = await api.delete(`/files/${fileId}`);
     
     console.log("File deleted successfully:", response.data);
-  } catch (error) {
+  } catch (error:any) {
     if (error.response) {
       //console.error("Error deleting file:", error.response.data);
 
