@@ -1,7 +1,7 @@
 import { Text, View, StyleSheet, TouchableOpacity, Alert, Button, SafeAreaView, Platform } from "react-native"
 import { GestureHandlerRootView, ScrollView, TextInput } from "react-native-gesture-handler";
 import React, {useState} from "react";
-import { submitEvent, fetchAndOpenFile, fetchData, submitUpdateEvent } from "./api_helper";
+import { submitEvent, fetchAndOpenFile, fetchData, submitUpdateEvent, addFileToEvent } from "./api_helper";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { createElement } from "react";
 import { formToJSON } from "axios";
@@ -48,6 +48,7 @@ export const EventForm = () => {
     const [date, setDate] = useState(new Date());
     const [toDate, setToDate] = useState("2025-03-14");
     const [fromDate, setFromDate] = useState("2025-03-14");
+
     if (eventId && eventId !== "null"){
         React.useEffect(() => {
             const fetchEventData = async () => {
@@ -69,7 +70,7 @@ export const EventForm = () => {
             }
         }, [eventId]);
         
-      }
+    }
     //fetchAndOpenFile("0bc784d5-8e72-4433-83da-dfcca30561e9", "presentation.pdf");
 
     const onChange = (event, selectedDate) => {
@@ -95,8 +96,13 @@ export const EventForm = () => {
         let res;
         try{
           if (eventId && eventId != "null"){
-            res = await submitUpdateEvent(Array.isArray(eventId) ? eventId[0] : eventId, TitleValue, DescriptionValue, CoordinatorValue, formatDate(date), fromDate, toDate );
-            alert("Uspešno posodobljen dogodek: ", TitleValue);
+            alert("Pozor", "Želiš spremeniti dogodek?", [{ text: 'Da', onPress: async () => {
+              
+              res = await submitUpdateEvent(Array.isArray(eventId) ? eventId[0] : eventId, TitleValue, DescriptionValue, CoordinatorValue, formatDate(date), fromDate, toDate );
+              alert("Uspešno posodobljen dogodek: ", TitleValue);
+              router.push("/calendar");
+          } }, { text: 'Ne', onPress: () => {} }])
+            
             
           }else {
            res = await submitEvent(TitleValue, DescriptionValue, CoordinatorValue, formatDate(date), fromDate, toDate );
@@ -104,9 +110,10 @@ export const EventForm = () => {
            alert("Uspešno ustvarjen dogodek: ", TitleValue,  [
             { text: "OK", onPress: () => {} }
         ]);
+        router.push("/calendar");
         
           }
-          router.push("/calendar");
+          
         }catch (error){
             if (error == 1){
               alert("Prosim izpolni vse nujne podatke");
@@ -177,10 +184,12 @@ export const EventForm = () => {
       }
 
     </View>
-    <TouchableOpacity style={styles.button} onPress={submitFn}><Text>Nastavi</Text></TouchableOpacity>
+    <TouchableOpacity style={styles.button} onPress={submitFn}><Text style={styles.buttonText}>Nastavi</Text></TouchableOpacity>
   <View style={styles.uploadScreen}>
   {eventId && eventId != "null" && (
-    <FileUploadScreen  refresh={() => {}} currentPath={"files/"} event={Array.isArray(eventId) ? eventId[0] : eventId} />
+    <View style ={[styles.button, {backgroundColor: "#5bb8f7"}]}>
+    <FileUploadScreen  refresh={() => {}} currentPath={"Files"} event={Array.isArray(eventId) ? eventId[0] : eventId} />
+    </View>
   )}
   </View>
     </ScrollView>
@@ -209,17 +218,26 @@ const styles = StyleSheet.create({
         backgroundColor: '#24a0ed',
         fontSize: 15,
         fontWeight: 'bold',
-        width: '25%',
+        width: '35%',
         padding: 20,
         color: 'white',
-        marginBottom: 20,
-        marginTop: 20
+        marginBottom: 5,
+        marginTop: 20,
+        alignSelf: "center"
     },
     mainView: {
       paddingLeft: 15
     }, 
     uploadScreen: {
       marginBottom:20
+    },
+    uploadScreen2: {
+      marginBottom:20,
+      borderColor: 'gray',
+      borderWidth: 1
+    },
+    buttonText: {
+      fontWeight: "bold"
     }
   });
   

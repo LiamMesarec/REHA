@@ -1,14 +1,17 @@
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Image } from "react-native";
 import React, { useEffect, useState } from "react";
-import { deleteEventById, fetchAndOpenFile, fetchData } from "./api_helper";
+import { deleteEventById, fetchAndOpenFile, fetchData, fetchFileUri } from "./api_helper";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import alert from "./alert";
 
 
-const TITLE_IMAGE_SECTION = "Image Section";
+const TITLE_IMAGE_SECTION = "Slike";
 const DISPLAY_TITLE = "Podrobnosti Dogodka";
 
-
+const imageExtensions = [
+    "jpg",
+    "png"
+];
 
 interface ParagraphProps {
     title: string;
@@ -32,7 +35,7 @@ async function getEventDetails(id: number): Promise<ParagraphProps[]> {
     let eventDetails: ParagraphProps[] = [];
     let eventDataObject = await fetchData(`/events/${id}`);
     let eventData = eventDataObject.event;
- -
+
 
     eventDetails.push({ title: "Opis", content: `${eventData.description}` });
     eventDetails.push({ title: "Podatki", content: `Dogodek se začne: ${eventData.start}. Dogodek bo koordiniral: ${eventData.coordinator}. \nIme dogodka: ${eventData.title}` });
@@ -42,6 +45,7 @@ async function getEventDetails(id: number): Promise<ParagraphProps[]> {
 
 const FilesParagraph = ({ id }: { id: number }) => {
   const [eventFiles, setEventFiles] = useState<{ uuid: string; name: string }[]>([]);
+    const [images, setImages] = useState<ImageSectionProps>();
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -51,11 +55,33 @@ const FilesParagraph = ({ id }: { id: number }) => {
     }catch (error){
         console.log("No response 4 files 4 specific events");
     }
-      
+    
     };
     fetchFiles();
   }, [id]);
 
+  console.log("Pre start of image fetch");
+
+  useEffect(() =>{
+    const fetchImageUri = async () => {
+        console.log("start of image fetch");
+        const imageFiles = eventFiles.filter((file) => {
+            const extension = file.name.split(".").pop()?.toLowerCase();
+            return imageExtensions.includes(extension || "");
+          });
+          console.log(imageFiles);
+          const imageUris = await Promise.all(
+            imageFiles.map(async (file) => ({
+              uri: await fetchFileUri(file.uuid),
+              width: 300,
+              height: 200
+            }))
+          );
+          const res: ImageSectionProps = { images: imageUris };
+          setImages(res);
+    };
+    fetchImageUri();
+  }, [eventFiles]);
   return (
     <View>
       <Text style={styles.title}>Datoteke</Text>
@@ -67,6 +93,8 @@ const FilesParagraph = ({ id }: { id: number }) => {
           <Text style={styles.content}>{file.name}</Text>
         </TouchableOpacity>
       ))}
+
+      {images && <ImageSection images={images.images} />}
     </View>
   );
 };
@@ -91,13 +119,21 @@ export const Paragraph = (props: ParagraphProps) => {
 
 
 export const ImageSection = (props: ImageSectionProps) => {
-    return (
-        <View>
-            <Text style = {styles.title}>{TITLE_IMAGE_SECTION}</Text>
-        
-        </View>
-    );
+  return (
+    <View>
+      <Text style={styles.title}>{TITLE_IMAGE_SECTION}</Text>
 
+      {props.images.map((image, index) => (
+        <Image
+          key={index}
+          style={{ width: image.width, height: image.height, marginTop:20, marginBottom:20}}
+          source={{
+            uri: image.uri,
+          }}
+        />
+      ))}
+    </View>
+  );
 };
 
 export function displayEventDetails(eventDetails: ParagraphProps[]) {
@@ -132,7 +168,7 @@ export const DeleteEventButton = (props: BtnProps) => {
                 alert("Brisanje","Brisanje dogodka ni uspelo");
             }
             }} >
-            <Text  style={styles.deleteBtn}>Izbriši dogodek</Text>
+            <Text  style={styles.deleteButtonText}>Izbriši dogodek</Text>
         </TouchableOpacity>
     );
 };
@@ -205,6 +241,10 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
         fontWeight: "bold",
         fontSize: 16,
+    },
+    picture: {
+        width: 50,
+        height: 50
     },
     mainView: {
         paddingLeft: 15,

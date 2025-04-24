@@ -9,6 +9,7 @@ const uploadToServer = async (file: any, path : string, event: string | null) =>
   if (file) {
     try {
       let result;
+      console.log("file: ", file, " path: ", path, " event: ",event);
       if (event){
         result = await uploadFileEvent(file, file.name, `${path}/${file.name}`, event);
       }else

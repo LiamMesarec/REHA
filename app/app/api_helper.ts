@@ -4,7 +4,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import alert from "./alert";
 
-const ip = "164.8.163.20";
+const ip = "192.168.31.210";
 const api = axios.create({
     baseURL: `http://${ip}:3000/api`,
     timeout: 10000, 
@@ -52,7 +52,8 @@ const api = axios.create({
   
       const result = await response.json();
       console.log("Upload success:", result);
-      
+      //alert(`Upload: ${result.message}`);
+      console.log("\n\n\n\n", `Upload: ${result.message}`);      
       return result;
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -65,10 +66,10 @@ const api = axios.create({
   export const uploadFileEvent = async (fileInput: any, filename: string, path: string, eventId: string) => {
     try {
       const response = await uploadFile(fileInput, filename, path);
-      console.log(response);
-      //addFileToEvent(2, 1);
+      let result = addFileToEvent(Number(eventId), response.id);
+      return result;
     }catch(error){
-
+      alert("Napaka pri dogajanju gradiva k dogodku", "Opozorilo");
     }
 
   };
@@ -170,10 +171,34 @@ export const fetchAndOpenFile = async (uuid: string, fileName: string) => {
   }
 };
 
+export const fetchFileUri = async (uuid:string) => {
+
+  const downloadResumable = FileSystem.createDownloadResumable(
+    `http://${ip}:3000/api/files/${uuid}/content`,
+    `${FileSystem.documentDirectory}${uuid}`
+  );
+
+  if (!downloadResumable) throw new Error("Error in filedownload");
+
+  const { uri } = await downloadResumable.downloadAsync();
+  if (!uri) {
+    throw new Error("Uri not valid"); 
+  }
+  return uri;
+
+}
+
 export const addFileToEvent = async (id: number, fileId: number) => {
-  const response = await axios.post(`/events/${id}/files`, {
+  let response;
+  try {
+  response = await api.post(`/events/${id}/files`, {
     fileId: fileId
   });
+  }catch (error){
+  console.log("Response: ______ ", error);
+  return response;
+  }
+
 }
 
 export const deleteFileById = async (fileId: number) => {
