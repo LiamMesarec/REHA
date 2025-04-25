@@ -1,5 +1,5 @@
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Image } from "react-native";
-import React, { useEffect, useState } from "react";
+import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Image, Platform, RefreshControl } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
 import { deleteEventById, fetchAndOpenFile, fetchData, fetchFileUri } from "./api_helper";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import alert from "./alert";
@@ -80,6 +80,7 @@ const FilesParagraph = ({ id }: { id: number }) => {
           const res: ImageSectionProps = { images: imageUris };
           setImages(res);
     };
+    Platform.OS != 'web'
     fetchImageUri();
   }, [eventFiles]);
   return (
@@ -130,6 +131,7 @@ export const ImageSection = (props: ImageSectionProps) => {
           source={{
             uri: image.uri,
           }}
+          resizeMode="contain"
         />
       ))}
     </View>
@@ -177,17 +179,29 @@ export const DeleteEventButton = (props: BtnProps) => {
 export function EventPage() {
     const { eventId } = useLocalSearchParams();
     const [eventDetails, setEventDetails] = useState<ParagraphProps[]>([]);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const fetchEventDetails = async () => {
+      const details = await getEventDetails(Number(eventId));
+      setEventDetails(details);
+  };
 
     useEffect(() => {
-        const fetchEventDetails = async () => {
-            const details = await getEventDetails(eventId);
-            setEventDetails(details);
-        };
+        
         fetchEventDetails();
     }, [eventId]);
 
+    const onRefresh = useCallback(() => {
+      //setRefreshing(true);
+      //router.reload();
+      //setRefreshing(false);
+    }, []);
+
     return (
-        <ScrollView style={styles.mainView}>
+        <ScrollView style={styles.mainView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }>
             <Text>Event id: {eventId}</Text>
             {displayEventDetails(eventDetails)}
             <FilesParagraph id={Number(eventId)} />

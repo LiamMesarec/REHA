@@ -3,6 +3,7 @@ import { Alert, Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import alert from "./alert";
+import { router } from "expo-router";
 
 const ip = "192.168.31.210";
 const api = axios.create({
@@ -67,6 +68,7 @@ const api = axios.create({
     try {
       const response = await uploadFile(fileInput, filename, path);
       let result = addFileToEvent(Number(eventId), response.id);
+      router.back();
       return result;
     }catch(error){
       alert("Napaka pri dogajanju gradiva k dogodku", "Opozorilo");
