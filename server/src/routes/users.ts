@@ -17,7 +17,7 @@ const writeUsers = (users: string[]) => {
 
 //requirement: login v microsoft AND access-level 3
 //pogledamo če je njegov email v whitelist
-router.post('/add', async (req: any, res: any) => {
+router.post('/add',authHandler, async (req: any, res: any) => {
     const { email, accessLevel } = req.body;
     console.log(req.body);
     if (!email || ![1, 2, 3].includes(accessLevel)) {
@@ -54,11 +54,28 @@ router.delete('/delete', async (req: any, res: any) => {
 
 router.get('/list', authHandler, async (req: any, res: any) => {
     const users = readUsers();
-    console.log(req.body);
+    console.log("Mail:", await req.body.mail);
+    const bodyMail = await req.body.mail;
+    if (bodyMail == null) {
+        return res.status(401).send({ "message": "Unauthorized" });
+    }
+    
+    // Find user with admin access instead of using map incorrectly
+    const requestingUser = users.find(line => {
+        const [email, accessLevel] = line.split(',');
+        return email === bodyMail && accessLevel === '3';
+    });
+    
+    if (!requestingUser) {
+        return res.status(401).send({ "message": "Unauthorized" });
+    }
+    
+    // Create the list of all users
     const userList = users.map(line => {
         const [email, accessLevel] = line.split(',');
         return { email, accessLevel: parseInt(accessLevel as string, 10) };
     });
+    
     res.json(userList);
 });
 

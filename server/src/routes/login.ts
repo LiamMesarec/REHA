@@ -22,7 +22,12 @@ router.get('/', async (_req:any, res:any) => {
         });
         if (response.status === 200) {
             const resJson = await response.json();
-            const userList = await fetch('http://localhost:3000/api/users/list');
+            const userList = await fetch('http://localhost:3000/api/users/list', {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             const userListJson = await userList.json();
             console.log(userListJson);
             console.log(resJson.mail);

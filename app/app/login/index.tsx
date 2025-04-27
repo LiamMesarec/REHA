@@ -129,7 +129,7 @@ export default function Login() {
             console.log("Authorized");
             setStatus("Successfully logged in!");
             setTimeout(() => {
-              router.back();
+              router.navigate("/");
             }, 1000);
           } else {
             setStatus("Failed to log in!");
@@ -152,6 +152,7 @@ export default function Login() {
             ).then((res:any) => {
               console.log(res);
               setToken(res.accessToken);
+              console.log("Token: ", res.accessToken);
               SecureStore.setItemAsync('token', res.accessToken);
             });
           }
