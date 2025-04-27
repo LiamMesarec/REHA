@@ -39,7 +39,7 @@ const HomePage: React.FC = () => {
           <Button title="CALENDAR" onPress={() => router.push("/calendar")} />
           <Button title="EVENT FORM" onPress={() => router.push("/eventForm")} />
           <Button title="SEARCH EVENTS" onPress={() => router.push("/eventSearch")} />
-          <Button title="SEARCH EVENTS" onPress={() => router.push("./login")} />
+          <Button title="Login" onPress={() => router.push("./login")} />
           <Button
         title="Logout"
         onPress={() => {
