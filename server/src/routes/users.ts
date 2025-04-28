@@ -11,6 +11,8 @@ const readUsers = () => {
     return fs.readFileSync(USERS_FILE, 'utf8').split('\n').filter(line => line);
 };
 
+export { readUsers };
+
 const writeUsers = (users: string[]) => {
     fs.writeFileSync(USERS_FILE, users.join('\n'), 'utf8');
 };
@@ -18,6 +20,14 @@ const writeUsers = (users: string[]) => {
 //requirement: login v microsoft AND access-level 3
 //pogledamo če je njegov email v whitelist
 router.post('/add',authHandler, async (req: any, res: any) => {
+    const user = await req.body.user;
+    if (user == null) {
+        return res.status(401).send({ "message": "Unauthorized" });
+    }
+    
+    if (user[1] < 3) {
+        return res.status(401).send({ "message": "Unauthorized" });
+    }
     const { email, accessLevel } = req.body;
     console.log(req.body);
     if (!email || ![1, 2, 3].includes(accessLevel)) {
@@ -35,7 +45,15 @@ router.post('/add',authHandler, async (req: any, res: any) => {
 });
 
 // Delete user by email
-router.delete('/delete', async (req: any, res: any) => {
+router.delete('/delete', authHandler, async (req: any, res: any) => {
+    const user = await req.body.user;
+    if (user == null) {
+        return res.status(401).send({ "message": "Unauthorized" });
+    }
+    
+    if (user[1] < 3) {
+        return res.status(401).send({ "message": "Unauthorized" });
+    }
     const { email } = req.body;
     if (!email) {
         return res.status(400).json({ error: 'Email is required' });
@@ -54,23 +72,15 @@ router.delete('/delete', async (req: any, res: any) => {
 
 router.get('/list', authHandler, async (req: any, res: any) => {
     const users = readUsers();
-    console.log("Mail:", await req.body.mail);
-    const bodyMail = await req.body.mail;
-    if (bodyMail == null) {
+    const user = await req.body.user;
+    if (user == null) {
         return res.status(401).send({ "message": "Unauthorized" });
     }
     
-    // Find user with admin access instead of using map incorrectly
-    const requestingUser = users.find(line => {
-        const [email, accessLevel] = line.split(',');
-        return email === bodyMail && accessLevel === '3';
-    });
-    
-    if (!requestingUser) {
+    if (user[1] < 3) {
         return res.status(401).send({ "message": "Unauthorized" });
     }
-    
-    // Create the list of all users
+
     const userList = users.map(line => {
         const [email, accessLevel] = line.split(',');
         return { email, accessLevel: parseInt(accessLevel as string, 10) };

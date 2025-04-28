@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { readUsers } from '../routes/users';
 
 async function authHandler(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
@@ -13,9 +14,15 @@ async function authHandler(req: Request, res: Response, next: NextFunction) {
     }).then((response) => {
       if (response.status === 200) {
         console.log("Authorized");
-        req.body.mail = response.json().then((data) => {
+        req.body.user = response.json().then((data) => {
+          const users = readUsers();
+          const userData = users.find((line:any) => line.startsWith(data.mail + ','));
+          if (!userData) {
+            return res.status(401).send({ "message": "Unauthorized" });
+          }
+          const user = userData.split(',');
           next();
-          return data.mail;
+          return user;
         });
         return;
       } else {
@@ -25,10 +32,8 @@ async function authHandler(req: Request, res: Response, next: NextFunction) {
     });
   }
   else {
-
-  req.body.mail = null;
-  console.log('Auth handler called');
-  next(); // Call the next middleware or route handler
+    req.body.user = null;
+    next();
   }
 }
 
