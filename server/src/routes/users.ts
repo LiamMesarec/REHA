@@ -89,4 +89,17 @@ router.get('/list', authHandler, async (req: any, res: any) => {
     res.json(userList);
 });
 
+router.get('/me', authHandler, async (req: any, res: any) => {
+    const user = await req.body.user;
+    if (user == null) {
+        return res.status(401).send({ "message": "Unauthorized" });
+    }
+    
+    if (user[1] < 3) {
+        return res.status(401).send({ "message": "Unauthorized" });
+    }
+    
+    res.json({"email":user[0], "accessLevel": user[1]});
+});
+
 export default router;
