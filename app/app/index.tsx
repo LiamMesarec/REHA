@@ -10,6 +10,7 @@ import * as SecureStore from 'expo-secure-store';
 import EventSearch from "./eventSearch"
 import { Text, TouchableOpacity, View, Alert, StyleSheet, ScrollView, TextInput, Button } from "react-native";
 import { RootStackParamList } from './types';
+import { LoginButton } from "./login";
 //import { RootStackParamList } from "./types"; // Create and import this type
 
 
@@ -39,13 +40,7 @@ const HomePage: React.FC = () => {
           <Button title="CALENDAR" onPress={() => router.push("/calendar")} />
           <Button title="EVENT FORM" onPress={() => router.push("/eventForm")} />
           <Button title="SEARCH EVENTS" onPress={() => router.push("/eventSearch")} />
-          <Button title="Login" onPress={() => router.push("./login")} />
-          <Button
-        title="Logout"
-        onPress={() => {
-          SecureStore.deleteItemAsync('token');
-        }}
-      />
+          <LoginButton/>
           </View>
   )
 }
