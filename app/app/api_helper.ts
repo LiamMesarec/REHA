@@ -269,3 +269,57 @@ export const fetchUsers = async () => {
       return null;
   }
 }
+
+export const deleteUser = async (email: string) => {
+  const token = await SecureStore.getItemAsync('token');
+  if (!token) {
+    console.log("No token found");
+    return null;
+  }
+  try {
+    const response = await fetch(`http://${ip}:3000/api/users/delete`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+    if (response.status === 200) {
+      return response;
+    }
+    const data = await response.json();
+    console.log("Error deleting user: ", data);
+    return null;
+  } catch (error) {
+      console.error("Error deleting user:", error);
+      return null;
+  }
+}
+
+export const addUser = async (email: string, accessLevel: number) => {
+  const token = await SecureStore.getItemAsync('token');
+  if (!token) {
+    console.log("No token found");
+    return null;
+  }
+  try {
+    const response = await fetch(`http://${ip}:3000/api/users/add`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, accessLevel }),
+    });
+    if (response.status === 200) {
+      return response;
+    }
+    const data = await response.json();
+    console.log("Error adding user: ", data);
+    return null;
+  } catch (error) {
+      console.error("Error adding user:", error);
+      return null;
+  }
+}

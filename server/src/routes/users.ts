@@ -67,7 +67,7 @@ router.delete('/delete', authHandler, async (req: any, res: any) => {
     }
 
     writeUsers(updatedUsers);
-    res.json({ message: 'User deleted successfully' });
+    res.status(200).json({ message: 'User deleted successfully' });
 });
 
 router.get('/list', authHandler, async (req: any, res: any) => {
