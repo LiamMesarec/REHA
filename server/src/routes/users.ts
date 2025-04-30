@@ -95,10 +95,6 @@ router.get('/me', authHandler, async (req: any, res: any) => {
         return res.status(401).send({ "message": "Unauthorized" });
     }
     
-    if (user[1] < 3) {
-        return res.status(401).send({ "message": "Unauthorized" });
-    }
-    
     res.json({"email":user[0], "accessLevel": user[1]});
 });
 

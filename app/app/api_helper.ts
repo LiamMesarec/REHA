@@ -4,6 +4,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import alert from "./alert";
 import { router } from "expo-router";
+import * as SecureStore from 'expo-secure-store';
 
 const ip = "192.168.50.170";
 const api = axios.create({
@@ -220,3 +221,51 @@ export const deleteFileById = async (fileId: number) => {
   }
 };
 export default api;
+
+export const fetchMe = async () => {
+  const token = await SecureStore.getItemAsync('token');
+  if (!token) {
+    console.log("No token found");
+    return null;
+  }
+  try {
+    const response = await fetch(`http://${ip}:3000/api/users/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (response.status === 200) {
+      return data;
+    }
+    console.log("Error fetching user data: ", data);
+    return null;
+  } catch (error) {
+      console.error("Error fetching user data:", error);
+      return null;
+  }
+}
+
+export const fetchUsers = async () => {
+  const token = await SecureStore.getItemAsync('token');
+  if (!token) {
+    console.log("No token found");
+    return null;
+  }
+  try {
+    const response = await fetch(`http://${ip}:3000/api/users/list`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (response.status === 200) {
+      return data;
+    }
+    console.log("Error fetching user data: ", data);
+    return null;
+  } catch (error) {
+      console.error("Error fetching user data:", error);
+      return null;
+  }
+}
