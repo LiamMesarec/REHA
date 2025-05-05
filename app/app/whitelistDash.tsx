@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Button, StyleSheet, Alert, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, Button, StyleSheet, Alert, TouchableOpacity, ScrollView, Modal, Pressable, TextInput } from "react-native";
 import { useRouter } from "expo-router";
-import { fetchMe, fetchUsers, deleteUser } from "./api_helper";
+import { fetchMe, fetchUsers, deleteUser, addUser } from "./api_helper";
 import { hp, wp } from "./size"
-import { Trash2 } from 'lucide-react-native';
+import { Trash2, CirclePlus } from 'lucide-react-native';
+import { add } from "lodash";
 
 export function WhitelistDash() {
     const [me, setMe] = useState({ "email": "", "accessLevel": 0 });
     const [users, setUsers] = useState([{ "email": "", "accessLevel": 0 }]);
     const [loading, setLoading] = useState(true);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [accessLevel, setAccessLevel] = useState(0);
+    const [email, setEmail] = useState("");
 
     useEffect(() => {
         const fetchData = async () => {
@@ -34,6 +38,42 @@ export function WhitelistDash() {
     const router = useRouter();
     return (
         <ScrollView>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    Alert.alert('Modal has been closed.');
+                    setModalVisible(!modalVisible);
+                }}>
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <Text style={styles.modalText}>Vpišite mail novega uporabnika:</Text>
+                        <TextInput
+                            style={{ height: hp(5), width: wp(80), borderColor: 'gray', borderWidth: 1, marginBottom: hp(2) }}
+                            onChangeText={text => setEmail(text)}
+                            value={email}
+                            placeholder=""
+                        />
+                        <Pressable
+                            style={[styles.button, styles.buttonClose]}
+                            onPress={() => {
+                                addUser(email, accessLevel).then((response) => {
+                                    if (response?.status === 200) {
+                                        Alert.alert("Uspeh", "Uporabnik uspešno dodan!");
+                                        setUsers([...users, { email: email, accessLevel: accessLevel }]);
+                                        setEmail("");
+                                    } else {
+                                        Alert.alert("Napaka", "Napaka pri dodajanju uporabnika!");
+                                    }
+                                })
+                                setModalVisible(!modalVisible)
+                                }}>
+                            <Text style={styles.textStyle}>Dodaj</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </Modal>
             <View style={{ display: "flex", alignItems: "center", paddingTop: hp(2) }}>
                 {loading ? (
                     <Text>Loading...</Text>
@@ -61,6 +101,15 @@ export function WhitelistDash() {
                                     </View>
                                 ) : null
                             ))}
+                            <TouchableOpacity
+                                style={styles.addButton}
+                                onPress={() => {
+                                    setAccessLevel(1);
+                                    modalVisible ? setModalVisible(false) : setModalVisible(true);
+                                }}
+                            >
+                                <CirclePlus size={20} color="green" />
+                            </TouchableOpacity>
                         </View>
                         <Text style={{ fontSize: 20, fontWeight: "bold" }}>Mentorji:</Text>
                         <View style={styles.container}>
@@ -84,6 +133,15 @@ export function WhitelistDash() {
                                     </View>
                                 ) : null
                             ))}
+                            <TouchableOpacity
+                                style={styles.addButton}
+                                onPress={() => {
+                                    setAccessLevel(2);
+                                    modalVisible ? setModalVisible(false) : setModalVisible(true);
+                                }}
+                            >
+                                <CirclePlus size={20} color="green" />
+                            </TouchableOpacity>
                         </View>
                         <Text style={{ fontSize: 20, fontWeight: "bold" }}>Administratorji:</Text>
                         <View style={styles.container}>
@@ -107,6 +165,15 @@ export function WhitelistDash() {
                                     </View>
                                 ) : null
                             ))}
+                            <TouchableOpacity
+                                style={styles.addButton}
+                                onPress={() => {
+                                    setAccessLevel(3);
+                                    modalVisible ? setModalVisible(false) : setModalVisible(true);
+                                }}
+                            >
+                                <CirclePlus size={20} color="green" />
+                            </TouchableOpacity>
                         </View>
                     </>
                 )}
@@ -141,12 +208,64 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignSelf: "flex-end"
     },
+    addButton: {
+        borderWidth: 1,
+        borderRadius: 5,
+        padding: 5,
+        width: wp(7.5),
+        height: hp(3.75),
+        alignItems: "center",
+        justifyContent: "center",
+        alignSelf: "center",
+        marginRight: "auto",
+        marginLeft: "auto",
+    },
     userEntry: {
         margin: hp(0.5),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between'
-    }
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      modalView: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+      },
+      button: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+      },
+      buttonOpen: {
+        backgroundColor: '#F194FF',
+      },
+      buttonClose: {
+        backgroundColor: '#2196F3',
+      },
+      textStyle: {
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+      },
+      modalText: {
+        marginBottom: 15,
+        textAlign: 'center',
+      },
 })
 
 export default WhitelistDash;
