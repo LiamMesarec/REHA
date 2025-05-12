@@ -6,7 +6,7 @@ import alert from "./alert";
 import { router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 
-const ip = "192.168.50.170";
+const ip = "localhost";
 const api = axios.create({
     baseURL: `http://${ip}:3000/api`,
     timeout: 10000, 

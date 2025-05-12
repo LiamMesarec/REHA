@@ -1,70 +1,113 @@
-
-import Calendar from "./calendar";
-import { NavigationIndependentTree } from '@react-navigation/native';
+import React, { useContext } from 'react';
+import { View, TouchableOpacity, Text, StyleSheet, Image, Platform } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import {EventPage} from "./event_detailed";
-import FileSystem from './fileSystem'; 
-import { EventForm } from "./eventForm";
-import { WhitelistDash } from "./whitelistDash"; 
-import { useRouter } from "expo-router";
-import * as SecureStore from 'expo-secure-store';
-import EventSearch from "./eventSearch"
-import { Text, TouchableOpacity, View, Alert, StyleSheet, ScrollView, TextInput, Button } from "react-native";
-import { RootStackParamList } from './types';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { LoginButton } from "./login";
-import { fetchMe } from "./api_helper";
-//import { RootStackParamList } from "./types"; // Create and import this type
-
-
-//const Stack = createNativeStackNavigator();
+import Calendar from './calendar';
+import FileSystem from './fileSystem';
+import { EventForm } from './eventForm';
+import { WhitelistDash } from './whitelistDash';
+import { EventPage } from './event_detailed';
+import { RootStackParamList } from './types';
+import { AuthProvider } from "./authContext";
+import { AuthContext } from './authContext';
+import { withAuth } from './protectedRoute';
 const Stack = createStackNavigator<RootStackParamList>();
 
-function RootStack() {
-  return (
-    <Stack.Navigator
-      initialRouteName="Calendar">
-      <Stack.Screen name="Calendar" component={Calendar} />
-      <Stack.Screen name="Files" component={FileSystem} />
-      <Stack.Screen name ="EventForm" component={EventForm}/>
-      <Stack.Screen name="WhitelistDash" component={WhitelistDash}/>
-      <Stack.Screen name="EventPage" component={EventPage}>
-      </Stack.Screen>
+type NavBarProps = {
+  navigation: StackNavigationProp<RootStackParamList>;
+};
 
-    </Stack.Navigator>
+function Navbar({ navigation }: NavBarProps) {
+  const logoIcon = require('./logo_fakulteta.png');
+  const logoLongIcon = require('./logo_fakulteta_long.png');
+  const logoSource = Platform.OS === 'web' ? logoLongIcon : logoIcon;
+  const { token } = useContext(AuthContext);
+
+  return (
+    <View style={styles.container}>
+    <View style={styles.navLeft}>
+    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Calendar')}>
+    <Text style={styles.label}>Koledar</Text>
+    </TouchableOpacity>
+    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Files')}>
+    <Text style={styles.label}>Datoteke</Text>
+    </TouchableOpacity>
+            {token && (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('WhitelistDash')}
+          >
+            <Text style={styles.label}>Administracija</Text>
+          </TouchableOpacity>
+        )}
+    <LoginButton/>
+    </View>
+    <Image source={logoIcon} style={styles.logo} resizeMode="contain" />
+    </View>
   );
 }
 
-const HomePage: React.FC = () => {
-  const router = useRouter();
-  return(
-      <View>
-          <Text style={{ fontSize: 24 }}>Home Screen</Text>
-          <Button title="FILES" onPress={() => router.push("/fileSystem")} />
-          <Button title="CALENDAR" onPress={() => router.push("/calendar")} />
-          <Button title="EVENT FORM" onPress={() => router.push("/eventForm")} />
-          <Button title="SEARCH EVENTS" onPress={() => router.push("/eventSearch")} />
-          <LoginButton/>
-          <Button title="FETCH ME" onPress={async () => {
-              const response = await fetchMe();
-              console.log("ME: ", response);
-          }} />
-          <Button title="WHITELIST DASHBOARD" onPress={() => router.push("/whitelistDash")} />
-          </View>
-  )
-}
-
-
 export default function Index() {
-  //console.log(fetchData("/files"));
   return (
-    <HomePage/>
+          <AuthProvider>
+    <Stack.Navigator
+    initialRouteName="Calendar"
+    screenOptions={({ navigation }) => ({
+      header: () => <Navbar navigation={navigation} />,
+    })}
+    >
+    <Stack.Screen
+    name="Calendar"
+    component={Calendar}
+    />
+    <Stack.Screen
+    name="Files"
+    component={FileSystem}
+    />
+    <Stack.Screen
+    name="EventForm"
+    component={EventForm}
+    />
+    <Stack.Screen
+    name="WhitelistDash"
+    component={withAuth(WhitelistDash)}
+    />
+    <Stack.Screen
+    name="EventPage"
+    component={EventPage}
+    />
+    </Stack.Navigator>
+        </AuthProvider>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    height: 64,
+    elevation: 4,
+  },
+  navLeft: {
+    flexDirection: 'row',
+  },
   button: {
-    width: '100%',
-    margin: 0,
-    padding: 0
-  }
+    marginRight: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  logo: {
+    width: 40,
+    height: 40,
+  },
 });

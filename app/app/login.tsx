@@ -6,8 +6,8 @@ import {
   useAuthRequest,
   useAutoDiscovery,
 } from 'expo-auth-session';
-import { Button, Text, SafeAreaView, StyleSheet, Modal, Alert } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import { Button, Text, SafeAreaView, StyleSheet, Modal, Alert, TouchableOpacity } from 'react-native';
+import { getItem, setItem, deleteItem } from './storage';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from './types';
 import { router } from 'expo-router';
@@ -41,7 +41,7 @@ export const LoginButton = () => {
   );
 
   useEffect(() => {
-    SecureStore.getItemAsync('token').then((token:any) => {
+    getItem('token').then((token:any) => {
       if (token) {
         setToken(token);
       }
@@ -51,9 +51,9 @@ export const LoginButton = () => {
   return (
     <SafeAreaView>
       {token === null ? (
-      <Button
+      <TouchableOpacity
         disabled={!request}
-        title="Login"
+        style={styles.button}
         onPress={() => {
           promptAsync().then((codeResponse:any) => {
             if (request && codeResponse?.type === 'success' && discovery) {
@@ -86,18 +86,19 @@ export const LoginButton = () => {
                     {text: 'OK'},
                   ]);
                 }
-                SecureStore.setItemAsync('token', res.accessToken);
+                setItem('token', res.accessToken);
               });
             }
           });
         }}
-      />
+      >  <Text style={styles.label}>Prijava</Text>
+      </TouchableOpacity>
       ): 
       <Button
         disabled={!request}
         title="Logout"
         onPress={() => {
-          SecureStore.deleteItemAsync('token');
+          deleteItem('token');
           setToken(null);
         }}
       />}
@@ -112,7 +113,7 @@ export default function Login() {
   setTimeout(() => {
     (async () => {
       console.log("Checking token");
-      const foundToken = await SecureStore.getItemAsync('token');
+      const foundToken = await getItem('token');
       if (foundToken) {
         console.log("Token found");
           const response = await fetch("http://192.168.50.170:3000/api/login", { // TUKAJ VPIŠI SVOJ NASLOV ZA SERVER
@@ -166,5 +167,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 20,
     color: 'red',
+  },
+  button: {
+    marginRight: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
   }
 });
