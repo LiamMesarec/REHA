@@ -220,8 +220,9 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
   }
 
   const connectSelected = () => {
+    console.log("Files selcected 4 connecting: ");
     for(let id of filesToDelete){
-      console.log(id);
+      console.log("connect: ", id);
     }
 
     

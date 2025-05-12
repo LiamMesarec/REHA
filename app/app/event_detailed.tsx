@@ -34,11 +34,17 @@ interface ImageSectionProps {
 async function getEventDetails(id: number): Promise<ParagraphProps[]> {
     let eventDetails: ParagraphProps[] = [];
     let eventDataObject = await fetchData(`/events/${id}`);
-    let eventData = eventDataObject.event;
+    let eventData;
+    if (eventDataObject){
+      eventData = eventDataObject.event;
+    }
 
+    if (eventDataObject){
 
     eventDetails.push({ title: "Opis", content: `${eventData.description}` });
     eventDetails.push({ title: "Podatki", content: `Dogodek se začne: ${eventData.start}. Dogodek bo koordiniral: ${eventData.coordinator}. \nIme dogodka: ${eventData.title}` });
+    }
+    
     return eventDetails;
 }
 

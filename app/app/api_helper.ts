@@ -5,7 +5,7 @@ import * as Sharing from 'expo-sharing';
 import alert from "./alert";
 import { router } from "expo-router";
 
-const ip = "192.168.31.210";
+const ip = "172.23.208.1";
 const api = axios.create({
     baseURL: `http://${ip}:3000/api`,
     timeout: 10000, 
@@ -14,12 +14,18 @@ const api = axios.create({
     },
   });
 
+//const noConnectionAlert = alert("Ni povezave");
+
   export const fetchData = async (path: string): Promise<any> => {
     try {
       const response = await api.get(path);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching data with path:",path," ---- Error: ", error);
+      if (error.code == "ERR_NETWORK") {
+          alert("Ni povezave");
+          return;
+      }
       throw error;
     }
   };

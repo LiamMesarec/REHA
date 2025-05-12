@@ -53,6 +53,8 @@ export const EventForm = () => {
         React.useEffect(() => {
             const fetchEventData = async () => {
                 const eventDataObject = await fetchData(`/events/${eventId}`);
+                if (!eventDataObject) return ;
+
                 let eventData = eventDataObject.event;
                 console.log(eventData)
                 setToDate(eventData.to_date);

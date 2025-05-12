@@ -111,6 +111,9 @@ export const MonthHeader = (props: { month: string, year: number }) => {
 export const getEvents = async (): Promise<DayEventProps[]> => {
   let events: DayEventProps[] = [];
   let eventsData = await fetchData("/events");
+  if (! eventsData) {
+    return [];
+  }
   console.log(eventsData);
   eventsData.events.forEach((event: any) => {
     //console.log(event.start);
