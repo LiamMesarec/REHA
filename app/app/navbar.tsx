@@ -32,7 +32,7 @@ export function Navbar() {
         )}
     <LoginButton/>
     </View>
-    <Image source={logoIcon} style={styles.logo} resizeMode="contain" />
+    <Image source={logoIcon} style={styles.logo} href="https://www.fzsv.si/" target="_blank" resizeMode="contain" />
     </View>
   );
 }
