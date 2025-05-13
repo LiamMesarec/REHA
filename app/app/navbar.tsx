@@ -1,36 +1,37 @@
-import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useContext } from 'react';
+import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
+import { LoginButton } from "./login";
+import { AuthContext } from './authContext';
+import { withAuth } from './protectedRoute';
+import { StyleSheet } from 'react-native';   // ← add StyleSheet & View
 
+import { useRouter } from "expo-router";
 export function Navbar() {
-  const nav = useNavigation();
   const logoIcon = require('./logo_fakulteta.png');
+  const logoLongIcon = require('./logo_fakulteta_long.png');
+  const logoSource = Platform.OS === 'web' ? logoLongIcon : logoIcon;
+  const { token } = useContext(AuthContext);
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
     <View style={styles.navLeft}>
-    <TouchableOpacity
-    style={styles.button}
-    onPress={() => nav.navigate('Calendar' as any)}
-    >
-    <Text style={styles.label}>Calendar</Text>
+    <TouchableOpacity style={styles.button} onPress={() => router.push('/calendar')}>
+    <Text style={styles.label}>Koledar</Text>
     </TouchableOpacity>
-
-    <TouchableOpacity
-    style={styles.button}
-    onPress={() => nav.navigate('Files' as any)}
-    >
-    <Text style={styles.label}>Files</Text>
+    <TouchableOpacity style={styles.button} onPress={() => router.push('/fileSystem')}>
+    <Text style={styles.label}>Datoteke</Text>
     </TouchableOpacity>
-
-    <TouchableOpacity
-    style={styles.button}
-    onPress={() => nav.navigate('WhitelistDash' as any)}
-    >
-    <Text style={styles.label}>Whitelist</Text>
-    </TouchableOpacity>
+            {token && (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => router.push('/whitelistDash')}
+          >
+            <Text style={styles.label}>Administracija</Text>
+          </TouchableOpacity>
+        )}
+    <LoginButton/>
     </View>
-
     <Image source={logoIcon} style={styles.logo} resizeMode="contain" />
     </View>
   );
