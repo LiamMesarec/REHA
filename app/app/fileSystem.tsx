@@ -219,6 +219,18 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
     setEditActive(false);
   }
 
+  const connectSelected = () => {
+    for(let id of filesToDelete){
+      console.log(id);
+    }
+
+    
+    setFilesToDelete([]);
+    setFoldersToDelete([]);
+    loadFromServer();  
+    setEditActive(false);
+  }
+
   const handleFolderPress = (folder: FileNode) => {
     setCurrentMap(folder);
     setModaleVisible(false);
@@ -326,6 +338,10 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
 
           {editActive && <TouchableOpacity onPress={deleteSelected}>
             <Icon name="delete" size={30} color="gray" />
+          </TouchableOpacity>}
+
+          {editActive && <TouchableOpacity onPress={connectSelected}>
+            <Icon name="delete" size={30} color="blue" />
           </TouchableOpacity>}
         </View>
       </View>

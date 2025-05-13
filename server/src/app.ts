@@ -3,8 +3,11 @@ import cors from 'cors';
 import { Database } from 'sqlite3';
 import eventRoutes from './routes/eventRoutes';
 import fileRoutes from './routes/fileRoutes';
+import users from './routes/users';
+import login from './routes/login';
 import { notFound } from './middleware/errorHandler';
 import { errorHandler } from './middleware/errorHandler';
+import { authHandler } from './middleware/authHandler';
 
 export function App(db: Database): express.Application {
   const app = express();
@@ -14,7 +17,10 @@ export function App(db: Database): express.Application {
 
   app.use('/api/events', eventRoutes);
   app.use('/api/files', fileRoutes);
+  app.use('/api/users', users);
+  app.use('/api/login', login);
 
+  app.use(authHandler);
   app.use(notFound);
   app.use(errorHandler);
 

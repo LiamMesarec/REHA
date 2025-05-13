@@ -1,12 +1,14 @@
 import axios from "axios";
-import { Alert, Platform } from 'react-native';
+import { Alert } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import alert from "./alert";
+import { router } from "expo-router";
+import * as SecureStore from 'expo-secure-store';
 
-const ip = "164.8.163.20";
+const ip = "193.2.219.130";
 const api = axios.create({
-    baseURL: `http://${ip}:3000/api`,
+    baseURL: `http://${ip}/api`,
     timeout: 10000, 
     headers: { 
       "Content-Type": "application/json",
@@ -40,7 +42,7 @@ const api = axios.create({
         type: file.type
       } as any); 
   
-      const UPLOAD_URL = `http://${ip}:3000/api/files`;
+      const UPLOAD_URL = `http://${ip}/api/files`;
   
       const response = await fetch(UPLOAD_URL, {
         method: 'POST',
@@ -52,7 +54,8 @@ const api = axios.create({
   
       const result = await response.json();
       console.log("Upload success:", result);
-      
+      //alert(`Upload: ${result.message}`);
+      console.log("\n\n\n\n", `Upload: ${result.message}`);      
       return result;
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -65,10 +68,11 @@ const api = axios.create({
   export const uploadFileEvent = async (fileInput: any, filename: string, path: string, eventId: string) => {
     try {
       const response = await uploadFile(fileInput, filename, path);
-      console.log(response);
-      //addFileToEvent(2, 1);
+      let result = addFileToEvent(Number(eventId), response.id);
+      router.back();
+      return result;
     }catch(error){
-
+      alert("Napaka pri dogajanju gradiva k dogodku", "Opozorilo");
     }
 
   };
@@ -147,7 +151,7 @@ export const fetchAndOpenFile = async (uuid: string, fileName: string) => {
 
     // Download file
     const downloadResumable = FileSystem.createDownloadResumable(
-      `http://${ip}:3000/api/files/${uuid}/content`,
+      `http://${ip}/api/files/${uuid}/content`,
       fileUri
     );
 
@@ -170,10 +174,34 @@ export const fetchAndOpenFile = async (uuid: string, fileName: string) => {
   }
 };
 
+export const fetchFileUri = async (uuid:string) => {
+
+  const downloadResumable = FileSystem.createDownloadResumable(
+    `http://${ip}/api/files/${uuid}/content`,
+    `${FileSystem.documentDirectory}${uuid}`
+  );
+
+  if (!downloadResumable) throw new Error("Error in filedownload");
+
+  const { uri } = await downloadResumable.downloadAsync();
+  if (!uri) {
+    throw new Error("Uri not valid"); 
+  }
+  return uri;
+
+}
+
 export const addFileToEvent = async (id: number, fileId: number) => {
-  const response = await axios.post(`/events/${id}/files`, {
+  let response;
+  try {
+  response = await api.post(`/events/${id}/files`, {
     fileId: fileId
   });
+  }catch (error){
+  console.log("Response: ______ ", error);
+  return response;
+  }
+
 }
 
 export const deleteFileById = async (fileId: number) => {
@@ -193,3 +221,105 @@ export const deleteFileById = async (fileId: number) => {
   }
 };
 export default api;
+
+export const fetchMe = async () => {
+  const token = await SecureStore.getItemAsync('token');
+  if (!token) {
+    console.log("No token found");
+    return null;
+  }
+  try {
+    const response = await fetch(`http://${ip}/api/users/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (response.status === 200) {
+      return data;
+    }
+    console.log("Error fetching user data: ", data);
+    return null;
+  } catch (error) {
+      console.error("Error fetching user data:", error);
+      return null;
+  }
+}
+
+export const fetchUsers = async () => {
+  const token = await SecureStore.getItemAsync('token');
+  if (!token) {
+    console.log("No token found");
+    return null;
+  }
+  try {
+    const response = await fetch(`http://${ip}/api/users/list`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (response.status === 200) {
+      return data;
+    }
+    console.log("Error fetching user data: ", data);
+    return null;
+  } catch (error) {
+      console.error("Error fetching user data:", error);
+      return null;
+  }
+}
+
+export const deleteUser = async (email: string) => {
+  const token = await SecureStore.getItemAsync('token');
+  if (!token) {
+    console.log("No token found");
+    return null;
+  }
+  try {
+    const response = await fetch(`http://${ip}/api/users/delete`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+    if (response.status === 200) {
+      return response;
+    }
+    const data = await response.json();
+    console.log("Error deleting user: ", data);
+    return null;
+  } catch (error) {
+      console.error("Error deleting user:", error);
+      return null;
+  }
+}
+
+export const addUser = async (email: string, accessLevel: number) => {
+  const token = await SecureStore.getItemAsync('token');
+  if (!token) {
+    console.log("No token found");
+    return null;
+  }
+  try {
+    const response = await fetch(`http://${ip}/api/users/add`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, accessLevel }),
+    });
+    if (response.status === 200) {
+      return response;
+    }
+    const data = await response.json();
+    console.log("Error adding user: ", data);
+    return null;
+  } catch (error) {
+      console.error("Error adding user:", error);
+      return null;
+  }
+}

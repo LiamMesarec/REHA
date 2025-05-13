@@ -6,6 +6,7 @@ export type RootStackParamList = {
     Calendar: undefined;
     EventPage: { eventId: number }; 
     EventForm: {eventId: number | null};
+    WhitelistDash: undefined;
   };
 
 export type FileNode = {

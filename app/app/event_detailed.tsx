@@ -1,216 +1,301 @@
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
-import React, { useEffect, useState } from "react";
-import { deleteEventById, fetchAndOpenFile, fetchData } from "./api_helper";
+import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Image, Platform, RefreshControl, FlatList } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { deleteEventById, fetchAndOpenFile, fetchData, fetchFileUri } from "./api_helper";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import alert from "./alert";
 
+// Constants
+const IMAGE_EXTENSIONS = ["jpg", "png", "jpeg", "webp"];
+const IMAGE_SECTION_TITLE = "Galerija";
+const FILE_SECTION_TITLE = "Priložene datoteke";
 
-const TITLE_IMAGE_SECTION = "Image Section";
-const DISPLAY_TITLE = "Podrobnosti Dogodka";
-
-
-
-interface ParagraphProps {
-    title: string;
-    content: string;
+interface EventDetail {
+  title: string;
+  content: string;
 }
 
-interface BtnProps {
-    id: string
+interface FileData {
+  uuid: string;
+  name: string;
 }
 
-interface ImageSectionProps {
-    images: {
-    uri: string;
-    width: number;
-    height: number;
-    }[];
-
+interface ImageData {
+  uri: string;
+  width: number;
+  height: number;
 }
 
-async function getEventDetails(id: number): Promise<ParagraphProps[]> {
-    let eventDetails: ParagraphProps[] = [];
-    let eventDataObject = await fetchData(`/events/${id}`);
-    let eventData = eventDataObject.event;
- -
+const EventHeader = ({ title }: { title: string }) => (
+  <View style={styles.headerContainer}>
+  <Text style={styles.eventTitle}>{title}</Text>
+  </View>
+);
 
-    eventDetails.push({ title: "Opis", content: `${eventData.description}` });
-    eventDetails.push({ title: "Podatki", content: `Dogodek se začne: ${eventData.start}. Dogodek bo koordiniral: ${eventData.coordinator}. \nIme dogodka: ${eventData.title}` });
-    return eventDetails;
-}
+const DetailSection = ({ title, content }: EventDetail) => (
+  <View style={styles.sectionContainer}>
+  {title && <Text style={styles.sectionTitle}>{title}</Text>}
+  <Text style={styles.sectionContent}>{content}</Text>
+  </View>
+);
 
+const FileList = ({ files }: { files: FileData[] }) => (
+  <View style={styles.sectionContainer}>
+  <Text style={styles.sectionTitle}>{FILE_SECTION_TITLE}</Text>
+  {files.map((file, index) => (
+    <TouchableOpacity
+    key={index}
+    style={styles.fileItem}
+    onPress={() => fetchAndOpenFile(file.uuid, file.name)}
+    >
+    <Text style={styles.fileText}>📎 {file.name}</Text>
+    </TouchableOpacity>
+  ))}
+  </View>
+);
 
-const FilesParagraph = ({ id }: { id: number }) => {
-  const [eventFiles, setEventFiles] = useState<{ uuid: string; name: string }[]>([]);
+const ImageGrid = ({ images }: { images: ImageData[] }) => (
+  <View style={styles.sectionContainer}>
+  <Text style={styles.sectionTitle}>{IMAGE_SECTION_TITLE}</Text>
+  <FlatList
+  data={images}
+  numColumns={2}
+  columnWrapperStyle={styles.imageRow}
+  renderItem={({ item }) => (
+    <Image
+    style={[styles.image, { width: item.width, height: item.height }]}
+    source={{ uri: item.uri }}
+    resizeMode="cover"
+    />
+  )}
+  keyExtractor={(item, index) => index.toString()}
+  />
+  </View>
+);
+
+const ActionButton = ({
+  label,
+  onPress,
+  color = "#007BFF",
+  textColor = "#FFFFFF"
+}: {
+  label: string;
+  onPress: () => void;
+  color?: string;
+  textColor?: string;
+}) => (
+  <TouchableOpacity
+  style={[styles.actionButton, { backgroundColor: color }]}
+  onPress={onPress}
+  >
+  <Text style={[styles.actionButtonText, { color: textColor }]}>{label}</Text>
+  </TouchableOpacity>
+);
+
+const EventPage = () => {
+  const { eventId } = useLocalSearchParams();
+  const [eventTitle, setEventTitle] = useState("");
+  const [eventDetails, setEventDetails] = useState<EventDetail[]>([]);
+  const [files, setFiles] = useState<FileData[]>([]);
+  const [images, setImages] = useState<ImageData[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadEventData = async () => {
+    try {
+      const eventData = await fetchData(`/events/${eventId}`);
+
+      setEventTitle(eventData.event.title);
+
+      const details = [
+        {
+          title: "Opis",
+          content: eventData.event.description
+        },
+        {
+          title: "Podrobnosti",
+          content: `📅 Začetek: ${formatDate(eventData.event.start)}\n👤 Koordinator: ${eventData.event.coordinator}`
+        }
+      ];
+
+      setEventDetails(details);
+
+      // Handle files and images
+      const filesData = await fetchData(`/events/${eventId}/files`);
+      setFiles(filesData.files || []);
+
+      const imageFiles = filesData.files.filter(file => IMAGE_EXTENSIONS.includes(file.name.split(".").pop()?.toLowerCase() || ""));
+
+      const imageUris = await Promise.all(
+        imageFiles.map(async file => ({
+          uri: await fetchFileUri(file.uuid),
+                                      width: 160,
+                                      height: 160
+        }))
+      );
+
+      setImages(imageUris);
+    } catch (error) {
+      console.error("Error loading event data:", error);
+    }
+  };
+
+  // Basic date formatter
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('sl-SI', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   useEffect(() => {
-    const fetchFiles = async () => {
-        try{
-      const eventFilesObject = await fetchData(`/events/${id}/files`);
-      setEventFiles(eventFilesObject.files);
-    }catch (error){
-        console.log("No response 4 files 4 specific events");
-    }
-      
-    };
-    fetchFiles();
-  }, [id]);
+    loadEventData();
+  }, [eventId]);
+
+  const handleDelete = () => {
+    alert("Brisanje", "Ali ste prepričani, da želite izbrisati dogodek?", [
+      {
+        text: 'Potrdi',
+        onPress: async () => {
+          await deleteEventById(Number(eventId));
+          router.push("/calendar");
+        }
+      },
+      { text: 'Prekliči', style: "cancel" }
+    ]);
+  };
 
   return (
-    <View>
-      <Text style={styles.title}>Datoteke</Text>
-      {eventFiles.map((file, index) => (
-        <TouchableOpacity
-          key={index}
-          onPress={() => fetchAndOpenFile(file.uuid, file.name)}
-        >
-          <Text style={styles.content}>{file.name}</Text>
-        </TouchableOpacity>
-      ))}
+    <ScrollView
+    style={styles.container}
+    refreshControl={
+      <RefreshControl
+      refreshing={refreshing}
+      onRefresh={loadEventData}
+      tintColor="#007BFF"
+      />
+    }
+    >
+    <EventHeader title={eventTitle} />
+
+    {eventDetails.map((detail, index) => (
+      <DetailSection key={index} {...detail} />
+    ))}
+
+    <FileList files={files} />
+    {images.length > 0 && <ImageGrid images={images} />}
+
+    <View style={styles.buttonGroup}>
+    <Link href={`/eventForm?eventId=${eventId}`} asChild>
+    <ActionButton
+    label="Uredi dogodek"
+    color="#4CAF50"
+    />
+    </Link>
+    <ActionButton
+    label="Izbriši dogodek"
+    onPress={handleDelete}
+    color="#FF5252"
+    />
     </View>
+    </ScrollView>
   );
 };
-/* 
-function getImages(): ImageSectionProps[] {
-    let images: [
-    {imageUri: "https://legacy.reactjs.org/logo-og.png", width: 100, height: 100},
-    {imageUri: "https://usmuni.com/double-trip-sidewalk-snowplow/", width: 1280, height: 721}
-    ];
-    return {images}; 
-}*/
-
-export const Paragraph = (props: ParagraphProps) => {
-    return (
-    <View>
-        <Text style={styles.title}>{props.title}</Text>
-        <Text style={styles.content}>{props.content}</Text>
-    </View>
-    );
-}
-
-
-
-export const ImageSection = (props: ImageSectionProps) => {
-    return (
-        <View>
-            <Text style = {styles.title}>{TITLE_IMAGE_SECTION}</Text>
-        
-        </View>
-    );
-
-};
-
-export function displayEventDetails(eventDetails: ParagraphProps[]) {
-    //let eventDetails:  = await getEventDetails(id);
-    //let imageSectionProps: ImageSectionProps = getImages();
-    return (
-        <View>
-            <Text style={styles.eventTitle}>{DISPLAY_TITLE}</Text>
-            {eventDetails.map((eventDetail, index) => {
-                return <Paragraph key={index} title={eventDetail.title} content={eventDetail.content} />;
-            })}
-            
-        </View>
-    );
-}
-
-export const DeleteEventButton = (props: BtnProps) => {
-    return (
-        <TouchableOpacity
-        style={styles.deleteButton} 
-        onPress={()=> {
-            try{
-            alert("Brisanje", "Želiš izbrisati dogodek?", [{ text: 'Da', onPress: () => {
-                deleteEventById(Number(props.id));
-                alert("Brisanje","Znebil si se dogodka");
-                // should use back (if only used in event detailed), but this causes the calendar to be updated
-                router.push("/calendar");
-            } }, { text: 'Ne', onPress: () => {} }])
-            
-            
-            } catch(_error){
-                alert("Brisanje","Brisanje dogodka ni uspelo");
-            }
-            }} >
-            <Text  style={styles.deleteBtn}>Izbriši dogodek</Text>
-        </TouchableOpacity>
-    );
-};
-
-
-export function EventPage() {
-    const { eventId } = useLocalSearchParams();
-    const [eventDetails, setEventDetails] = useState<ParagraphProps[]>([]);
-
-    useEffect(() => {
-        const fetchEventDetails = async () => {
-            const details = await getEventDetails(eventId);
-            setEventDetails(details);
-        };
-        fetchEventDetails();
-    }, [eventId]);
-
-    return (
-        <ScrollView style={styles.mainView}>
-            <Text>Event id: {eventId}</Text>
-            {displayEventDetails(eventDetails)}
-            <FilesParagraph id={Number(eventId)} />
-            <View style={styles.editButton}>
-                <Link href={`/eventForm?eventId=${eventId}`}>
-                    <Text style={styles.editButtonText}>Spremeni dogodek</Text>
-                </Link>
-            </View>
-            <DeleteEventButton id={Array.isArray(eventId) ? eventId[0] : eventId} />
-        </ScrollView>
-    );
-}
 
 const styles = StyleSheet.create({
-    eventTitle: {
-        fontSize: 30,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'center'
-    },
-    title: {
-        fontSize: 25,
-        fontWeight: 'bold',
-        marginBottom: 15
-    },
-    content: {
-        fontSize: 15,
-        marginBottom: 15
-    },
-    editButton: {
-        backgroundColor: "#007BFF",
-        padding: 15,
-        borderRadius: 8,
-        alignItems: "center",
-        marginBottom: 20,
-    },
-    editButtonText: {
-        color: "#FFFFFF",
-        fontWeight: "bold",
-        fontSize: 16,
-        textAlign: "center",
-    },
-    deleteButton: {
-        backgroundColor: "#FF4D4D",
-        padding: 15,
-        borderRadius: 8,
-        alignItems: "center",
-        marginBottom: 20,
-    },
-    deleteButtonText: {
-        color: "#FFFFFF",
-        fontWeight: "bold",
-        fontSize: 16,
-    },
-    mainView: {
-        paddingLeft: 15,
-        paddingRight: 15,
-        paddingTop: 10,
-    }
+  container: {
+    flex: 1,
+    backgroundColor: "#F8F9FA",
+    paddingHorizontal: 24,
+  },
+  headerContainer: {
+    marginVertical: 32,
+    paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+  },
+  eventTitle: {
+    fontSize: 36,
+    fontWeight: "800",
+    color: "#1A1A1A",
+    textAlign: "center",
+    lineHeight: 42,
+    fontFamily: Platform.OS === "ios" ? "Helvetica Neue" : "sans-serif",
+  },
+  sectionContainer: {
+    marginBottom: 32,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 20,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#2D2D2D",
+    marginBottom: 12,
+  },
+  sectionContent: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: "#4A4A4A",
+  },
+  fileItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEE",
+  },
+  fileText: {
+    fontSize: 16,
+    color: "#007BFF",
+    textDecorationLine: "underline",
+  },
+  imageRow: {
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  image: {
+    borderRadius: 8,
+    backgroundColor: "#F0F0F0",
+  },
+  buttonGroup: {
+    gap: 16,
+    marginVertical: 32,
+  },
+  actionButton: {
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+  },
+  actionButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
 });
-
 export default EventPage;
