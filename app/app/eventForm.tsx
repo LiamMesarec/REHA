@@ -17,7 +17,6 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { router, useLocalSearchParams } from "expo-router";
 import FileUploadScreen from "./fileUpload";
 import "react-datepicker/dist/react-datepicker.css";
-
 interface FieldProps {
   title: string;
   data: string;
@@ -93,30 +92,18 @@ export const EventForm = () => {
   const submitFn = async () => {
     try {
       if (eventId && eventId !== "null") {
-        Alert.alert(
-          "Pozor",
-          "Želiš spremeniti dogodek?",
-          [
-            { text: "Ne" },
-            {
-              text: "Da",
-              onPress: async () => {
-                await submitUpdateEvent(
-                  Array.isArray(eventId) ? eventId[0] : eventId,
-                  TitleValue,
-                  DescriptionValue,
-                  CoordinatorValue,
-                  formatDate(date),
-                  fromDate,
-                  toDate
-                );
-                router.push("/calendar");
-              },
-            },
-          ],
-          { cancelable: true }
+        // update existing event immediately
+        await submitUpdateEvent(
+          Array.isArray(eventId) ? eventId[0] : eventId,
+          TitleValue,
+          DescriptionValue,
+          CoordinatorValue,
+          formatDate(date),
+          fromDate,
+          toDate
         );
       } else {
+        // create new event
         await submitEvent(
           TitleValue,
           DescriptionValue,
@@ -125,13 +112,11 @@ export const EventForm = () => {
           fromDate,
           toDate
         );
-        router.push("/calendar");
       }
+      router.push("/calendar");
     } catch (error) {
-      Alert.alert(
-        "Napaka",
-        error instanceof Error ? error.message : "Neznana napaka"
-      );
+      console.error("Error submitting event data:", error);
+      alert("Napaka pri pošiljanju dogodka");
     }
   };
 
