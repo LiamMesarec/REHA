@@ -96,12 +96,17 @@ const getFilesByEventId = asyncHandler(
 
 // @desc    Attach a file to an event and return the updated file list
 // @route   POST /api/events/:id/files
-// @access  Public - for now
+// @access  Student/Mentor/Admin
 const attachFileToEvent = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { id } = req.params;
     const { fileId } = req.body;
+
+    const user = await req.body.user;
+    if (!user && user[1] >= 1) {
+      res.status(401).send({ message: 'Unauthorized' });
+    }
 
     if (!fileId) {
       res.status(400).json({ message: 'Missing required field: fileId' });
@@ -147,11 +152,15 @@ const attachFileToEvent = asyncHandler(
 
 // @desc    Create an event
 // @route   POST /api/events
-// @access  Public - for now
+// @access  Student/Mentor/Admin
 const createEvent = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { title, coordinator, description, start, from_date, to_date } = req.body;
+    const user = await req.body.user;
+    if (!user && user[1] >= 1) {
+      res.status(401).send({ message: 'Unauthorized' });
+    }
 
     if (!title || !coordinator || !description || !start) {
       res.status(400).json({
@@ -216,12 +225,17 @@ const createEvent = asyncHandler(
 
 // @desc    Update an event
 // @route   PUT /api/events/:id
-// @access  Public - for now
+// @access  Student/Mentor/Admin
 const updateEvent = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { id } = req.params;
     const { title, coordinator, description, start, from_date, to_date } = req.body;
+
+    const user = await req.body.user;
+    if (!user && user[1] >= 1) {
+      res.status(401).send({ message: 'Unauthorized' });
+    }
 
     if (!title || !coordinator || !description || !start) {
       res.status(400).json({
@@ -316,11 +330,15 @@ const updateEvent = asyncHandler(
 
 // @desc    Delete an event
 // @route   DELETE /api/events/:id
-// @access  Public
+// @access  Mentor/Admin
 const deleteEvent = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { id } = req.params;
+    const user = await req.body.user;
+    if (!user && user[1] >= 2) {
+      res.status(401).send({ message: 'Unauthorized' });
+    }
 
     db.get('SELECT id FROM Events WHERE id = ?', [id], (err: any, row: any) => {
       if (err) {
