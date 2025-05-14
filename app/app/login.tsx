@@ -10,12 +10,16 @@ import { TouchableOpacity, Text, SafeAreaView, StyleSheet } from 'react-native';
 import { getItem, setItem, deleteItem } from './storage';
 
 WebBrowser.maybeCompleteAuthSession();
+const isWeb = Platform.OS === 'web';
 
 export const LoginButton = () => {
-  const [token, setToken] = useState<string | null>(null);
   const discovery = useAutoDiscovery('https://login.microsoftonline.com/common/v2.0');
   const redirectUri = makeRedirectUri({ scheme: 'https://193.2.219.130' });
   const clientId = '21bd0147-4d70-40b6-b482-8f63a0cb6e44';
+  const initialToken = isWeb
+  ? window.localStorage.getItem('token')
+  : null;
+  const [token, setToken] = useState<string | null>(initialToken);
 
   const [request, , promptAsync] = useAuthRequest(
     {
@@ -27,9 +31,11 @@ export const LoginButton = () => {
   );
 
   useEffect(() => {
-    getItem('token').then((t) => {
-      if (t) setToken(t);
-    });
+    if (!isWeb) {
+      getItem('token').then((t) => {
+        if (t) setToken(t);
+      });
+    }
   }, []);
 
   const handleLogin = useCallback(() => {
@@ -54,9 +60,9 @@ export const LoginButton = () => {
           });
           if (response.ok) {
             const { email } = await response.json();
-            console.log('Status prijave', `Uspešno ste se prijavili kot: ${email}`);
+            console.log(`Uspešno ste se prijavili kot: ${email}`);
           } else {
-            console.log('Status prijave', 'Prijava v vaš račun ni uspela!');
+            console.log('Prijava v vaš račun ni uspela!');
           }
         });
       }
