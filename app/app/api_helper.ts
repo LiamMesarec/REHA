@@ -138,37 +138,79 @@ export const submitUpdateEvent = async (
   description: string,
   coordinator: string,
   date: string,
-  from: string,
-  to: string
+  from: string | null,
+  to: string | null
 ) => {
-  try {
-    const response = await api.put(`/events/${id}`, {
-      title,
-      coordinator,
-      description,
-      start: date,
-      from_date: from,
-      to_date: to,
-    });
-    console.log(response.data);
-  } catch (error) {
-    console.error("Error when updating event: ", error);
+  // 1) Validate inputs
+  if (!id || !title || !description || !coordinator || !date) {
+    throw new Error("Missing required fields for update");
   }
+
+  // 2) Retrieve auth token
+  const token = await storage.getItem("token");
+  if (!token) {
+    throw new Error("No authentication token found");
+  }
+
+  // 3) Build request body
+  const body: any = { title, coordinator, description, start: date };
+  if (from && to) {
+    body.from_date = from;
+    body.to_date = to;
+  }
+
+  // 4) Send PUT request
+  const response = await fetch(`https://${ip}/api/events/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  // 5) Handle error status
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(
+      errData.message || `Failed to update event (status ${response.status})`
+    );
+  }
+
+  // 6) Return parsed JSON
+  return response.json();
 };
 
 export const deleteEventById = async (id: number) => {
-  try {
-    const response = await api.delete(`/events/${id}`);
-    console.log("Event deleted successfully:", response.data);
-    return response.data;
-  } catch (error: any) {
-    if (error.request) {
-      console.error("No response received:", error.request);
-    } else {
-      console.error("Error:", error.message);
-    }
-    throw error;
+  if (!id) {
+    throw new Error("Event ID is required for deletion");
   }
+
+  // 1) Retrieve auth token
+  const token = await storage.getItem("token");
+  if (!token) {
+    throw new Error("No authentication token found");
+  }
+
+  // 2) Send DELETE request
+  const response = await fetch(`https://${ip}/api/events/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  // 3) Handle error status
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(
+      errData.message || `Failed to delete event (status ${response.status})`
+    );
+  }
+
+  // 4) Return parsed JSON
+  return response.json();
 };
 
 export const fetchAndOpenFile = async (uuid: string, fileName: string) => {
