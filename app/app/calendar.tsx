@@ -288,7 +288,7 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
   const [events3, setEvents3] = useState<GroupedEvent[]>([]);
 
   const { width } = useWindowDimensions();
-  const isDesktop = Platform.OS === "web" && width >= 768; // desktop check
+  const isDesktop = Platform.OS === "web" && width >= 768;
 
   const renderItem = useCallback(({ item }: any) => {
     return <AgendaItem item={item} />;
@@ -297,9 +297,7 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
   useEffect(() => {
     const fetchEvents = async () => {
       const eventsData = await getEvents();
-      //console.log(eventsData);
       setEvents3(groupEventsByDate(eventsData));
-      //console.log(events3[0].title);
       setEvents2(eventsData);
     };
 
@@ -308,52 +306,37 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
 
   return (
     <View
-      style={[
-        styles.outerContainer,
-        isDesktop && styles.outerContainerWeb /* desktop override */,
-      ]}
+      style={[styles.outerContainer, isDesktop && styles.outerContainerWeb]}
     >
+      {/* Floating Add Button */}
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => router.push("/eventForm")}
+      >
+        <Text style={styles.addButtonText}>+</Text>
+      </TouchableOpacity>
+
       <View
-        style={[
-          styles.innerContainer,
-          isDesktop && styles.innerContainerWeb /* desktop card styling */,
-        ]}
+        style={[styles.innerContainer, isDesktop && styles.innerContainerWeb]}
       >
         <CalendarProvider
           date={getTodayDate()}
-          // onDateChanged={onDateChanged}
-          // onMonthChange={onMonthChange}
           showTodayButton
-          // disabledOpacity={0.6}
           theme={todayBtnTheme.current}
         >
           <ExpandableCalendar
             testID={"expandableCalendar"}
-            // horizontal={false}
-            // hideArrows
-            // disablePan
-            // hideKnob
-            // initialPosition={ExpandableCalendar.positions.OPEN}
             calendarStyle={styles.calendar}
-            // headerStyle={styles.header} // for horizontal only
-            // disableWeekScroll
             theme={theme.current}
-            // disableAllTouchEventsForDisabledDays
             firstDay={1}
-            //markedDates={getMarkedDates().current}
             leftArrowImageSource={leftArrowIcon}
             rightArrowImageSource={rightArrowIcon}
             allowShadow={true}
-            //animateScroll
-            // closeOnDayPress={false}
           />
-          <Text style={{ fontSize: 3 }}></Text>
           <AgendaList
             sections={events3}
             renderItem={renderItem}
-            // scrollToNextEvent
             sectionStyle={styles.section}
-            // dayFormat={'yyyy-MM-d'}
           />
         </CalendarProvider>
       </View>
@@ -421,17 +404,24 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 24,
   },
-  refreshButton: {
-    backgroundColor: "#007BFF",
-    padding: 10,
-    borderRadius: 5,
+  addButton: {
+    position: "absolute",
+    bottom: 30,
+    right: 30,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: themeColor,
+    justifyContent: "center",
     alignItems: "center",
-    marginVertical: 10,
+    elevation: 5,
+    zIndex: 999,
   },
-  refreshButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
-    fontSize: 16,
+  addButtonText: {
+    fontSize: 30,
+    color: "white",
+    marginBottom: 4,
   },
 });
+
 export default Calendar;
