@@ -8,8 +8,6 @@ import {
 } from 'expo-auth-session';
 import { Button, Text, SafeAreaView, StyleSheet, Modal, Alert, TouchableOpacity } from 'react-native';
 import { getItem, setItem, deleteItem } from './storage';
-import { RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from './types';
 import { router } from 'expo-router';
 
 
@@ -23,10 +21,9 @@ export const LoginButton = () => {
     'https://login.microsoftonline.com/common/v2.0',
   );
   const redirectUri = makeRedirectUri({
-    scheme: 'exp://127.0.0.1:8081',
-    //preferLocalhost: true, // če ti da bluescreen na telefonu komentiraj to ven in mi pošlji tvoj expo url
-    path: '/',
+    useProxy: true
   });
+
   const clientId = '21bd0147-4d70-40b6-b482-8f63a0cb6e44';
 
   const [token, setToken] = useState<string | null>(null);
@@ -93,7 +90,7 @@ export const LoginButton = () => {
         }}
       >  <Text style={styles.label}>Prijava</Text>
       </TouchableOpacity>
-      ): 
+      ):
       <Button
         disabled={!request}
         title="Logout"
@@ -109,14 +106,14 @@ export const LoginButton = () => {
 
 export default function Login() {
   const [status, setStatus] = useState<string | null>("Logging in!");
-  
+
   setTimeout(() => {
     (async () => {
       console.log("Checking token");
       const foundToken = await getItem('token');
       if (foundToken) {
         console.log("Token found");
-          const response = await fetch("http://192.168.50.170:3000/api/login", { // TUKAJ VPIŠI SVOJ NASLOV ZA SERVER
+          const response = await fetch("http://193.2.219.130/api/login", { // TUKAJ VPIŠI SVOJ NASLOV ZA SERVER
             method: 'GET',
             headers: {
               Authorization: `Bearer ${foundToken}`,
