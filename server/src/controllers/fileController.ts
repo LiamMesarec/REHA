@@ -3,6 +3,7 @@ import asyncHandler from '../middleware/asyncHandler';
 import path from 'path';
 import fs from 'fs';
 import mime from 'mime-types';
+import { authHandler } from '../middleware/authHandler';
 
 // @desc    Fetch all files
 // @route   GET /api/files
@@ -15,7 +16,7 @@ const getFiles = asyncHandler(
         console.error('GET /api/files error:', err);
         return next(err);
       }
-      res.json({ files: rows }).status(200);
+      res.status(200).json({ files: rows });
     });
   },
 );
@@ -35,46 +36,61 @@ const getFileById = asyncHandler(
       if (!row) {
         return res.status(404).json({ message: 'File not found' });
       }
-      res.json({ file: row });
+      res.status(200).json({ file: row });
     });
   },
 );
 
 // @desc    Create a file
 // @route   POST /api/files
-// @access  Private/Admin
-const createFile = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+// @access  Private (accessLevel > 1)
+const createFile = [
+  authHandler,
+asyncHandler(
+  async (req: any, res: Response, next: NextFunction): Promise<void> => {
+    const user = req.body.user;
+    if (!user || user[1] < 1) {
+      return res.status(403).json({ message: 'Forbidden: insufficient access level' });
+    }
+
     const db = req.app.locals.db;
-    const { name, path } = req.body;
+    const { name, path: filePathBody } = req.body;
 
     if (!req.file) {
       res.status(400).json({ message: 'No file uploaded' });
       return;
     }
 
-    if (!name || !path) {
+    if (!name || !filePathBody) {
       res.status(400).json({ message: 'Name and path are required' });
       return;
     }
 
     const query = `INSERT INTO Files (name, path, uuid) VALUES (?, ?, ?)`;
-    db.run(query, [name, path, req.file.filename], function (err: any) {
+    db.run(query, [name, filePathBody, req.file.filename], function (err: any) {
       if (err) {
         return next(err);
       }
       res
-        .status(201)
-        .json({ id: this.lastID, name, path, uuid: req.file?.filename, date_uploaded: new Date() });
+      .status(201)
+      .json({ id: this.lastID, name, path: filePathBody, uuid: req.file.filename, date_uploaded: new Date() });
     });
   },
-);
+),
+];
 
 // @desc    Delete a file
 // @route   DELETE /api/files/:id
-// @access  Private/Admin
-const deleteFile = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+// @access  Private/Admin (accessLevel > 2)
+const deleteFile = [
+  authHandler,
+asyncHandler(
+  async (req: any, res: Response, next: NextFunction): Promise<void> => {
+    const user = req.body.user;
+    if (!user || user[1] <= 2) {
+      return res.status(403).json({ message: 'Forbidden: insufficient access level' });
+    }
+
     const db = req.app.locals.db;
     const { id } = req.params;
 
@@ -96,15 +112,15 @@ const deleteFile = asyncHandler(
         fs.unlink(filePath, (fsErr) => {
           if (fsErr && fsErr.code !== 'ENOENT') {
             console.error('Error deleting file:', fsErr);
-            res.status(500);
+            return res.status(500).end();
           }
+          res.status(200).json({ message: 'File deleted successfully' });
         });
-
-        res.json({ message: 'File deleted successfully' });
       });
     });
   },
-);
+),
+];
 
 // @desc    Fetch file contents
 // @route   GET /api/files/:uuid/content
@@ -123,7 +139,7 @@ const getFileContentsById = asyncHandler(
             const fileStream = fs.createReadStream(filePath);
             const mimeType = mime.lookup(filePath) || 'application/octet-stream';
             res.setHeader('Content-Type', mimeType);
-            res.setHeader('Content-Type', mimeType);
+
             fileStream.on('error', (err) => {
               res.status(500).json({ err });
             });
