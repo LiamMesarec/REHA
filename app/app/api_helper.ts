@@ -8,7 +8,7 @@ import * as storage from './storage';
 
 const ip = "193.2.219.130";
 const api = axios.create({
-  baseURL: `http://${ip}/api`,
+  baseURL: `https://${ip}/api`,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
@@ -42,7 +42,7 @@ export const uploadFile = async (fileInput: any, filename: string, path: string)
       type: file.type
     } as any);
 
-    const UPLOAD_URL = `http://${ip}/api/files`;
+    const UPLOAD_URL = `https://${ip}/api/files`;
 
     const response = await fetch(UPLOAD_URL, {
       method: 'POST',
@@ -141,7 +141,7 @@ export const fetchAndOpenFile = async (uuid: string, fileName: string) => {
     const fileUri = `${FileSystem.documentDirectory}${fileName}.${fileExtension}`;
 
     const downloadResumable = FileSystem.createDownloadResumable(
-      `http://${ip}/api/files/${uuid}/content`,
+      `https://${ip}/api/files/${uuid}/content`,
       fileUri
     );
 
@@ -163,7 +163,7 @@ export const fetchAndOpenFile = async (uuid: string, fileName: string) => {
 
 export const fetchFileUri = async (uuid: string) => {
   const downloadResumable = FileSystem.createDownloadResumable(
-    `http://${ip}/api/files/${uuid}/content`,
+    `https://${ip}/api/files/${uuid}/content`,
     `${FileSystem.documentDirectory}${uuid}`
   );
 
@@ -207,7 +207,7 @@ export const fetchMe = async () => {
     return null;
   }
   try {
-    const response = await fetch(`http://${ip}/api/users/me`, {
+    const response = await fetch(`https://${ip}/api/users/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -231,7 +231,7 @@ export const fetchUsers = async () => {
     return null;
   }
   try {
-    const response = await fetch(`http://${ip}/api/users/list`, {
+    const response = await fetch(`https://${ip}/api/users/list`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -255,7 +255,7 @@ export const deleteUser = async (email: string) => {
     return null;
   }
   try {
-    const response = await fetch(`http://${ip}/api/users/delete`, {
+    const response = await fetch(`https://${ip}/api/users/delete`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -282,7 +282,7 @@ export const addUser = async (email: string, accessLevel: number) => {
     return null;
   }
   try {
-    const response = await fetch(`http://${ip}/api/users/add`, {
+    const response = await fetch(`https://${ip}/api/users/add`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
