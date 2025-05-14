@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import asyncHandler from '../middleware/asyncHandler';
-import { authHandler } from 'src/middleware/authHandler';
+import { authHandler } from '../middleware/authHandler';
 
 // @desc    Fetch all events
 // @route   GET /api/events
