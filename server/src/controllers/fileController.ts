@@ -50,7 +50,8 @@ asyncHandler(
   async (req: any, res: Response, next: NextFunction): Promise<void> => {
     const user = req.body.user;
     if (!user || user[1] < 1) {
-      return res.status(403).json({ message: 'Forbidden: insufficient access level' });
+       res.status(403).json({ message: 'Forbidden: insufficient access level' });
+       return
     }
 
     const db = req.app.locals.db;
@@ -88,7 +89,8 @@ asyncHandler(
   async (req: any, res: Response, next: NextFunction): Promise<void> => {
     const user = req.body.user;
     if (!user || user[1] <= 2) {
-      return res.status(403).json({ message: 'Forbidden: insufficient access level' });
+       res.status(403).json({ message: 'Forbidden: insufficient access level' });
+       return
     }
 
     const db = req.app.locals.db;
@@ -99,7 +101,8 @@ asyncHandler(
         return next(err);
       }
       if (!row) {
-        return res.status(404).json({ message: 'File not found' });
+         res.status(404).json({ message: 'File not found' });
+          return;
       }
 
       const filePath = path.join('files', row.uuid);
@@ -112,7 +115,8 @@ asyncHandler(
         fs.unlink(filePath, (fsErr) => {
           if (fsErr && fsErr.code !== 'ENOENT') {
             console.error('Error deleting file:', fsErr);
-            return res.status(500).end();
+             res.status(500).end();
+              return;
           }
           res.status(200).json({ message: 'File deleted successfully' });
         });
