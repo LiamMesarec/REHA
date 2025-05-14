@@ -79,7 +79,7 @@ export function WhitelistDash() {
                     <Text>Loading...</Text>
                 ) : (
                     <>
-                        <Text style={{ fontSize: 20, fontWeight: "bold" }}>Študenti:</Text>
+                        <Text style={{ fontSize: 14, fontWeight: "bold" }}>Študenti:</Text>
                         <View style={styles.container}>
                             {users.map((user: any, index: number) => (
                                 user.accessLevel === 1 ? (
