@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import asyncHandler from '../middleware/asyncHandler';
-import { authHandler } from '../middleware/authHandler';
 
 // @desc    Fetch all events
 // @route   GET /api/events
@@ -100,9 +99,8 @@ const getFilesByEventId = asyncHandler(
 // @desc    Attach a file to an event and return the updated file list
 // @route   POST /api/events/:id/files
 // @access  Student/Mentor/Admin  (accessLevel >= 1)
-const attachFileToEvent = [
-  authHandler,
-  asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+const attachFileToEvent = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { id } = req.params;
     const { fileId } = req.body;
@@ -157,15 +155,14 @@ const attachFileToEvent = [
         },
       );
     });
-  }),
-];
+  },
+);
 
 // @desc    Create an event
 // @route   POST /api/events
 // @access  Student/Mentor/Admin (accessLevel >= 1)
-const createEvent = [
-  authHandler,
-  asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+const createEvent = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { title, coordinator, description, start, from_date, to_date } = req.body;
     const user = await req.body.user;
@@ -240,15 +237,14 @@ const createEvent = [
         });
       },
     );
-  }),
-];
+  },
+);
 
 // @desc    Update an event
 // @route   PUT /api/events/:id
 // @access  Student/Mentor/Admin (accessLevel >= 1)
-const updateEvent = [
-  authHandler,
-  asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+const updateEvent = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { id } = req.params;
     const { title, coordinator, description, start, from_date, to_date } = req.body;
@@ -355,15 +351,14 @@ const updateEvent = [
         }
       },
     );
-  }),
-];
+  },
+);
 
 // @desc    Delete an event
 // @route   DELETE /api/events/:id
 // @access  Mentor/Admin   (accessLevel >= 2)
-const deleteEvent = [
-  authHandler,
-  asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+const deleteEvent = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { id } = req.params;
     const user = await req.body.user;
@@ -396,8 +391,8 @@ const deleteEvent = [
         return;
       });
     });
-  }),
-];
+  },
+);
 
 export {
   getEvents,

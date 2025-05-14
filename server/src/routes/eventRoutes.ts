@@ -8,13 +8,18 @@ import {
   getFilesByEventId,
   attachFileToEvent,
 } from '../controllers/eventController';
+import { authHandler } from '../middleware/authHandler';
 
 const router = express.Router();
 
-router.route('/').get(getEvents).post(createEvent);
+router.route('/').get(getEvents).post(authHandler, createEvent);
 
-router.route('/:id').get(getEventById).put(updateEvent).delete(deleteEvent);
+router
+  .route('/:id')
+  .get(getEventById)
+  .put(authHandler, updateEvent)
+  .delete(authHandler, deleteEvent);
 
-router.route('/:id/files').get(getFilesByEventId).post(attachFileToEvent);
+router.route('/:id/files').get(getFilesByEventId).post(authHandler, attachFileToEvent);
 
 export default router;
