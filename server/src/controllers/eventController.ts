@@ -163,6 +163,8 @@ const createEvent = asyncHandler(
     const db = req.app.locals.db;
     const { title, coordinator, description, start, from_date, to_date } = req.body;
     const user = await req.body.user;
+    console.log('user', user);
+    console.log('user[1]', user[1]);
     if (!user || user[1] < 1) {
       res.status(401).send({ message: 'Unauthorized' });
       return;
