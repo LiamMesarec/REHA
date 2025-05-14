@@ -1,24 +1,33 @@
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Platform, RefreshControl } from "react-native"
-import { GestureHandlerRootView, TextInput } from "react-native-gesture-handler";
+import {
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Platform,
+  RefreshControl,
+} from "react-native";
+import {
+  GestureHandlerRootView,
+  TextInput,
+} from "react-native-gesture-handler";
 import React, { useState } from "react";
 import { submitEvent, fetchData, submitUpdateEvent } from "./api_helper";
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { router, useLocalSearchParams } from "expo-router";
 import FileUploadScreen from "./fileUpload";
 import "react-datepicker/dist/react-datepicker.css";
 
 interface FieldProps {
-  title: string,
-  data: string,
-  onChange: (text: string) => void
+  title: string;
+  data: string;
+  onChange: (text: string) => void;
 }
 
 const Field = (props: FieldProps) => {
   return (
     <View style={styles.sectionContainer}>
-      <Text style={styles.sectionTitle}>
-        {props.title}
-      </Text>
+      <Text style={styles.sectionTitle}>{props.title}</Text>
       <TextInput
         style={styles.input}
         value={props.data}
@@ -28,12 +37,15 @@ const Field = (props: FieldProps) => {
       />
     </View>
   );
-}
+};
 
 const formatDate = (dateIn: Date) => {
-  return dateIn.toISOString().split('T')[0] + " " +
-         dateIn.toISOString().split('T')[1].split('.')[0];
-}
+  return (
+    dateIn.toISOString().split("T")[0] +
+    " " +
+    dateIn.toISOString().split("T")[1].split(".")[0]
+  );
+};
 
 export const EventForm = () => {
   const { eventId } = useLocalSearchParams();
@@ -42,7 +54,7 @@ export const EventForm = () => {
   const [CoordinatorValue, setCoordinatorValue] = useState("");
   const [Date2, setDate2] = useState("2025-03-14 13:50:33");
   const [show, setShow] = useState(false);
-  const [mode, setMode] = useState<'date' | 'time'>('date');
+  const [mode, setMode] = useState<"date" | "time">("date");
   const [date, setDate] = useState(new Date());
   const [toDate, setToDate] = useState("2025-03-14");
   const [fromDate, setFromDate] = useState("2025-03-14");
@@ -59,9 +71,12 @@ export const EventForm = () => {
         setTitleValue(eventData.title);
         setDate(new Date(eventData.start));
       };
-      
-      try { fetchEventData(); } 
-      catch (error) { console.warn(error); }
+
+      try {
+        fetchEventData();
+      } catch (error) {
+        console.warn(error);
+      }
     }, [eventId]);
   }
 
@@ -70,28 +85,37 @@ export const EventForm = () => {
     setDate(selectedDate);
   };
 
-  const showMode = (currentMode: 'date' | 'time') => {
+  const showMode = (currentMode: "date" | "time") => {
     setShow(true);
     setMode(currentMode);
   };
 
   const submitFn = async () => {
     try {
-      if (eventId && eventId != "null") {
-        alert("Pozor", "Želiš spremeniti dogodek?", [{
-          text: 'Da', onPress: async () => {
-            await submitUpdateEvent(
-              Array.isArray(eventId) ? eventId[0] : eventId,
-              TitleValue,
-              DescriptionValue,
-              CoordinatorValue,
-              formatDate(date),
-              fromDate,
-              toDate
-            );
-            router.push("/calendar");
-          }
-        }, { text: 'Ne' }]);
+      if (eventId && eventId !== "null") {
+        Alert.alert(
+          "Pozor",
+          "Želiš spremeniti dogodek?",
+          [
+            { text: "Ne" },
+            {
+              text: "Da",
+              onPress: async () => {
+                await submitUpdateEvent(
+                  Array.isArray(eventId) ? eventId[0] : eventId,
+                  TitleValue,
+                  DescriptionValue,
+                  CoordinatorValue,
+                  formatDate(date),
+                  fromDate,
+                  toDate
+                );
+                router.push("/calendar");
+              },
+            },
+          ],
+          { cancelable: true }
+        );
       } else {
         await submitEvent(
           TitleValue,
@@ -104,7 +128,10 @@ export const EventForm = () => {
         router.push("/calendar");
       }
     } catch (error) {
-      alert("Napaka", error instanceof Error ? error.message : "Neznana napaka");
+      Alert.alert(
+        "Napaka",
+        error instanceof Error ? error.message : "Neznana napaka"
+      );
     }
   };
 
@@ -121,8 +148,16 @@ export const EventForm = () => {
         </View>
 
         <Field title="Ime dogodka" data={TitleValue} onChange={setTitleValue} />
-        <Field title="Opis" data={DescriptionValue} onChange={setDescriptionValue} />
-        <Field title="Koordinator" data={CoordinatorValue} onChange={setCoordinatorValue} />
+        <Field
+          title="Opis"
+          data={DescriptionValue}
+          onChange={setDescriptionValue}
+        />
+        <Field
+          title="Koordinator"
+          data={CoordinatorValue}
+          onChange={setCoordinatorValue}
+        />
 
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Časovni okvir</Text>
@@ -131,25 +166,27 @@ export const EventForm = () => {
             <Field title="Do" data={toDate} onChange={setToDate} />
           </View>
 
-          {Platform.OS === 'web' ? (
+          {Platform.OS === "web" ? (
             <DateTimePicker
               value={date}
               mode="datetime"
               display="spinner"
-              onChange={(_, selectedDate) => selectedDate && setDate(selectedDate)}
+              onChange={(_, selectedDate) =>
+                selectedDate && setDate(selectedDate)
+              }
               style={styles.datePicker}
             />
           ) : (
             <>
               <TouchableOpacity
                 style={styles.dateButton}
-                onPress={() => showMode('date')}
+                onPress={() => showMode("date")}
               >
                 <Text style={styles.buttonText}>Izberi datum</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.dateButton}
-                onPress={() => showMode('time')}
+                onPress={() => showMode("time")}
               >
                 <Text style={styles.buttonText}>Izberi čas</Text>
               </TouchableOpacity>
