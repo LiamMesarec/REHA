@@ -6,7 +6,7 @@ import {
   useAuthRequest,
   useAutoDiscovery,
 } from 'expo-auth-session';
-import { TouchableOpacity, Text, SafeAreaView, StyleSheet, Alert } from 'react-native';
+import { TouchableOpacity, Text, SafeAreaView, StyleSheet } from 'react-native';
 import { getItem, setItem, deleteItem } from './storage';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -54,9 +54,9 @@ export const LoginButton = () => {
           });
           if (response.ok) {
             const { email } = await response.json();
-            Alert.alert('Status prijave', `Uspešno ste se prijavili kot: ${email}`, [{ text: 'OK' }]);
+            console.log('Status prijave', `Uspešno ste se prijavili kot: ${email}`);
           } else {
-            Alert.alert('Status prijave', 'Prijava v vaš račun ni uspela!', [{ text: 'OK' }]);
+            console.log('Status prijave', 'Prijava v vaš račun ni uspela!');
           }
         });
       }
