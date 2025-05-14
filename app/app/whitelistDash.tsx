@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     },
     text: {
         textAlign: 'center',
-        fontSize: wp(2.5),
+        fontSize: wp(2),
     },
     deleteButton: {
         borderWidth: 1,
