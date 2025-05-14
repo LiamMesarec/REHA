@@ -1,10 +1,10 @@
 import axios from "axios";
-import { Alert } from 'react-native';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
+import { Alert } from "react-native";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 import alert from "./alert";
 import { router } from "expo-router";
-import * as storage from './storage';
+import * as storage from "./storage";
 
 const ip = "193.2.219.130";
 const api = axios.create({
@@ -20,36 +20,45 @@ export const fetchData = async (path: string): Promise<any> => {
     const response = await api.get(path);
     return response.data;
   } catch (error) {
-    console.error("Error fetching data with path:", path, " ---- Error: ", error);
+    console.error(
+      "Error fetching data with path:",
+      path,
+      " ---- Error: ",
+      error
+    );
     throw error;
   }
 };
 
-export const uploadFile = async (fileInput: any, filename: string, path: string) => {
+export const uploadFile = async (
+  fileInput: any,
+  filename: string,
+  path: string
+) => {
   try {
     const file = {
       uri: fileInput.uri,
       name: filename,
-      type: fileInput.mimeType
+      type: fileInput.mimeType,
     };
 
     const formData = new FormData();
-    formData.append('name', filename);
-    formData.append('path', path);
-    formData.append('file', {
+    formData.append("name", filename);
+    formData.append("path", path);
+    formData.append("file", {
       uri: file.uri,
       name: file.name,
-      type: file.type
+      type: file.type,
     } as any);
 
     const UPLOAD_URL = `https://${ip}/api/files`;
 
     const response = await fetch(UPLOAD_URL, {
-      method: 'POST',
+      method: "POST",
       body: formData,
       headers: {
-        'Content-Type': 'multipart/form-data',
-      }
+        "Content-Type": "multipart/form-data",
+      },
     });
 
     const result = await response.json();
@@ -62,7 +71,12 @@ export const uploadFile = async (fileInput: any, filename: string, path: string)
   }
 };
 
-export const uploadFileEvent = async (fileInput: any, filename: string, path: string, eventId: string) => {
+export const uploadFileEvent = async (
+  fileInput: any,
+  filename: string,
+  path: string,
+  eventId: string
+) => {
   try {
     const response = await uploadFile(fileInput, filename, path);
     const result = addFileToEvent(Number(eventId), response.id);
@@ -73,38 +87,60 @@ export const uploadFileEvent = async (fileInput: any, filename: string, path: st
   }
 };
 
-export const submitEvent = async (title: string, description: string, coordinator: string, date: string, from: string | null, to: string | null) => {
+export const submitEvent = async (
+  title: string,
+  description: string,
+  coordinator: string,
+  date: string,
+  from: string | null,
+  to: string | null
+) => {
   if (!title || !description || !coordinator || !date) {
-    throw 1;
+    throw new Error("Missing required fields");
   }
+
+  const token = await storage.getItem("token");
+  if (!token) {
+    throw new Error("No authentication token found");
+  }
+
   try {
-    let response;
-    if (!from || !to) {
-      response = await api.post("/events", {
-        title,
-        coordinator,
-        description,
-        start: date
-      });
-    } else {
-      response = await api.post("/events", {
+    const response = await fetch(`https://${ip}/api/events`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
         title,
         coordinator,
         description,
         start: date,
-        from_date: from,
-        to_date: to
-      });
+        ...(from && to ? { from_date: from, to_date: to } : {}),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to create event");
     }
-    return response.data;
+
+    return await response.json();
   } catch (error) {
     console.error("Error submitting Event creation data: ", error);
-    alert("Napaka pri posiljanju podatkov za ustvarjanje dogodka", "Opozorilo");
     throw error;
   }
 };
 
-export const submitUpdateEvent = async (id: string, title: string, description: string, coordinator: string, date: string, from: string, to: string) => {
+export const submitUpdateEvent = async (
+  id: string,
+  title: string,
+  description: string,
+  coordinator: string,
+  date: string,
+  from: string,
+  to: string
+) => {
   try {
     const response = await api.put(`/events/${id}`, {
       title,
@@ -112,7 +148,7 @@ export const submitUpdateEvent = async (id: string, title: string, description: 
       description,
       start: date,
       from_date: from,
-      to_date: to
+      to_date: to,
     });
     console.log(response.data);
   } catch (error) {
@@ -137,7 +173,7 @@ export const deleteEventById = async (id: number) => {
 
 export const fetchAndOpenFile = async (uuid: string, fileName: string) => {
   try {
-    const fileExtension = fileName.split('.').pop() || 'pdf';
+    const fileExtension = fileName.split(".").pop() || "pdf";
     const fileUri = `${FileSystem.documentDirectory}${fileName}.${fileExtension}`;
 
     const downloadResumable = FileSystem.createDownloadResumable(
@@ -148,16 +184,16 @@ export const fetchAndOpenFile = async (uuid: string, fileName: string) => {
     const { uri } = await downloadResumable.downloadAsync();
 
     if (uri) {
-      console.log('File downloaded to:', uri);
+      console.log("File downloaded to:", uri);
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri);
       } else {
-        Alert.alert('Error', 'File sharing is not available on this device.');
+        Alert.alert("Error", "File sharing is not available on this device.");
       }
     }
   } catch (error) {
-    console.error('Error downloading or opening file:', error);
-    Alert.alert('Error', 'Failed to open file.');
+    console.error("Error downloading or opening file:", error);
+    Alert.alert("Error", "Failed to open file.");
   }
 };
 
@@ -201,7 +237,7 @@ export const deleteFileById = async (fileId: number) => {
 export default api;
 
 export const fetchMe = async () => {
-  const token = await storage.getItem('token');
+  const token = await storage.getItem("token");
   if (!token) {
     console.log("No token found");
     return null;
@@ -225,7 +261,7 @@ export const fetchMe = async () => {
 };
 
 export const fetchUsers = async () => {
-  const token = await storage.getItem('token');
+  const token = await storage.getItem("token");
   if (!token) {
     console.log("No token found");
     return null;
@@ -249,17 +285,17 @@ export const fetchUsers = async () => {
 };
 
 export const deleteUser = async (email: string) => {
-  const token = await storage.getItem('token');
+  const token = await storage.getItem("token");
   if (!token) {
     console.log("No token found");
     return null;
   }
   try {
     const response = await fetch(`https://${ip}/api/users/delete`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ email }),
     });
@@ -276,17 +312,17 @@ export const deleteUser = async (email: string) => {
 };
 
 export const addUser = async (email: string, accessLevel: number) => {
-  const token = await storage.getItem('token');
+  const token = await storage.getItem("token");
   if (!token) {
     console.log("No token found");
     return null;
   }
   try {
     const response = await fetch(`https://${ip}/api/users/add`, {
-      method: 'POST',
+      method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ email, accessLevel }),
     });
