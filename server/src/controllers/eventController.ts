@@ -16,6 +16,7 @@ const getEvents = asyncHandler(
           return next(err);
         }
         res.status(200).json({ events: rows });
+        return;
       },
     );
   },
@@ -49,6 +50,7 @@ const getEventById = asyncHandler(
         }
 
         res.status(200).json({ event: row });
+        return;
       },
     );
   },
@@ -104,8 +106,9 @@ const attachFileToEvent = asyncHandler(
     const { fileId } = req.body;
 
     const user = await req.body.user;
-    if (!user && user[1] >= 1) {
+    if (!user || user[1] < 1) {
       res.status(401).send({ message: 'Unauthorized' });
+      return;
     }
 
     if (!fileId) {
@@ -118,7 +121,8 @@ const attachFileToEvent = asyncHandler(
         return next(err);
       }
       if (!event) {
-        return res.status(404).json({ message: 'Event not found' });
+        res.status(404).json({ message: 'Event not found' });
+        return;
       }
 
       db.run(
@@ -139,9 +143,10 @@ const attachFileToEvent = asyncHandler(
               if (err) {
                 return next(err);
               }
-              return res.status(201).json({
+              res.status(201).json({
                 files: files || [],
               });
+              return;
             },
           );
         },
@@ -158,14 +163,16 @@ const createEvent = asyncHandler(
     const db = req.app.locals.db;
     const { title, coordinator, description, start, from_date, to_date } = req.body;
     const user = await req.body.user;
-    if (!user && user[1] >= 1) {
+    if (!user || user[1] < 1) {
       res.status(401).send({ message: 'Unauthorized' });
+      return;
     }
 
     if (!title || !coordinator || !description || !start) {
       res.status(400).json({
         message: 'Missing required fields: title, coordinator, description, start.',
       });
+      return;
     }
 
     db.run(
@@ -204,7 +211,8 @@ const createEvent = asyncHandler(
                     if (err) {
                       return next(err);
                     }
-                    return res.status(201).json({ event: eventRow });
+                    res.status(201).json({ event: eventRow });
+                    return;
                   },
                 );
               },
@@ -214,7 +222,8 @@ const createEvent = asyncHandler(
               if (err) {
                 return next(err);
               }
-              return res.status(201).json({ event: eventRow });
+              res.status(201).json({ event: eventRow });
+              return;
             });
           }
         });
@@ -233,14 +242,16 @@ const updateEvent = asyncHandler(
     const { title, coordinator, description, start, from_date, to_date } = req.body;
 
     const user = await req.body.user;
-    if (!user && user[1] >= 1) {
+    if (!user || user[1] < 1) {
       res.status(401).send({ message: 'Unauthorized' });
+      return;
     }
 
     if (!title || !coordinator || !description || !start) {
       res.status(400).json({
         message: 'Missing required fields: title, coordinator, description, start.',
       });
+      return;
     }
 
     db.run(
@@ -277,7 +288,8 @@ const updateEvent = asyncHandler(
                         if (err) {
                           return next(err);
                         }
-                        return res.status(200).json({ event: eventRow });
+                        res.status(200).json({ event: eventRow });
+                        return;
                       },
                     );
                   },
@@ -300,7 +312,8 @@ const updateEvent = asyncHandler(
                         if (err) {
                           return next(err);
                         }
-                        return res.status(200).json({ event: eventRow });
+                        res.status(200).json({ event: eventRow });
+                        return;
                       },
                     );
                   },
@@ -319,7 +332,8 @@ const updateEvent = asyncHandler(
               if (err) {
                 return next(err);
               }
-              return res.status(200).json({ event: eventRow });
+              res.status(200).json({ event: eventRow });
+              return;
             },
           );
         }
@@ -336,7 +350,7 @@ const deleteEvent = asyncHandler(
     const db = req.app.locals.db;
     const { id } = req.params;
     const user = await req.body.user;
-    if (!user && user[1] >= 2) {
+    if (!user || user[1] < 1) {
       res.status(401).send({ message: 'Unauthorized' });
     }
 
@@ -345,7 +359,8 @@ const deleteEvent = asyncHandler(
         return next(err);
       }
       if (!row) {
-        return res.status(404).json({ message: 'Event not found!' });
+        res.status(404).json({ message: 'Event not found!' });
+        return;
       }
 
       db.run('DELETE FROM Events WHERE id = ?', [id], (err2: any) => {
@@ -356,6 +371,7 @@ const deleteEvent = asyncHandler(
         res.status(200).json({
           message: 'Event successfully deleted.',
         });
+        return;
       });
     });
   },
