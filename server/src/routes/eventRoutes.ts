@@ -1,5 +1,4 @@
 import express from 'express';
-import { authHandler } from '../middleware/authHandler';
 import {
   createEvent,
   deleteEvent,
@@ -12,14 +11,10 @@ import {
 
 const router = express.Router();
 
-router.route('/').get(getEvents).post(authHandler, createEvent);
+router.route('/').get(getEvents).post(createEvent);
 
-router
-  .route('/:id')
-  .get(getEventById)
-  .put(authHandler, updateEvent)
-  .delete(authHandler, deleteEvent);
+router.route('/:id').get(getEventById).put(updateEvent).delete(deleteEvent);
 
-router.route('/:id/files').get(getFilesByEventId).post(authHandler, attachFileToEvent);
+router.route('/:id/files').get(getFilesByEventId).post(attachFileToEvent);
 
 export default router;

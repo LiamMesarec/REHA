@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import asyncHandler from '../middleware/asyncHandler';
+import { authHandler } from 'src/middleware/authHandler';
 
 // @desc    Fetch all events
 // @route   GET /api/events
@@ -98,19 +99,23 @@ const getFilesByEventId = asyncHandler(
 
 // @desc    Attach a file to an event and return the updated file list
 // @route   POST /api/events/:id/files
-// @access  Student/Mentor/Admin
-const attachFileToEvent = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+// @access  Student/Mentor/Admin  (accessLevel >= 1)
+const attachFileToEvent = [
+  authHandler,
+  asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { id } = req.params;
     const { fileId } = req.body;
 
     const user = await req.body.user;
-    if (!user || user[1] < 1) {
-      res.status(401).send({ message: 'Unauthorized' });
+    if (user == null) {
+      res.status(401).json({ message: 'Unauthorized' });
       return;
     }
-
+    if (user[1] < 1) {
+      res.status(401).json({ message: 'Forbidden' });
+      return;
+    }
     if (!fileId) {
       res.status(400).json({ message: 'Missing required field: fileId' });
       return;
@@ -152,21 +157,25 @@ const attachFileToEvent = asyncHandler(
         },
       );
     });
-  },
-);
+  }),
+];
 
 // @desc    Create an event
 // @route   POST /api/events
-// @access  Student/Mentor/Admin
-const createEvent = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+// @access  Student/Mentor/Admin (accessLevel >= 1)
+const createEvent = [
+  authHandler,
+  asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { title, coordinator, description, start, from_date, to_date } = req.body;
     const user = await req.body.user;
-    console.log('user', user);
-    console.log('user[1]', user[1]);
-    if (!user || user[1] < 1) {
-      res.status(401).send({ message: 'Unauthorized' });
+
+    if (user == null) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+    if (user[1] < 1) {
+      res.status(401).json({ message: 'Forbidden' });
       return;
     }
 
@@ -231,21 +240,26 @@ const createEvent = asyncHandler(
         });
       },
     );
-  },
-);
+  }),
+];
 
 // @desc    Update an event
 // @route   PUT /api/events/:id
-// @access  Student/Mentor/Admin
-const updateEvent = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+// @access  Student/Mentor/Admin (accessLevel >= 1)
+const updateEvent = [
+  authHandler,
+  asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { id } = req.params;
     const { title, coordinator, description, start, from_date, to_date } = req.body;
 
     const user = await req.body.user;
-    if (!user || user[1] < 1) {
-      res.status(401).send({ message: 'Unauthorized' });
+    if (user == null) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+    if (user[1] < 1) {
+      res.status(401).json({ message: 'Forbidden' });
       return;
     }
 
@@ -341,19 +355,25 @@ const updateEvent = asyncHandler(
         }
       },
     );
-  },
-);
+  }),
+];
 
 // @desc    Delete an event
 // @route   DELETE /api/events/:id
-// @access  Mentor/Admin
-const deleteEvent = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+// @access  Mentor/Admin   (accessLevel >= 2)
+const deleteEvent = [
+  authHandler,
+  asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { id } = req.params;
     const user = await req.body.user;
-    if (!user || user[1] < 1) {
-      res.status(401).send({ message: 'Unauthorized' });
+    if (user == null) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+    if (user[1] < 2) {
+      res.status(401).json({ message: 'Forbidden' });
+      return;
     }
 
     db.get('SELECT id FROM Events WHERE id = ?', [id], (err: any, row: any) => {
@@ -376,8 +396,8 @@ const deleteEvent = asyncHandler(
         return;
       });
     });
-  },
-);
+  }),
+];
 
 export {
   getEvents,
