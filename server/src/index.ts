@@ -1,11 +1,8 @@
-import { connectDB, closeDB, runMigrations, dropTables } from './database/db';
-import { testSeedDatabase } from './database/seeder';
+import { connectDB, closeDB, runMigrations } from './database/db';
 import { App } from './app';
 
-const db = connectDB('./test.db');
-dropTables(db);
+const db = connectDB('./production.db');
 runMigrations(db);
-testSeedDatabase(db);
 
 const app = App(db);
 app.listen(3000);
