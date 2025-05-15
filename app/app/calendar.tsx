@@ -19,10 +19,12 @@ import {
   CalendarProvider,
   LocaleConfig,
 } from "react-native-calendars";
-import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo, useContext } from "react";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import DropDownPicker from "react-native-dropdown-picker";
+import { AuthContext } from "./authContext";
 import { SearchType } from "./eventSearch";
+
 const leftArrowIcon = require("./previous.png");
 const rightArrowIcon = require("./next.png");
 
@@ -312,6 +314,7 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
   const todayBtnTheme = useRef({
     todayButtonTextColor: themeColor,
   });
+    const { token } = useContext(AuthContext);
   const navigation = useNavigation();
   const [events2, setEvents2] = useState<DayEventProps[]>([]);
   const [events3, setEvents3] = useState<GroupedEvent[]>([]);
@@ -370,13 +373,14 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
     <View
       style={[styles.outerContainer, isDesktop && styles.outerContainerWeb]}
     >
-      {/* Floating Add Button */}
+    {token && (
       <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => router.push("/eventForm")}
+      style={styles.addButton}
+      onPress={() => router.push("/eventForm")}
       >
-        <Text style={styles.addButtonText}>+</Text>
+      <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
+    )}
 
       <View
         style={[styles.innerContainer, isDesktop && styles.innerContainerWeb]}
