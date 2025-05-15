@@ -1,8 +1,9 @@
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Image, Platform, RefreshControl, FlatList } from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useContext } from "react";
 import { deleteEventById, fetchAndOpenFile, fetchData, fetchFileUri } from "./api_helper";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import alert from "./alert";
+import { AuthContext } from "./authContext";
 
 // Constants
 const IMAGE_EXTENSIONS = ["jpg", "png", "jpeg", "webp"];
@@ -98,6 +99,7 @@ const EventPage = () => {
   const [files, setFiles] = useState<FileData[]>([]);
   const [images, setImages] = useState<ImageData[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const { token } = useContext(AuthContext);
 
   const loadEventData = async () => {
     try {
@@ -187,6 +189,7 @@ const EventPage = () => {
     <FileList files={files} />
     {images.length > 0 && <ImageGrid images={images} />}
 
+    {token && (
     <View style={styles.buttonGroup}>
     <Link href={`/eventForm?eventId=${eventId}`} asChild>
     <ActionButton
@@ -200,6 +203,7 @@ const EventPage = () => {
     color="#FF5252"
     />
     </View>
+    )}
     </ScrollView>
   );
 };
