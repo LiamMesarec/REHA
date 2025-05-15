@@ -5,6 +5,7 @@ type AuthContextType = {
   token: string | null;
   login: (token: string) => Promise<void>;
   logout: () => Promise<void>;
+  setToken: (token: string | null) => {};
 };
 
 export const AuthContext = createContext<AuthContextType>({
@@ -33,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ token, login, logout, setToken }}>
       {children}
     </AuthContext.Provider>
   );
