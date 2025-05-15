@@ -2,8 +2,7 @@ import React, { useContext } from 'react';
 import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
 import { LoginButton } from "./login";
 import { AuthContext } from './authContext';
-import { withAuth } from './protectedRoute';
-import { StyleSheet } from 'react-native';   // ← add StyleSheet & View
+import { StyleSheet } from 'react-native';
 
 import { useRouter } from "expo-router";
 export function Navbar() {
@@ -19,12 +18,13 @@ export function Navbar() {
     <TouchableOpacity style={styles.button} onPress={() => router.push('/calendar')}>
     <Text style={styles.label}>Koledar</Text>
     </TouchableOpacity>
+
     {token && (
       <TouchableOpacity
       style={styles.button}
       onPress={() => router.push('/fileSystem')}
       >
-      <Text style={styles.label}>Administracija</Text>
+      <Text style={styles.label}>E-Knjižnica</Text>
       </TouchableOpacity>
     )}
             {token && (
@@ -35,6 +35,9 @@ export function Navbar() {
             <Text style={styles.label}>Administracija</Text>
           </TouchableOpacity>
         )}
+    <TouchableOpacity style={styles.button} onPress={() => router.push('/about')}>
+    <Text style={styles.label}>O strani</Text>
+    </TouchableOpacity>
     <LoginButton/>
     </View>
     <Image source={logoIcon} style={styles.logo} href="https://www.fzsv.si/" target="_blank" resizeMode="contain" />

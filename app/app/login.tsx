@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import {
   exchangeCodeAsync,
@@ -8,6 +8,7 @@ import {
 } from 'expo-auth-session';
 import { TouchableOpacity, Text, SafeAreaView, StyleSheet, Platform } from 'react-native';
 import { getItem, setItem, deleteItem } from './storage';
+import { AuthContext } from './authContext';
 
 WebBrowser.maybeCompleteAuthSession();
 const isWeb = Platform.OS === 'web';
@@ -19,8 +20,8 @@ export const LoginButton = () => {
   const initialToken = isWeb
   ? window.localStorage.getItem('token')
   : null;
-  const [token, setToken] = useState<string | null>(initialToken);
-
+  //const [token, setToken] = useState<string | null>(initialToken);
+  const { token, setToken } = useContext(AuthContext);
   const [request, , promptAsync] = useAuthRequest(
     {
       clientId,
