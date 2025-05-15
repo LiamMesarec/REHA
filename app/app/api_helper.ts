@@ -5,6 +5,7 @@ import * as Sharing from "expo-sharing";
 import alert from "./alert";
 import { router } from "expo-router";
 import * as storage from "./storage";
+import { Platform } from 'react-native';
 
 const ip = "193.2.219.130";
 const api = axios.create({
@@ -41,20 +42,21 @@ export const uploadFile = async (
       throw new Error("No authentication token found");
     }
 
-    const file = {
-      uri: fileInput.uri,
-      name: filename,
-      type: fileInput.mimeType || fileInput.type, // web or native fallback
-    };
-
     const formData = new FormData();
     formData.append("name", filename);
     formData.append("path", path);
-    formData.append("file", {
-      uri: file.uri,
-      name: file.name,
-      type: file.type,
-    } as any);
+
+    if (Platform.OS === "web") {
+      // Use actual File object on web
+      formData.append("file", fileInput.file);
+    } else {
+      // Use file object with uri on native
+      formData.append("file", {
+        uri: fileInput.uri,
+        name: filename,
+        type: fileInput.mimeType || fileInput.type,
+      } as any);
+    }
 
     const UPLOAD_URL = `https://${ip}/api/files`;
 
@@ -62,14 +64,12 @@ export const uploadFile = async (
       method: "POST",
       body: formData,
       headers: {
-        "Authorization": `Bearer ${token}`,
-        // Do NOT manually set Content-Type for FormData in fetch — it will be set automatically
+        Authorization: `Bearer ${token}`,
       },
     });
 
     const result = await response.json();
     console.log("Upload success:", result);
-    console.log("\n\n\n\n", `Upload: ${result.message}`);
     return result;
   } catch (error) {
     console.error("Error uploading file:", error);
