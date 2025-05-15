@@ -6,6 +6,7 @@ import {
   ScrollView,
   Platform,
   RefreshControl,
+  Button,
 } from "react-native";
 import {
   GestureHandlerRootView,
@@ -16,7 +17,9 @@ import { submitEvent, fetchData, submitUpdateEvent } from "./api_helper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { router, useLocalSearchParams } from "expo-router";
 import FileUploadScreen from "./fileUpload";
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { WebView } from "react-native-webview";
 interface FieldProps {
   title: string;
   data: string;
@@ -46,6 +49,11 @@ const formatDate = (dateIn: Date) => {
   );
 };
 
+const joinDate = (date: string, time: string) => {
+  return date+" "+time+":00";
+}
+
+
 export const EventForm = () => {
   const { eventId } = useLocalSearchParams();
   const [TitleValue, setTitleValue] = useState("");
@@ -57,6 +65,8 @@ export const EventForm = () => {
   const [date, setDate] = useState(new Date());
   const [toDate, setToDate] = useState("2025-03-14");
   const [fromDate, setFromDate] = useState("2025-03-14");
+  const [fromTime, setFromTime] = useState("12:00");
+  const [showToDate, setShowToDate] = useState(false);
 
   if (eventId && eventId !== "null") {
     React.useEffect(() => {
@@ -69,6 +79,10 @@ export const EventForm = () => {
         setCoordinatorValue(eventData.coordinator);
         setTitleValue(eventData.title);
         setDate(new Date(eventData.start));
+        const startDate = new Date(eventData.start);
+        const hours = String(startDate.getHours()).padStart(2, "0");
+        const minutes = String(startDate.getMinutes()).padStart(2, "0");
+        setFromTime(`${hours}:${minutes}`);
       };
 
       try {
@@ -91,6 +105,7 @@ export const EventForm = () => {
 
   const submitFn = async () => {
     try {
+      //console.log(joinDate(fromDate, fromTime));
       if (eventId && eventId !== "null") {
         // update existing event immediately
         await submitUpdateEvent(
@@ -98,7 +113,7 @@ export const EventForm = () => {
           TitleValue,
           DescriptionValue,
           CoordinatorValue,
-          formatDate(date),
+          joinDate(fromDate, fromTime),
           fromDate,
           toDate
         );
@@ -108,7 +123,7 @@ export const EventForm = () => {
           TitleValue,
           DescriptionValue,
           CoordinatorValue,
-          formatDate(date),
+          joinDate(fromDate, fromTime),
           fromDate,
           toDate
         );
@@ -147,20 +162,46 @@ export const EventForm = () => {
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Časovni okvir</Text>
           <View style={styles.dateRow}>
-            <Field title="Od" data={fromDate} onChange={setFromDate} />
-            <Field title="Do" data={toDate} onChange={setToDate} />
+                <Text style={styles.sectionSubTitle}>Začetek dogodka: </Text>
+                {showToDate && <Text style={styles.sectionSubTitle}>Ponavlja do: </Text>}
+                
+          </View>
+          <View style={styles.dateRow}>
+
+               <input
+                  type="date"
+                  value={fromDate}
+                  onChange={e => setFromDate(e.target.value)}
+                  style={{ flex: 1, minWidth: 120 }}
+                />
+
+                <input
+                  type="time"
+                  value={fromTime}
+                  onChange={e => setFromTime(e.target.value)}
+                  style={{ flex: 1, minWidth: 120 }}
+                />
+            <Button title="Ponavljajoči dogodek" onPress={() => {setShowToDate(!showToDate)}}/>
+                          {showToDate && 
+               <input
+                type="date"
+                value={toDate}
+                onChange={e => setToDate(e.target.value)}
+                style={{ flex: 1, minWidth: 120 }}
+                />            
+            }
           </View>
 
+
           {Platform.OS === "web" ? (
-            <DateTimePicker
-              value={date}
-              mode="datetime"
-              display="spinner"
-              onChange={(_, selectedDate) =>
-                selectedDate && setDate(selectedDate)
-              }
-              style={styles.datePicker}
-            />
+              (
+          <View>
+           
+              
+          </View>
+          
+          
+        )
           ) : (
             <>
               <TouchableOpacity
@@ -252,6 +293,12 @@ const styles = StyleSheet.create({
     color: "#2D2D2D",
     marginBottom: 16,
   },
+    sectionSubTitle: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#2D2D2D",
+    marginBottom: 4,
+  },
   input: {
     height: 48,
     borderWidth: 1,
@@ -266,6 +313,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 16,
+    marginBottom: 10,
   },
   dateButton: {
     backgroundColor: "#007BFF",
