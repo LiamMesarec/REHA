@@ -21,7 +21,6 @@ if (!fs.existsSync(uploadDir)) {
 
 const storage = multer.diskStorage({
   destination: 'files/',
-  limits: { fileSize: 10 * 1024 * 1024 *100}, // 1GB  
   filename: (_, file, cb) => {
     const uniqueSuffix = `${uuidv4()}${path.extname(file.originalname)}`;
     cb(null, `${file.fieldname}-${uniqueSuffix}`);
