@@ -19,9 +19,14 @@ export function Navbar() {
     <TouchableOpacity style={styles.button} onPress={() => router.push('/calendar')}>
     <Text style={styles.label}>Koledar</Text>
     </TouchableOpacity>
-    <TouchableOpacity style={styles.button} onPress={() => router.push('/fileSystem')}>
-    <Text style={styles.label}>Datoteke</Text>
-    </TouchableOpacity>
+    {token && (
+      <TouchableOpacity
+      style={styles.button}
+      onPress={() => router.push('/fileSystem')}
+      >
+      <Text style={styles.label}>Administracija</Text>
+      </TouchableOpacity>
+    )}
             {token && (
           <TouchableOpacity
             style={styles.button}

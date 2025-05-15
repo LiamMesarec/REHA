@@ -5,6 +5,7 @@ import { fetchMe, fetchUsers, deleteUser, addUser } from "./api_helper";
 import { hp, wp } from "./size"
 import { Trash2, CirclePlus } from 'lucide-react-native';
 import { add } from "lodash";
+import { withAuth } from './protectedRoute';
 
 export function WhitelistDash() {
     const [me, setMe] = useState({ "email": "", "accessLevel": 0 });
@@ -268,4 +269,4 @@ const styles = StyleSheet.create({
       },
 })
 
-export default WhitelistDash;
+export default withAuth(WhitelistDash);

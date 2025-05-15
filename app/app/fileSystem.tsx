@@ -13,6 +13,7 @@ import {deleteFileById} from "./api_helper";
 import CreateFolder from "./createFolder";
 import SideMenu from "./sideMenuFiles";
 import EventSearch from "./eventSearch";
+import { withAuth } from './protectedRoute';
 
 
 type FileListRouteProp = RouteProp<RootStackParamList, 'Files'>;
@@ -497,4 +498,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FileSystem;
+export default withAuth(FileSystem);
