@@ -12,7 +12,7 @@ import {
   GestureHandlerRootView,
   TextInput,
 } from "react-native-gesture-handler";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { submitEvent, fetchData, submitUpdateEvent } from "./api_helper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { router, useLocalSearchParams } from "expo-router";
@@ -20,6 +20,8 @@ import FileUploadScreen from "./fileUpload";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { WebView } from "react-native-webview";
+import { AuthContext } from "./authContext";
+
 interface FieldProps {
   title: string;
   data: string;
@@ -67,6 +69,7 @@ export const EventForm = () => {
   const [fromDate, setFromDate] = useState("2025-03-14");
   const [fromTime, setFromTime] = useState("12:00");
   const [showToDate, setShowToDate] = useState(false);
+  const { token } = useContext(AuthContext);
 
   if (eventId && eventId !== "null") {
     React.useEffect(() => {
@@ -228,24 +231,27 @@ export const EventForm = () => {
           )}
         </View>
 
+        {eventId && eventId != "null" && (
+          <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Priložene datoteke</Text>
+          <FileUploadScreen
+          refresh={() => {}}
+          currentPath="Files"
+          event={Array.isArray(eventId) ? eventId[0] : eventId}
+          />
+          </View>
+        )}
+
+        {token && (
         <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: "#4CAF50" }]}
           onPress={submitFn}
         >
+
           <Text style={styles.actionButtonText}>
             {eventId ? "POSODOBI" : "USTVARI"}
           </Text>
         </TouchableOpacity>
-
-        {eventId && eventId != "null" && (
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Priložene datoteke</Text>
-            <FileUploadScreen
-              refresh={() => {}}
-              currentPath="Files"
-              event={Array.isArray(eventId) ? eventId[0] : eventId}
-            />
-          </View>
         )}
       </ScrollView>
     </GestureHandlerRootView>
