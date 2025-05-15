@@ -3,19 +3,19 @@ import { View, Button, Alert, Text, TouchableOpacity, StyleSheet } from 'react-n
 import * as DocumentPicker from 'expo-document-picker';
 import {uploadFile, uploadFileEvent } from "./api_helper";
 import alert from './alert';
-
+  import { Platform } from 'react-native';
 
 const uploadToServer = async (file: any, path : string, event: string | null) => {
   if (file) {
     try {
       let result;
       console.log("file: ", file, " path: ", path, " event: ",event);
-      if (event){
+      if (event != null){
         result = await uploadFileEvent(file, file.name, `${path}/${file.name}`, event);
       }else
       result = await uploadFile(file, file.name, `${path}/${file.name}`);
       console.log("Upload result:", result);
-      alert('Upload Successful', `File ${file.name} uploaded successfully!`);
+      alert('Upload Successful', `File ${file.name} uploaded successfully! ${result}`);
     } catch (error) {
       console.error("Upload failed:", error);
       alert('Upload Failed', 'There was an error uploading the file.');
@@ -34,27 +34,59 @@ const FileUploadScreen: React.FC<UploadProps> = ({refresh, currentPath, event}) 
 
 
 
-  const selectFile = async () => {
+
+const selectFile = async () => {
+  if (Platform.OS === 'web') { //web
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '*/*'; 
+    input.onchange = async (event) => {
+      const file = event.target!.files[0];
+      if (!file) {
+        console.log('No file selected');
+        return;
+      }
+
+      const selectedFile = {
+        uri: URL.createObjectURL(file),
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        file,
+      };
+
+      setFile(selectedFile);
+      const tmp = await uploadToServer(selectedFile, currentPath, null);
+      refresh();
+      console.log('SERVER RESPONSE:', tmp);
+    };
+    input.click();
+  } else {
+    // Native platforms (iOS/Android)
     try {
       const res = await DocumentPicker.getDocumentAsync({
-        type: '*/*',  
+        type: '*/*',
       });
 
+      if(!res){
+        return
+      }
       if (res.type === 'cancel') {
         console.log('User canceled the picker');
         return;
       }
-      console.log('DOCUMENT RESPONSE:', res);
 
       const selectedFile = res.assets[0];
       setFile(selectedFile);
-      let tmp = await uploadToServer(selectedFile, currentPath, event);
+      const tmp = await uploadToServer(selectedFile, currentPath, event);
       refresh();
-      console.log("SERVER RESPONSE: ", tmp);
+      console.log('SERVER RESPONSE:', tmp);
     } catch (err) {
-      //console.error('Error picking document:', err);
+      console.error('Error picking document:', err);
     }
-  };
+  }
+};
+
 
   return (
     <TouchableOpacity onPress={selectFile} style={styles.uploadButtonContainer}>

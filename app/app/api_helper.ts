@@ -36,10 +36,15 @@ export const uploadFile = async (
   path: string
 ) => {
   try {
+    const token = await storage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
     const file = {
       uri: fileInput.uri,
       name: filename,
-      type: fileInput.mimeType,
+      type: fileInput.mimeType || fileInput.type, // web or native fallback
     };
 
     const formData = new FormData();
@@ -57,7 +62,8 @@ export const uploadFile = async (
       method: "POST",
       body: formData,
       headers: {
-        "Content-Type": "multipart/form-data",
+        "Authorization": `Bearer ${token}`,
+        // Do NOT manually set Content-Type for FormData in fetch — it will be set automatically
       },
     });
 
@@ -70,6 +76,7 @@ export const uploadFile = async (
     throw error;
   }
 };
+
 
 export const uploadFileEvent = async (
   fileInput: any,
