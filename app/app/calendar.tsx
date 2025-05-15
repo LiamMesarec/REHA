@@ -351,6 +351,7 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
     setEventsFiltered(filteredGroups);
   };
 
+  
   return (
     <View
       style={[styles.outerContainer, isDesktop && styles.outerContainerWeb]}
@@ -367,31 +368,29 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
         style={[styles.innerContainer, isDesktop && styles.innerContainerWeb]}
       >
         <View style={styles.search}>
-              <View style={styles.searchContainer}>
-                {/* ISKALNIK */}
-                <TextInput
-                  style={styles.searchBar}
-                  placeholder="Išči Dogodek"
-                  placeholderTextColor="gray"
-                  value={searchBarText}
-                  onChangeText={setSearchBarText}
-                  onSubmitEditing={() => findMatchingEvents(value)}
-                  returnKeyType="search"
-                />
-                {/* Ikona z povečevalnim steklom */}
-                <TouchableOpacity onPress={() => findMatchingEvents(value)}>
-                  <Icon name="magnify" size={24} color="black" />
-                </TouchableOpacity>
-              </View>
-              <DropDownPicker
-              open={open}
-              value={value}
-              items={dropdownItems}
-              setOpen={setOpen}
-              setValue={setValue}
-              
-                />
-            </View>
+          <View style={styles.searchBarWrapper}>
+            <Icon name="magnify" size={22} color="#888" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchBarImproved }
+              placeholder="Išči Dogodek"
+              placeholderTextColor="#888"
+              value={searchBarText}
+              onChangeText={setSearchBarText}
+              onSubmitEditing={() => findMatchingEvents(value)}
+              returnKeyType="search"
+            />
+            <TouchableOpacity onPress={() => findMatchingEvents(value)} style={styles.searchButton}>
+              <Text style={styles.searchButtonText}>Išči</Text>
+            </TouchableOpacity>
+          </View>
+          <DropDownPicker
+            open={open}
+            value={value}
+            items={dropdownItems}
+            setOpen={setOpen}
+            setValue={setValue}
+          />
+        </View>
         <CalendarProvider
           date={getTodayDate()}
           showTodayButton
@@ -536,7 +535,38 @@ const styles = StyleSheet.create({
   search: {
     zIndex: 1000, 
     elevation: 1000
-  }
+  },
+  searchBarWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    height: 40,
+    marginBottom: 10,
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchBarImproved: {
+    flex: 1,
+    height: "100%",
+    outlineColor: "black",
+    paddingLeft: 10,
+    outlineStyle: 'none'
+  },
+  searchButton: {
+    marginLeft: 10,
+    backgroundColor: themeColor,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  searchButtonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
 });
 
 export default Calendar;
