@@ -19,7 +19,7 @@ import {
   CalendarProvider,
   LocaleConfig,
 } from "react-native-calendars";
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import DropDownPicker from "react-native-dropdown-picker";
 import { SearchType } from "./eventSearch";
@@ -293,8 +293,9 @@ export function getTheme() {
 
 export const Calendar: React.FC<{ route: any }> = ({ route }) => {
   const router = useRouter();
+  const refreshKey = String(Math.random());
   let dateDisplayed: Date = new Date();
-  const theme = useRef(getTheme());
+  const theme = useMemo(() => getTheme(), []);
   const todayBtnTheme = useRef({
     todayButtonTextColor: themeColor,
   });
@@ -392,6 +393,7 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
           />
         </View>
         <CalendarProvider
+        key={refreshKey}
           date={getTodayDate()}
           showTodayButton
           theme={todayBtnTheme.current}
@@ -399,7 +401,7 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
           <ExpandableCalendar
             testID={"expandableCalendar"}
             calendarStyle={styles.calendar}
-            theme={theme.current}
+            theme={theme}
             firstDay={1}
             leftArrowImageSource={leftArrowIcon}
             rightArrowImageSource={rightArrowIcon}
