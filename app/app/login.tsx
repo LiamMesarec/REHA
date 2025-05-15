@@ -6,7 +6,7 @@ import {
   useAuthRequest,
   useAutoDiscovery,
 } from 'expo-auth-session';
-import { TouchableOpacity, Text, SafeAreaView, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, SafeAreaView, StyleSheet, Platform } from 'react-native';
 import { getItem, setItem, deleteItem } from './storage';
 
 WebBrowser.maybeCompleteAuthSession();
