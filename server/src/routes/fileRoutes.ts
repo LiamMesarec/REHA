@@ -31,6 +31,9 @@ const upload = multer({ storage,  limits: {
     fileSize: 1 * 1024 ** 3
   }, });
 
+
+console.log('Multer configured with limit:', upload.limits);
+
 router.route('/').get(getFiles).post(upload.single('file'), createFile);
 
 router.route('/:id').get(getFileById).delete(deleteFile);
