@@ -215,22 +215,36 @@ export const deleteEventById = async (id: number) => {
 
 export const fetchAndOpenFile = async (uuid: string, fileName: string) => {
   try {
-    const fileExtension = fileName.split(".").pop() || "pdf";
-    const fileUri = `${FileSystem.documentDirectory}${fileName}.${fileExtension}`;
+    const downloadUrl = `https://${ip}/api/files/${uuid}/content`;
 
-    const downloadResumable = FileSystem.createDownloadResumable(
-      `https://${ip}/api/files/${uuid}/content`,
-      fileUri
-    );
+    if (Platform.OS === 'web') {
+      // Web download via anchor tag
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = fileName; // suggest a file name
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      console.log("File download triggered on web.");
+    } else {
+      // Native (mobile) download via FileSystem and Sharing
+      const fileExtension = fileName.split(".").pop() || "pdf";
+      const fileUri = `${FileSystem.documentDirectory}${fileName}.${fileExtension}`;
 
-    const { uri } = await downloadResumable.downloadAsync();
+      const downloadResumable = FileSystem.createDownloadResumable(
+        downloadUrl,
+        fileUri
+      );
 
-    if (uri) {
-      console.log("File downloaded to:", uri);
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri);
-      } else {
-        Alert.alert("Error", "File sharing is not available on this device.");
+      const { uri } = await downloadResumable.downloadAsync();
+
+      if (uri) {
+        console.log("File downloaded to:", uri);
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(uri);
+        } else {
+          Alert.alert("Error", "File sharing is not available on this device.");
+        }
       }
     }
   } catch (error) {
