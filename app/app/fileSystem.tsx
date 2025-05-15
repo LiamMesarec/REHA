@@ -21,7 +21,7 @@ interface FileListProps {
 }
 
 let defaultMap = {
-  name: "Files",
+  name: "Datoteke",
   type: 0,
   filePath : "Files",
   date : ""
@@ -255,7 +255,7 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
                 
                 {/*Trenutna mapa*/}
             <Text style={styles.headerText}>
-                {currentMap ? `${currentMap.name}:` : 'Shranjene datoteke:'}
+                {currentMap ? `${currentMap.name}` : 'Shranjene datoteke:'}
             </Text>
                 
                 {/*Menu*/}

@@ -37,7 +37,7 @@ const getFileIcon = (fileName: string) => {
     files: FileNode[];
     toggleSelectFile : (id : number) => void;
     selectedFiles : number[];
-    editVisible : boolean; 
+    editVisible : boolean;
   }
 
 const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFiles, editVisible}) => {
@@ -56,11 +56,11 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
     <View style={styles.container}>
       {files.map((file, index) => {
         const { name, color } = getFileIcon(file.name);
-  
+
         if (file.name.endsWith(".folder")) {
           return null; // Skip rendering this file
         }
-  
+
         return (
           <View key = {file.id} style = {styles.fileContainer}>
              {editVisible &&<Checkbox
@@ -76,9 +76,9 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
                 </View>
               </View>
             </TouchableOpacity>
-           
+
           </View>
-          
+
         );
       })}
     </View>
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
       borderColor: "black",
       borderWidth: 1,
       width: "100%",
-      alignItems: "flex-start", 
+      alignItems: "flex-start",
       marginLeft : 5,
     },
     fileRow: {
@@ -121,12 +121,12 @@ const styles = StyleSheet.create({
       fontWeight: "bold",
       marginLeft: 10,
       textAlignVertical: "center",
-    }, 
+    },
     fileContainer: {
       flex : 1,
       flexDirection : "row",
       alignItems : "center"
-    }, 
+    },
     mapNameContainer : {
       flex: 1,
       flexDirection: "column",
