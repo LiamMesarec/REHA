@@ -8,7 +8,7 @@ const About = () => {
         <View style={styles.qnaContainer}>
         <Text style={styles.question}>Ali se moram prijaviti?</Text>
         <Text style={styles.answer}>
-          • Prijaviti se morate če ste študent ali mentor ki želi upravljati z e-knjižnico ali datotekami na strani. {"\n"}
+          • Prijaviti se morate če ste študent ali mentor ki želi upravljati z e-knjižnico ali dogodki na strani. {"\n"}
           • Da se lahko prijavite morate kontaktirati mentorja ali administratorja. {"\n"}
         </Text>
         </View>
@@ -16,6 +16,7 @@ const About = () => {
         <View style={styles.qnaContainer}>
           <Text style={styles.question}>Želim ustvariti dogodek</Text>
           <Text style={styles.answer}>
+          • Prijavite se v stran z gumbom "Prijava".{"\n"}
             • Na strani "Koledar" kliknite spodnji desni gumb "+".{"\n"}
             • Izpolnite informacije o dogodku.{"\n"}
             • Če želite da se dogodek tedensko ponavlja, izberite časovni okvir.{"\n"}
@@ -26,7 +27,7 @@ const About = () => {
         <View style={styles.qnaContainer}>
         <Text style={styles.question}>Želim urediti ali izbrisati dogodek</Text>
         <Text style={styles.answer}>
-          • Prijavite se v stran.{"\n"}
+          • Prijavite se v stran z gumbom "Prijava".{"\n"}
           • Poiščite dogodek v iskalniku nad koledarjem.{"\n"}
           • Kliknite "Več" v dogodku pod koledarjem.{"\n"}
           • Kliknite "Uredi" ali "Izbriši".{"\n"}
@@ -34,7 +35,7 @@ const About = () => {
         </View>
 
         <View style={styles.qnaContainer}>
-        <Text style={styles.question}>Želim dodati datoteke k dogodku</Text>
+        <Text style={styles.question}>Želim dodati datoteko v e-knjižnici v dogodek</Text>
         <Text style={styles.answer}>
           • Če še ne obstaja, dodajte datoteke v e-knjižnico. {"\n"}
           • Uredite dogodek in na enak način kot je razloženo v prejšnjem odseku in dodajte dogodke. {"\n"}

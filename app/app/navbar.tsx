@@ -18,9 +18,7 @@ export function Navbar() {
     <TouchableOpacity style={styles.button} onPress={() => router.push('/calendar')}>
     <Text style={styles.label}>Koledar</Text>
     </TouchableOpacity>
-    <TouchableOpacity style={styles.button} onPress={() => router.push('/about')}>
-    <Text style={styles.label}>O strani</Text>
-    </TouchableOpacity>
+
     {token && (
       <TouchableOpacity
       style={styles.button}
@@ -37,6 +35,9 @@ export function Navbar() {
             <Text style={styles.label}>Administracija</Text>
           </TouchableOpacity>
         )}
+    <TouchableOpacity style={styles.button} onPress={() => router.push('/about')}>
+    <Text style={styles.label}>O strani</Text>
+    </TouchableOpacity>
     <LoginButton/>
     </View>
     <Image source={logoIcon} style={styles.logo} href="https://www.fzsv.si/" target="_blank" resizeMode="contain" />
