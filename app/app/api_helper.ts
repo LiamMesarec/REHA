@@ -264,15 +264,28 @@ export const addFileToEvent = async (id: number, fileId: number) => {
 
 export const deleteFileById = async (fileId: number) => {
   try {
-    const response = await api.delete(`/files/${fileId}`);
+    const token = await storage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const response = await api.delete(`/files/${fileId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
     console.log("File deleted successfully:", response.data);
+    return response.data;
   } catch (error: any) {
     if (error.response) {
+      console.error("Server responded with error:", error.response.data);
     } else if (error.request) {
       console.error("No response received:", error.request);
     } else {
       console.error("Error:", error.message);
     }
+    throw error;
   }
 };
 
