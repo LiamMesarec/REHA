@@ -270,7 +270,15 @@ export const fetchFileUri = async (uuid: string) => {
 
 export const addFileToEvent = async (id: number, fileId: number) => {
   try {
-    return await api.post(`/events/${id}/files`, { fileId });
+    const token = await storage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+    return await api.post(`/events/${id}/files`, { fileId }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
   } catch (error) {
     console.log("Response: ______ ", error);
   }
