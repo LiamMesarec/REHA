@@ -2,8 +2,7 @@ import React, { useContext } from 'react';
 import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
 import { LoginButton } from "./login";
 import { AuthContext } from './authContext';
-import { withAuth } from './protectedRoute';
-import { StyleSheet } from 'react-native';   // ← add StyleSheet & View
+import { StyleSheet } from 'react-native';
 
 import { useRouter } from "expo-router";
 export function Navbar() {
@@ -18,6 +17,9 @@ export function Navbar() {
     <View style={styles.navLeft}>
     <TouchableOpacity style={styles.button} onPress={() => router.push('/calendar')}>
     <Text style={styles.label}>Koledar</Text>
+    </TouchableOpacity>
+    <TouchableOpacity style={styles.button} onPress={() => router.push('/about')}>
+    <Text style={styles.label}>O strani</Text>
     </TouchableOpacity>
     {token && (
       <TouchableOpacity
