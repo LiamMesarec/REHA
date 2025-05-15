@@ -114,7 +114,7 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
     });
     } else {
         console.log("Already at root.");
-      }
+      } 
 }
 
   const findFile = (fileName : string) => {
