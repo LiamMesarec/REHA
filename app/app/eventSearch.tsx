@@ -148,14 +148,15 @@ export const EventSearch = (props: EventSearchProps) => {
           <Icon name="magnify" size={24} color="black" />
         </TouchableOpacity>
       </View>
-      <DropDownPicker
-      open={open}
-      value={value}
-      items={dropdownItems}
-      setOpen={setOpen}
-      setValue={setValue}
-      
-        />
+      <View style={styles.search}>
+        <DropDownPicker
+        open={open}
+        value={value}
+        items={dropdownItems}
+        setOpen={setOpen}
+        setValue={setValue}
+          />
+      </View>
       <MatchingEvents matchingEventProps={matchingEventProps} />
     </View>
     </GestureHandlerRootView>
@@ -224,5 +225,9 @@ const styles = StyleSheet.create({
     marginTop: 100,
     marginBottom: 50,
     paddingRight: 10,
+  },
+  search: {
+    zIndex: 1000, 
+    elevation: 1000
   },
 });

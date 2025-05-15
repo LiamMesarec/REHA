@@ -242,19 +242,34 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
     <View style={styles.container}>
       <Modal
         visible={modaleEventSearch}
-        onRequestClose={() => {setModaleEventSearch(false)}}>
-          <View>
-            <Text style={{margin: 20, fontSize: 20}}>Najdi in izberi dogodek, ki ga želiš povezati z datotekami</Text>
-            <Button title="Zapri" onPress={() => {setModaleEventSearch(false)}}/>
-
-          <EventSearch
-            showWindow={setModaleEventSearch}
-            connect={true}
-            files={filesToDelete}
-            onClose={onEventSearchClose}
-          />
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => { setModaleEventSearch(false); }}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              Najdi in izberi dogodek, ki ga želiš povezati z datotekami
+            </Text>
+            <View style={{zIndex:1000}}>
+            <EventSearch
+              showWindow={setModaleEventSearch}
+              connect={true}
+              files={filesToDelete}
+              onClose={onEventSearchClose}
+            />
+            </View>
+            <View style={{zIndex:10}}>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setModaleEventSearch(false)}
+            >
+              <Text style={styles.modalCloseButtonText}>Zapri</Text>
+            </TouchableOpacity>
+            </View>
           </View>
-        </Modal>
+        </View>
+      </Modal>
       <View style={styles.header}>
         <View style={styles.headerRow}>
             {/*Nazaj*/}
@@ -439,8 +454,48 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end", 
     alignItems: "flex-start",
     paddingTop: 10, 
-  }
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderRadius: 18,
+    padding: 24,
+    width: "90%",
+    maxWidth: 400,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 18,
+    textAlign: "center",
+    color: "#1983C5",
+  },
+  modalCloseButton: {
+    marginTop: 18,
+    backgroundColor: "#1983C5",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 32,
+    alignSelf: "center",
+    zIndex: 1
+  },
+  modalCloseButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
+    letterSpacing: 1,
+  },
 });
-
 
 export default FileSystem;
