@@ -70,6 +70,8 @@ asyncHandler(
     const query = `INSERT INTO Files (name, path, uuid) VALUES (?, ?, ?)`;
     db.run(query, [name, filePathBody, req.file.filename], function (err: any) {
       if (err) {
+        console.log(res);
+        console.log(err);
         return next(err);
       }
       res
