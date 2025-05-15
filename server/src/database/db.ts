@@ -12,6 +12,7 @@ export function connectDB(path: string): Database {
   return db;
 }
 
+
 export function runMigrations(db: Database): void {
   const tablesDir = path.join(__dirname, 'tables');
   const files = fs.readdirSync(tablesDir).filter((file) => file.endsWith('.sql'));

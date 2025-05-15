@@ -2,6 +2,9 @@ services:
   app:
     build: .
     command: npm run dev
+    volumes:
+      - dataStorage:/server/src/data
+      - fileStorage:/server/files
     develop:
       watch:
         - action: sync
@@ -16,11 +19,7 @@ services:
     environment:
       - NODE_ENV=development
 
-  test:
-    build: .
-    command: npm test
-    environment:
-      - NODE_ENV=test
-    volumes:
-      - .:/server
-      - /server/node_modules
+
+volumes: 
+  dataStorage: 
+  fileStorage: 

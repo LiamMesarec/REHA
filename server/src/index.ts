@@ -1,7 +1,7 @@
 import { connectDB, closeDB, runMigrations } from './database/db';
 import { App } from './app';
 
-const db = connectDB('./production.db');
+const db = connectDB('./data/production.db');
 runMigrations(db);
 
 const app = App(db);
