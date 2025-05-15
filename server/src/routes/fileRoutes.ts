@@ -27,7 +27,10 @@ const storage = multer.diskStorage({
     cb(null, `${file.fieldname}-${uniqueSuffix}`);
   },
 });
-const upload = multer({ storage });
+const upload = multer({ storage,  limits: {
+    // 1 GiB = 1 × 1024³ bytes
+    fileSize: 1 * 1024 ** 3
+  }, });
 
 router.route('/').get(getFiles).post(upload.single('file'), createFile);
 
