@@ -26,7 +26,7 @@ export function Navbar() {
       style={styles.button}
       onPress={() => router.push('/fileSystem')}
       >
-      <Text style={styles.label}>Datoteke</Text>
+      <Text style={styles.label}>E-Knjižnica</Text>
       </TouchableOpacity>
     )}
             {token && (

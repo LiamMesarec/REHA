@@ -8,7 +8,7 @@ const About = () => {
         <View style={styles.qnaContainer}>
         <Text style={styles.question}>Ali se moram prijaviti?</Text>
         <Text style={styles.answer}>
-          • Prijaviti se morate če ste študent ali mentor ki želi upravljati z dogodki ali datotekami na strani. {"\n"}
+          • Prijaviti se morate če ste študent ali mentor ki želi upravljati z e-knjižnico ali datotekami na strani. {"\n"}
           • Da se lahko prijavite morate kontaktirati mentorja ali administratorja. {"\n"}
         </Text>
         </View>
@@ -36,6 +36,7 @@ const About = () => {
         <View style={styles.qnaContainer}>
         <Text style={styles.question}>Želim dodati datoteke k dogodku</Text>
         <Text style={styles.answer}>
+          • Če še ne obstaja, dodajte datoteke v e-knjižnico. {"\n"}
           • Uredite dogodek in na enak način kot je razloženo v prejšnjem odseku in dodajte dogodke. {"\n"}
         </Text>
         </View>
