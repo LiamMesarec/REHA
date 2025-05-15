@@ -38,34 +38,27 @@ export const uploadFile = async (
 ) => {
   try {
     const token = await storage.getItem("token");
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
+    if (!token) throw new Error("No authentication token found");
+
+    const isWeb = Platform.OS === 'web';
 
     const formData = new FormData();
     formData.append("name", filename);
     formData.append("path", path);
 
-    if (Platform.OS === "web") {
-      // Use actual File object on web
-      formData.append("file", fileInput.file);
-    } else {
-      // Use file object with uri on native
-      formData.append("file", {
-        uri: fileInput.uri,
-        name: filename,
-        type: fileInput.mimeType || fileInput.type,
-      } as any);
-    }
+    formData.append("file", isWeb ? fileInput.file : {
+      uri: fileInput.uri,
+      name: filename,
+      type: fileInput.mimeType || fileInput.type,
+    } as any);
 
-    const UPLOAD_URL = `https://${ip}/api/files`;
-
-    const response = await fetch(UPLOAD_URL, {
+    const response = await fetch(`https://${ip}/api/files`, {
       method: "POST",
-      body: formData,
       headers: {
         Authorization: `Bearer ${token}`,
+        // Do NOT manually set Content-Type — browser/React Native will do it
       },
+      body: formData,
     });
 
     const result = await response.json();

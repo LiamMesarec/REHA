@@ -36,57 +36,33 @@ const FileUploadScreen: React.FC<UploadProps> = ({refresh, currentPath, event}) 
 
 
 const selectFile = async () => {
-  if (Platform.OS === 'web') { //web
+  if (Platform.OS === 'web') {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '*/*'; 
     input.onchange = async (event) => {
-      const file = event.target!.files[0];
+      const file = event.target.files[0];
       if (!file) {
         console.log('No file selected');
         return;
       }
 
       const selectedFile = {
-        uri: URL.createObjectURL(file),
+        uri: '', // Not used in web fetch, optional
         name: file.name,
         size: file.size,
         type: file.type,
-        file,
+        file, // native File object
       };
 
-      setFile(selectedFile);
+      // Pass actual `file` instead of blob URI
       const tmp = await uploadToServer(selectedFile, currentPath, null);
       refresh();
       console.log('SERVER RESPONSE:', tmp);
     };
     input.click();
-  } else {
-    // Native platforms (iOS/Android)
-    try {
-      const res = await DocumentPicker.getDocumentAsync({
-        type: '*/*',
-      });
-
-      if(!res){
-        return
-      }
-      if (res.type === 'cancel') {
-        console.log('User canceled the picker');
-        return;
-      }
-
-      const selectedFile = res.assets[0];
-      setFile(selectedFile);
-      const tmp = await uploadToServer(selectedFile, currentPath, event);
-      refresh();
-      console.log('SERVER RESPONSE:', tmp);
-    } catch (err) {
-      console.error('Error picking document:', err);
-    }
   }
 };
-
 
   return (
     <TouchableOpacity onPress={selectFile} style={styles.uploadButtonContainer}>
