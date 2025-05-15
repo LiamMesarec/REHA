@@ -15,7 +15,7 @@ interface EventSimpleProps {
   clickFunction: () => void;
 }
 
-enum SearchType{
+export enum SearchType{
     Title,
     Coordinator,
     Description
@@ -28,7 +28,7 @@ interface EventSearchProps {
   onClose: () => void;
 }
 
-const EventSimple = (props: EventSimpleProps) => {
+export const EventSimple = (props: EventSimpleProps) => {
   return (
     <TouchableOpacity
       onPress={() => {props.clickFunction()}}

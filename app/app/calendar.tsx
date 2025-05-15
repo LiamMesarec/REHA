@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Platform,
   useWindowDimensions,
+  TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { fetchData } from "./api_helper";
@@ -19,7 +20,9 @@ import {
   LocaleConfig,
 } from "react-native-calendars";
 import React, { useEffect, useState, useCallback, useRef } from "react";
-
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import DropDownPicker from "react-native-dropdown-picker";
+import { SearchType } from "./eventSearch";
 const leftArrowIcon = require("./previous.png");
 const rightArrowIcon = require("./next.png");
 
@@ -92,6 +95,8 @@ interface DayEventProps {
   year: number;
   header: boolean;
   id: number;
+  description: string;
+  coordinator: string;
 }
 
 export interface AgendaEvent {
@@ -136,7 +141,7 @@ export const MonthHeader = (props: { month: string; year: number }) => {
 export const getEvents = async (): Promise<DayEventProps[]> => {
   let events: DayEventProps[] = [];
   let eventsData = await fetchData("/events");
-  console.log(eventsData);
+  //console.log(eventsData);
   eventsData.events.forEach((event: any) => {
     //console.log(event.start);
     let dateStart = new Date(event.start);
@@ -155,6 +160,8 @@ export const getEvents = async (): Promise<DayEventProps[]> => {
         year: dateStart.getFullYear(),
         header: false,
         id: event.id,
+        coordinator: event.coordinator,
+        description: event.description
       });
     } else {
       let date = dateStart;
@@ -172,6 +179,8 @@ export const getEvents = async (): Promise<DayEventProps[]> => {
           year: date.getFullYear(),
           header: false,
           id: event.id,
+          coordinator: event.coordinator,
+          description: event.description
         });
         date.setHours(date.getHours() + 24);
       }
@@ -190,6 +199,8 @@ interface EventEntry {
   time: string;
   id: number;
   title: string;
+  description: string;
+  coordinator: string;
 }
 
 function groupEventsByDate(events: DayEventProps[]): GroupedEvent[] {
@@ -206,6 +217,8 @@ function groupEventsByDate(events: DayEventProps[]): GroupedEvent[] {
         time: event.time,
         id: event.id,
         title: event.event,
+        coordinator: event.coordinator,
+        description: event.description
       });
     } else {
       acc.push({
@@ -215,6 +228,8 @@ function groupEventsByDate(events: DayEventProps[]): GroupedEvent[] {
             time: event.time,
             id: event.id,
             title: event.event,
+            coordinator: event.coordinator,
+            description: event.description
           },
         ],
       });
@@ -286,6 +301,16 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
   const navigation = useNavigation();
   const [events2, setEvents2] = useState<DayEventProps[]>([]);
   const [events3, setEvents3] = useState<GroupedEvent[]>([]);
+  const [eventsFiltered, setEventsFiltered] = useState<GroupedEvent[]>([]);
+  const [searchBarText, setSearchBarText] = useState("");
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(SearchType.Title);
+
+    const dropdownItems = [
+      { label: "Naslov", value: SearchType.Title },
+      { label: "Koordinator", value: SearchType.Coordinator },
+      { label: "Opis", value: SearchType.Description },
+    ];
 
   const { width } = useWindowDimensions();
   const isDesktop = Platform.OS === "web" && width >= 768;
@@ -298,11 +323,33 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
     const fetchEvents = async () => {
       const eventsData = await getEvents();
       setEvents3(groupEventsByDate(eventsData));
+      setEventsFiltered(groupEventsByDate(eventsData));
       setEvents2(eventsData);
+      //console.log(groupEventsByDate(eventsData));
     };
 
     fetchEvents();
   }, []);
+
+  const findMatchingEvents = (type: SearchType) => {
+    let filteredGroups = events3.map((group) => {
+      let filteredData = group.data.filter((entry) => {
+        switch (type) {
+          case SearchType.Title:
+            return entry.title.toLowerCase().includes(searchBarText.toLowerCase());
+          case SearchType.Coordinator:
+            return entry.coordinator.toLowerCase().includes(searchBarText.toLowerCase());
+          case SearchType.Description:
+            return entry.description.toLowerCase().includes(searchBarText.toLowerCase());
+          default:
+            return false;
+        }
+      });
+      return { ...group, data: filteredData };
+    }).filter(group => group.data.length > 0);
+
+    setEventsFiltered(filteredGroups);
+  };
 
   return (
     <View
@@ -319,6 +366,32 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
       <View
         style={[styles.innerContainer, isDesktop && styles.innerContainerWeb]}
       >
+        <View style={styles.search}>
+              <View style={styles.searchContainer}>
+                {/* ISKALNIK */}
+                <TextInput
+                  style={styles.searchBar}
+                  placeholder="Išči Dogodek"
+                  placeholderTextColor="gray"
+                  value={searchBarText}
+                  onChangeText={setSearchBarText}
+                  onSubmitEditing={() => findMatchingEvents(value)}
+                  returnKeyType="search"
+                />
+                {/* Ikona z povečevalnim steklom */}
+                <TouchableOpacity onPress={() => findMatchingEvents(value)}>
+                  <Icon name="magnify" size={24} color="black" />
+                </TouchableOpacity>
+              </View>
+              <DropDownPicker
+              open={open}
+              value={value}
+              items={dropdownItems}
+              setOpen={setOpen}
+              setValue={setValue}
+              
+                />
+            </View>
         <CalendarProvider
           date={getTodayDate()}
           showTodayButton
@@ -334,7 +407,7 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
             allowShadow={true}
           />
           <AgendaList
-            sections={events3}
+            sections={eventsFiltered}
             renderItem={renderItem}
             sectionStyle={styles.section}
           />
@@ -422,6 +495,48 @@ const styles = StyleSheet.create({
     color: "white",
     marginBottom: 4,
   },
+  eventSimpleData: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  eventSimpleTitle: {
+    marginRight: 20,
+  },
+  eventSimpleContainer: {
+    margin: 10,
+    borderColor: "black",
+    borderWidth: 2,
+    width: "auto",
+    padding: 5,
+  },
+  importantText: {
+    fontWeight: "bold",
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    height: 40,
+    width: "100%",
+    position: "relative",
+  },
+  searchBar: {
+    flex: 1,
+    paddingLeft: 10,
+    height: "100%",
+  },
+  scrollView: {
+    marginTop: 100,
+    marginBottom: 50,
+    paddingRight: 10,
+  },
+  search: {
+    zIndex: 1000, 
+    elevation: 1000
+  }
 });
 
 export default Calendar;
