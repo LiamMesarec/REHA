@@ -49,7 +49,7 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
 
   };
 
-  const fileButtonMargin = Platform.OS === "web" ? 25 : 15;
+  const fileButtonMargin = Platform.OS === "web" ? 0 : 15;
 
 
   return (
@@ -87,7 +87,6 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
       width: "100%",
       backgroundColor: "#ffffff",
       padding: 5,
