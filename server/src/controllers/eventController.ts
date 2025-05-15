@@ -158,6 +158,82 @@ const attachFileToEvent = asyncHandler(
   },
 );
 
+// @desc    Unlink a file from an event and return the updated file list
+// @route   DELETE /api/events/:id/files
+// @access  Student/Mentor/Admin  (accessLevel >= 1)
+const unlinkFileFromEvent = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const db = req.app.locals.db;
+    const { id } = req.params;
+    const { fileId } = req.body;
+
+    // --- Authentication & Authorization ---
+    const user = await req.body.user;
+    if (!user) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+    if (user[1] < 1) {
+      res.status(403).json({ message: 'Forbidden' });
+      return;
+    }
+    if (!fileId) {
+      res.status(400).json({ message: 'Missing required field: fileId' });
+      return;
+    }
+
+    // --- Verify event exists ---
+    db.get(
+      'SELECT id FROM Events WHERE id = ?',
+      [id],
+      (err: any, event: any) => {
+        if (err) {
+          return next(err);
+        }
+        if (!event) {
+          res.status(404).json({ message: 'Event not found' });
+          return;
+        }
+
+        // --- Perform the unlink (harmless if not linked) ---
+        db.run(
+          'DELETE FROM EventFiles WHERE event_id = ? AND file_id = ?',
+          [id, fileId],
+          (err: any) => {
+            if (err) {
+              return next(err);
+            }
+
+            // --- Return updated file list ---
+            db.all(
+              `
+              SELECT
+                Files.id,
+                Files.path,
+                Files.name
+              FROM Files
+              INNER JOIN EventFiles
+                ON Files.id = EventFiles.file_id
+              WHERE EventFiles.event_id = ?
+              `,
+              [id],
+              (err: any, files: any) => {
+                if (err) {
+                  return next(err);
+                }
+                res.status(200).json({
+                  files: files || [],
+                });
+              }
+            );
+          }
+        );
+      }
+    );
+  }
+);
+
+
 // @desc    Create an event
 // @route   POST /api/events
 // @access  Student/Mentor/Admin (accessLevel >= 1)
@@ -402,4 +478,5 @@ export {
   deleteEvent,
   getFilesByEventId,
   attachFileToEvent,
+  unlinkFileFromEvent
 };

@@ -1,6 +1,22 @@
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Image, Platform, RefreshControl, FlatList } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  Platform,
+  RefreshControl,
+  FlatList,
+} from "react-native";
 import React, { useCallback, useEffect, useState, useContext } from "react";
-import { deleteEventById, fetchAndOpenFile, fetchData, fetchFileUri } from "./api_helper";
+import {
+  deleteEventById,
+  fetchAndOpenFile,
+  fetchData,
+  fetchFileUri,
+  removeFileFromEvent,
+} from "./api_helper";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import alert from "./alert";
 import { AuthContext } from "./authContext";
@@ -16,6 +32,7 @@ interface EventDetail {
 }
 
 interface FileData {
+  id: number;
   uuid: string;
   name: string;
 }
@@ -28,48 +45,84 @@ interface ImageData {
 
 const EventHeader = ({ title }: { title: string }) => (
   <View style={styles.headerContainer}>
-  <Text style={styles.eventTitle}>{title}</Text>
+    <Text style={styles.eventTitle}>{title}</Text>
   </View>
 );
 
 const DetailSection = ({ title, content }: EventDetail) => (
   <View style={styles.sectionContainer}>
-  {title && <Text style={styles.sectionTitle}>{title}</Text>}
-  <Text style={styles.sectionContent}>{content}</Text>
+    {title && <Text style={styles.sectionTitle}>{title}</Text>}
+    <Text style={styles.sectionContent}>{content}</Text>
   </View>
 );
 
-const FileList = ({ files }: { files: FileData[] }) => (
-  <View style={styles.sectionContainer}>
-  <Text style={styles.sectionTitle}>{FILE_SECTION_TITLE}</Text>
-  {files.map((file, index) => (
-    <TouchableOpacity
-    key={index}
-    style={styles.fileItem}
-    onPress={() => fetchAndOpenFile(file.uuid, file.name)}
-    >
-    <Text style={styles.fileText}>📎 {file.name}</Text>
-    </TouchableOpacity>
-  ))}
-  </View>
-);
+const FileList: React.FC<FileListProps> = ({
+  eventId,
+  files,
+  onFilesUpdated,
+}) => {
+  const { token } = useContext(AuthContext);
+  const [loadingIds, setLoadingIds] = useState<number[]>([]);
+
+  const handleRemove = async (fileId: number) => {
+    setLoadingIds((ids) => [...ids, fileId]);
+    try {
+      await removeFileFromEvent(eventId, fileId);
+      onFilesUpdated?.(files.filter((f) => f.id !== fileId));
+    } catch (err) {
+      console.error("Failed to unlink file:", err);
+    } finally {
+      setLoadingIds((ids) => ids.filter((id) => id !== fileId));
+    }
+  };
+
+  return (
+    <View style={styles.sectionContainer}>
+      <Text style={styles.sectionTitle}>{FILE_SECTION_TITLE}</Text>
+      {files.map((file) => (
+        <View key={file.id} style={styles.fileItem}>
+          <TouchableOpacity
+            onPress={() => fetchAndOpenFile(file.uuid, file.name)}
+            style={{ flex: 1 }}
+          >
+            <Text style={styles.fileText}>📎 {file.name}</Text>
+          </TouchableOpacity>
+
+          {token ? (
+            <TouchableOpacity
+              onPress={() => handleRemove(file.id)}
+              disabled={loadingIds.includes(file.id)}
+              style={styles.removeButton}
+            >
+              {loadingIds.includes(file.id) ? (
+                <ActivityIndicator size="small" />
+              ) : (
+                <Text style={styles.removeIcon}>🗑️</Text>
+              )}
+            </TouchableOpacity>
+          ) : null}
+        </View>
+      ))}
+    </View>
+  );
+};
 
 const ImageGrid = ({ images }: { images: ImageData[] }) => (
   <View style={styles.sectionContainer}>
-  <Text style={styles.sectionTitle}>{IMAGE_SECTION_TITLE}</Text>
-  <FlatList
-  data={images}
-  numColumns={2}
-  columnWrapperStyle={styles.imageRow}
-  renderItem={({ item }) => (
-    <Image
-    style={[styles.image, { width: item.width, height: item.height }]}
-    source={{ uri: item.uri }}
-    resizeMode="cover"
+    <Text style={styles.sectionTitle}>{IMAGE_SECTION_TITLE}</Text>
+    <FlatList
+      data={images}
+      numColumns={2}
+      columnWrapperStyle={styles.imageRow}
+      renderItem={({ item }) => (
+        <Image
+          style={[styles.image, { width: item.width, height: item.height }]}
+          source={{ uri: item.uri }}
+          resizeMode="cover"
+        />
+      )}
+      keyExtractor={(item, index) => index.toString()}
     />
-  )}
-  keyExtractor={(item, index) => index.toString()}
-  />
   </View>
 );
 
@@ -77,7 +130,7 @@ const ActionButton = ({
   label,
   onPress,
   color = "#007BFF",
-  textColor = "#FFFFFF"
+  textColor = "#FFFFFF",
 }: {
   label: string;
   onPress: () => void;
@@ -85,10 +138,10 @@ const ActionButton = ({
   textColor?: string;
 }) => (
   <TouchableOpacity
-  style={[styles.actionButton, { backgroundColor: color }]}
-  onPress={onPress}
+    style={[styles.actionButton, { backgroundColor: color }]}
+    onPress={onPress}
   >
-  <Text style={[styles.actionButtonText, { color: textColor }]}>{label}</Text>
+    <Text style={[styles.actionButtonText, { color: textColor }]}>{label}</Text>
   </TouchableOpacity>
 );
 
@@ -110,12 +163,14 @@ const EventPage = () => {
       const details = [
         {
           title: "Opis",
-          content: eventData.event.description
+          content: eventData.event.description,
         },
         {
           title: "Podrobnosti",
-          content: `📅 Začetek: ${formatDate(eventData.event.start)}\n👤 Koordinator: ${eventData.event.coordinator}`
-        }
+          content: `📅 Začetek: ${formatDate(
+            eventData.event.start
+          )}\n👤 Koordinator: ${eventData.event.coordinator}`,
+        },
       ];
 
       setEventDetails(details);
@@ -124,13 +179,17 @@ const EventPage = () => {
       const filesData = await fetchData(`/events/${eventId}/files`);
       setFiles(filesData.files || []);
 
-      const imageFiles = filesData.files.filter(file => IMAGE_EXTENSIONS.includes(file.name.split(".").pop()?.toLowerCase() || ""));
+      const imageFiles = filesData.files.filter((file) =>
+        IMAGE_EXTENSIONS.includes(
+          file.name.split(".").pop()?.toLowerCase() || ""
+        )
+      );
 
       const imageUris = await Promise.all(
-        imageFiles.map(async file => ({
+        imageFiles.map(async (file) => ({
           uri: await fetchFileUri(file.uuid),
-                                      width: 160,
-                                      height: 160
+          width: 160,
+          height: 160,
         }))
       );
 
@@ -143,12 +202,12 @@ const EventPage = () => {
   // Basic date formatter
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('sl-SI', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleDateString("sl-SI", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -159,51 +218,49 @@ const EventPage = () => {
   const handleDelete = () => {
     alert("Brisanje", "Ali ste prepričani, da želite izbrisati dogodek?", [
       {
-        text: 'Potrdi',
+        text: "Potrdi",
         onPress: async () => {
           await deleteEventById(Number(eventId));
           router.push("/calendar");
-        }
+        },
       },
-      { text: 'Prekliči', style: "cancel" }
+      { text: "Prekliči", style: "cancel" },
     ]);
   };
 
   return (
     <ScrollView
-    style={styles.container}
-    refreshControl={
-      <RefreshControl
-      refreshing={refreshing}
-      onRefresh={loadEventData}
-      tintColor="#007BFF"
-      />
-    }
+      style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={loadEventData}
+          tintColor="#007BFF"
+        />
+      }
     >
-    <EventHeader title={eventTitle} />
-
-    {eventDetails.map((detail, index) => (
-      <DetailSection key={index} {...detail} />
-    ))}
-
-    <FileList files={files} />
-    {images.length > 0 && <ImageGrid images={images} />}
-
-    {token && (
-    <View style={styles.buttonGroup}>
-    <Link href={`/eventForm?eventId=${eventId}`} asChild>
-    <ActionButton
-    label="Uredi dogodek"
-    color="#4CAF50"
-    />
-    </Link>
-    <ActionButton
-    label="Izbriši dogodek"
-    onPress={handleDelete}
-    color="#FF5252"
-    />
-    </View>
-    )}
+      <EventHeader title={eventTitle} />
+      {eventDetails.map((detail, index) => (
+        <DetailSection key={index} {...detail} />
+      ))}
+      <FileList
+        eventId={Number(eventId)}
+        files={files}
+        onFilesUpdated={setFiles}
+      />{" "}
+      {images.length > 0 && <ImageGrid images={images} />}
+      {token && (
+        <View style={styles.buttonGroup}>
+          <Link href={`/eventForm?eventId=${eventId}`} asChild>
+            <ActionButton label="Uredi dogodek" color="#4CAF50" />
+          </Link>
+          <ActionButton
+            label="Izbriši dogodek"
+            onPress={handleDelete}
+            color="#FF5252"
+          />
+        </View>
+      )}
     </ScrollView>
   );
 };

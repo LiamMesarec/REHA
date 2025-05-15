@@ -7,6 +7,7 @@ import {
   updateEvent,
   getFilesByEventId,
   attachFileToEvent,
+  unlinkFileFromEvent,
 } from '../controllers/eventController';
 import { authHandler } from '../middleware/authHandler';
 
@@ -20,6 +21,6 @@ router
   .put(authHandler, updateEvent)
   .delete(authHandler, deleteEvent);
 
-router.route('/:id/files').get(getFilesByEventId).post(authHandler, attachFileToEvent);
+router.route('/:id/files').get(getFilesByEventId).post(authHandler, attachFileToEvent).delete(authHandler, unlinkFileFromEvent);
 
 export default router;

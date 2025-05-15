@@ -5,7 +5,7 @@ import * as Sharing from "expo-sharing";
 import alert from "./alert";
 import { router } from "expo-router";
 import * as storage from "./storage";
-import { Platform } from 'react-native';
+import { Platform } from "react-native";
 
 const ip = "193.2.219.130";
 const api = axios.create({
@@ -40,17 +40,22 @@ export const uploadFile = async (
     const token = await storage.getItem("token");
     if (!token) throw new Error("No authentication token found");
 
-    const isWeb = Platform.OS === 'web';
+    const isWeb = Platform.OS === "web";
 
     const formData = new FormData();
     formData.append("name", filename);
     formData.append("path", path);
 
-    formData.append("file", isWeb ? fileInput.file : {
-      uri: fileInput.uri,
-      name: filename,
-      type: fileInput.mimeType || fileInput.type,
-    } as any);
+    formData.append(
+      "file",
+      isWeb
+        ? fileInput.file
+        : ({
+            uri: fileInput.uri,
+            name: filename,
+            type: fileInput.mimeType || fileInput.type,
+          } as any)
+    );
 
     const response = await fetch(`https://${ip}/api/files`, {
       method: "POST",
@@ -69,7 +74,6 @@ export const uploadFile = async (
     throw error;
   }
 };
-
 
 export const uploadFileEvent = async (
   fileInput: any,
@@ -217,9 +221,9 @@ export const fetchAndOpenFile = async (uuid: string, fileName: string) => {
   try {
     const downloadUrl = `https://${ip}/api/files/${uuid}/content`;
 
-    if (Platform.OS === 'web') {
+    if (Platform.OS === "web") {
       // Web download via anchor tag
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = downloadUrl;
       link.download = fileName; // suggest a file name
       document.body.appendChild(link);
@@ -274,10 +278,31 @@ export const addFileToEvent = async (id: number, fileId: number) => {
     if (!token) {
       throw new Error("No authentication token found");
     }
-    return await api.post(`/events/${id}/files`, { fileId }, {
+    return await api.post(
+      `/events/${id}/files`,
+      { fileId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  } catch (error) {
+    console.log("Response: ______ ", error);
+  }
+};
+
+export const removeFileFromEvent = async (id: number, fileId: number) => {
+  try {
+    const token = await storage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+    return await api.delete(`/events/${id}/files`, {
+      data: { fileId },
       headers: {
         Authorization: `Bearer ${token}`,
-      }
+      },
     });
   } catch (error) {
     console.log("Response: ______ ", error);
