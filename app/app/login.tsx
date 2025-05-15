@@ -82,7 +82,7 @@ export const LoginButton = () => {
         style={styles.button}
         onPress={token ? handleLogout : handleLogin}
       >
-        <Text style={styles.label}>{token ? 'Logout' : 'Prijava'}</Text>
+        <Text style={styles.label}>{token ? 'Odjava' : 'Prijava'}</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
