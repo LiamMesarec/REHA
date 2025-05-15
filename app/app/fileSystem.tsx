@@ -397,7 +397,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     marginTop: 100,
-    marginBottom : 50,
     paddingRight : 10
   },
   searchContainer: {
@@ -434,11 +433,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   }, 
   nekiForcedPadding: {
-    minHeight: 300, 
+    minHeight: 300,
     flexDirection: "column",
-    justifyContent: "flex-end", 
+    justifyContent: "flex-end",
     alignItems: "flex-start",
-    paddingTop: 10, 
+    paddingTop: 10,
   }
 });
 
