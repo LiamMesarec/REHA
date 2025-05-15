@@ -57,14 +57,13 @@ const selectFile = async () => {
       }
 
       const selectedFile = {
-        uri: '', // Not used in web fetch, optional
+        uri: '',
         name: file.name,
         size: file.size,
         type: file.type,
-        file, // native File object
+        file,
       };
 
-      // Pass actual `file` instead of blob URI
       const tmp = await uploadToServer(selectedFile, currentPath, null);
       refresh();
       console.log('SERVER RESPONSE:', tmp);
