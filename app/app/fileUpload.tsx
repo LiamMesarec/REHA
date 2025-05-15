@@ -15,10 +15,19 @@ const uploadToServer = async (file: any, path : string, event: string | null) =>
       }else
       result = await uploadFile(file, file.name, `${path}/${file.name}`);
       console.log("Upload result:", result);
-      alert('Upload Successful', `File ${file.name} uploaded successfully! ${result}`);
+      if (Platform.OS === 'web') {
+        alert(`File ${file.name} uploaded successfully!\n${JSON.stringify(result)}`);
+      } else {
+        Alert.alert('Upload Successful', `File ${file.name} uploaded successfully!`);
+      }
+
     } catch (error) {
       console.error("Upload failed:", error);
-      alert('Upload Failed', 'There was an error uploading the file.');
+      if (Platform.OS === 'web') {
+        alert(`File ${file.name} uploaded successfully!\n${JSON.stringify(result)}`);
+      } else {
+        Alert.alert('Upload Successful', `File ${file.name} uploaded successfully!`);
+      }
     }
   }
 };

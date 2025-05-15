@@ -9,8 +9,15 @@ import {
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
+import fs from 'fs';
 
 const router = express.Router();
+
+const uploadDir = path.resolve(__dirname, '../files');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log(`Created upload directory at ${uploadDir}`);
+}
 
 const storage = multer.diskStorage({
   destination: 'files/',
