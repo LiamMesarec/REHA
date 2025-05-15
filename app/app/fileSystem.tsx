@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Text, TouchableOpacity, View, Alert, StyleSheet, ScrollView, TextInput } from "react-native";
+import { Text, TouchableOpacity, View, Alert, StyleSheet, ScrollView, TextInput, Modal, Button } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { RouteProp } from '@react-navigation/native';
 import { FilesystemElement, RootStackParamList, FileNode } from './types';
@@ -12,6 +12,7 @@ import api from "./api_helper";
 import {deleteFileById} from "./api_helper";
 import CreateFolder from "./createFolder";
 import SideMenu from "./sideMenuFiles";
+import EventSearch from "./eventSearch";
 
 
 type FileListRouteProp = RouteProp<RootStackParamList, 'Files'>;
@@ -40,6 +41,7 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
 
   const [modaleFiles, setModalFiles] = useState<FileNode[]>(); // datoteke ki jih prikaže search
   const [modaleFolders, setModalFolders] = useState<FileNode[]>(); // mape ki jih prikaže search
+  const [modaleEventSearch, setModaleEventSearch] = useState<boolean>(false);
   const [modaleVisible, setModaleVisible] = useState<boolean>(false);
 
   const [filesToDelete, setFilesToDelete] = useState<number[]>([]); //tu se hranijo id-ji datotek ki jih brišemo
@@ -53,7 +55,6 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
   };
 
   const loadFromSystem = () => { //skrbi za prikaz datotek shranjenih v podatkovni strukturio filesystem
-    console.log(fileSystemRef.current);
     let childArray = fileSystemRef.current?.getChildrenByPath(currentMap?.filePath ?? "Files");
     //console.log("CHILD ARR:  ", childArray);
     let newFolders: FileNode[] = [];
@@ -69,7 +70,6 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
     
     setFolders(newFolders)
     setFiles(newFiles);
-    console.log("Nareto");
   }
 
   const loadFromServer = async () => {
@@ -112,14 +112,12 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
         id: currentNode.parent.model.id,
         uuid : currentNode.parent.model.uuid
     });
-      console.log("NEW MAP: ", currentNode.parent.model.name);
     } else {
         console.log("Already at root.");
       }
 }
 
   const findFile = (fileName : string) => {
-    console.log("TO IŠČEM: ", fileName);
     let matches = fileSystemRef.current?.findNodesByName(fileName);
     let modalFilesBuffer: FileNode[] = [];
     let modalFoldersBuffer: FileNode[] = [];
@@ -215,14 +213,18 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
 
   const connectSelected = () => {
     for(let id of filesToDelete){
-      console.log(id);
+      console.log("file: "+id);
     }
-
+    setModaleEventSearch(true);
     
+    
+    setEditActive(false);
+  }
+
+  const onEventSearchClose = () => {
     setFilesToDelete([]);
     setFoldersToDelete([]);
     loadFromServer();  
-    setEditActive(false);
   }
 
   const handleFolderPress = (folder: FileNode) => {
@@ -238,6 +240,21 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
 
   return (
     <View style={styles.container}>
+      <Modal
+        visible={modaleEventSearch}
+        onRequestClose={() => {setModaleEventSearch(false)}}>
+          <View>
+            <Text style={{margin: 20, fontSize: 20}}>Najdi in izberi dogodek, ki ga želiš povezati z datotekami</Text>
+            <Button title="Zapri" onPress={() => {setModaleEventSearch(false)}}/>
+
+          <EventSearch
+            showWindow={setModaleEventSearch}
+            connect={true}
+            files={filesToDelete}
+            onClose={onEventSearchClose}
+          />
+          </View>
+        </Modal>
       <View style={styles.header}>
         <View style={styles.headerRow}>
             {/*Nazaj*/}

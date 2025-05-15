@@ -3,28 +3,35 @@ import { useEffect, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View, StyleSheet } from "react-native";
 import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { fetchData } from "./api_helper";
+import { addFileToEvent, fetchData } from "./api_helper";
 import DropDownPicker from 'react-native-dropdown-picker';
+import alert from "./alert"
 
 interface EventSimpleProps {
   id: number | string;
   title: string;
   coordinator: string;
   start: string;
+  clickFunction: () => void;
 }
 
-enum SearchType{
+export enum SearchType{
     Title,
     Coordinator,
     Description
 }
 
-const EventSimple = (props: EventSimpleProps) => {
+interface EventSearchProps {
+  showWindow: React.Dispatch<React.SetStateAction<boolean>>;
+  connect: boolean;
+  files: number[] | null;
+  onClose: () => void;
+}
+
+export const EventSimple = (props: EventSimpleProps) => {
   return (
     <TouchableOpacity
-      onPress={() => {
-        router.push(`/event_detailed?eventId=${props.id}`);
-      }}
+      onPress={() => {props.clickFunction()}}
     >
       <View style={styles.eventSimpleContainer}>
         <View style={styles.eventSimpleData}>
@@ -39,7 +46,7 @@ const EventSimple = (props: EventSimpleProps) => {
   );
 };
 
-export const EventSearch = () => {
+export const EventSearch = (props: EventSearchProps) => {
   const [searchBarText, setSearchBarText] = useState("");
   const [events, setEvents] = useState([]);
   const [matchingEventProps, setMatchingEventProps] = useState<
@@ -100,6 +107,24 @@ export const EventSearch = () => {
         title: event.title,
         coordinator: event.coordinator,
         start: event.start,
+        clickFunction: () => {
+          if (props.connect && props.files) {
+            props.files.forEach(async (fileId) => {
+              try {
+              await addFileToEvent(event.id, fileId);
+              alert("Adding file: "+fileId+ ", event: "+event.id);
+              } catch(e) {
+                alert(String(e));
+              }
+            });
+            props.showWindow(false);
+              
+          }else {
+        router.push(`/event_detailed?eventId=${event.id}`);
+        props.showWindow(false);            
+          }
+          props.onClose();
+      }
       }))
     );
   };
@@ -152,6 +177,7 @@ export const MatchingEvents = ({ matchingEventProps }: MatchingEventsProps) => {
           title={event.title}
           coordinator={event.coordinator}
           start={event.start}
+          clickFunction={event.clickFunction}
         />
       ))}
     </ScrollView>
