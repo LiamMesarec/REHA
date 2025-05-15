@@ -39,18 +39,18 @@ const MapList: React.FC<MapListProps> = ({
         />
       )}
       <TouchableOpacity
-      style={[styles.fileButton, { marginVertical: fileButtonMargin }]}
-      onPress={() => onFolderPress(folder)}
+        style={[styles.fileButton, { marginVertical: fileButtonMargin }]}
+        onPress={() => onFolderPress(folder)}
       >
-      <View style={styles.rowContainer}>
-      <Icon name="folder" size={40} color="#F1C27D" />
-      <View style={styles.mapNameContainer}>
-      <Text style={styles.text}>{folder.name}</Text>
-      <Text style={styles.dateText}>{folder.date}</Text>
-      </View>
-      </View>
-      </TouchableOpacity>
-      </View>
+        <View style={styles.rowContainer}>
+        <Icon name="folder" size={40} color="#F1C27D" />
+        <View style={styles.mapNameContainer}>
+        <Text style={styles.text}>{folder.name}</Text>
+        <Text style={styles.dateText}>{folder.date}</Text>
+        </View>
+        </View>
+        </TouchableOpacity>
+        </View>
     ))}
     </View>
   );

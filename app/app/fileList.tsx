@@ -1,5 +1,5 @@
 
-import { View, Text, TouchableOpacity, Alert, StyleSheet} from 'react-native';
+import { View, Text, TouchableOpacity, Alert, StyleSheet, Platform} from 'react-native';
 import { Checkbox } from 'expo-checkbox';
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -49,7 +49,7 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
 
   };
 
-
+  const fileButtonMargin = Platform.OS === "web" ? 20 : 15;
 
 
   return (
@@ -62,7 +62,7 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
         }
 
         return (
-          <View key = {file.id} style = {styles.fileContainer}>
+          <View key = {file.id} style = {[styles.fileContainer, { marginVertical: fileButtonMargin }]}>
              {editVisible &&<Checkbox
               value={selectedFiles.includes(file.id)}
               onValueChange={() => toggleSelectFile(file.id)}
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     fileContainer: {
       flex : 1,
       flexDirection : "row",
-      alignItems : "center"
+      alignItems : "center",
     },
     mapNameContainer : {
       flex: 1,

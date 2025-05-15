@@ -1,93 +1,124 @@
 import React, { useRef } from "react";
-import {View,Text,TouchableOpacity,Animated,StyleSheet,} from "react-native";
+import { View, Text, TouchableOpacity, Animated, StyleSheet, Platform, Alert } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import FileUploadScreen from "./fileUpload";
-interface MenuProps{
-    menuOpen : boolean;
-    toggleMenu : () => void;
-    refresh : () => void;
-    currentPath : string;
-    setNewFolderVisible : (val : boolean) => void;
+import * as DocumentPicker from 'expo-document-picker';
+import { uploadFile, uploadFileEvent } from "./api_helper";
+
+interface MenuProps {
+  menuOpen: boolean;
+  toggleMenu: () => void;
+  refresh: () => void;
+  currentPath: string;
+  setNewFolderVisible: (val: boolean) => void;
 }
 
-const SideMenu: React.FC<MenuProps> = ({ menuOpen, toggleMenu , refresh, currentPath, setNewFolderVisible}) => {
-    const slideAnim = useRef(new Animated.Value(menuOpen ? 0 : 250)).current;
+const SideMenu: React.FC<MenuProps> = ({
+  menuOpen,
+  toggleMenu,
+  refresh,
+  currentPath,
+  setNewFolderVisible,
+}) => {
+  const slideAnim = useRef(new Animated.Value(menuOpen ? 0 : 250)).current;
 
-React.useEffect(() => {
-  Animated.timing(slideAnim, {
-    toValue: menuOpen ? 0 :250,
-    duration: 300,
-    useNativeDriver: true,
-  }).start();
-}, [menuOpen]);
+  React.useEffect(() => {
+    Animated.timing(slideAnim, {
+      toValue: menuOpen ? 0 : 250,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [menuOpen]);
 
-    const event1 = () =>{
-        toggleMenu();
-        setNewFolderVisible(true);
+  const event1 = () => {
+    toggleMenu();
+    setNewFolderVisible(true);
+  };
+
+  const selectAndUpload = async () => {
+    // 1) pick
+    const result = await DocumentPicker.getDocumentAsync({ type: "*/*" });
+    if (result.type !== "success") return;  // user cancelled
+
+    // 2) upload
+    try {
+      const { name, uri } = result;
+      let uploadResult;
+      // if you ever need to pass an `event` string, use uploadFileEvent(...)
+      uploadResult = await uploadFile(
+        { uri, name },
+        name,
+        `${currentPath}/${name}`
+      );
+      if (Platform.OS === "web") {
+        alert(`Uploaded ${name}!`, JSON.stringify(uploadResult));
+      } else {
+        Alert.alert("Upload Successful", `File ${name} uploaded!`);
+      }
+      refresh();
+    } catch (err) {
+      console.error("Upload error:", err);
+      Alert.alert("Upload Failed", `${err}`);
     }
+  };
+
   return (
-    <Animated.View style={[styles.sideMenu, { transform: [{ translateX: slideAnim }] }]}>
-      {/* Close Button */}
+    <Animated.View
+    style={[styles.sideMenu, { transform: [{ translateX: slideAnim }] }]}
+    >
+    <Text style={styles.menuText}>MENU</Text>
 
-      <Text style={styles.menuText}>MENU</Text>
+    {/* Single pressable for both icon + "Naloži" */}
+    <TouchableOpacity
+    style={styles.menuItem}
+    onPress={() => {
+      toggleMenu();
+      selectAndUpload();
+    }}
+    >
+    <Icon name="upload" size={24} color="black" />
+    <Text style={styles.uploadText}>Naloži</Text>
+    </TouchableOpacity>
 
-      <TouchableOpacity style={styles.menuItem} onPress={toggleMenu}>
-        <Icon name="upload" size={24} color="black" />
-        <FileUploadScreen refresh={refresh} currentPath={currentPath} event={null}/>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.menuItem} onPress={() => event1()}>
-      <Icon name="file-document" size={24} color="black" />
-        <Text style={styles.menuText}>Nova Mapa</Text>
-      </TouchableOpacity>
-
-
+    <TouchableOpacity style={styles.menuItem} onPress={event1}>
+    <Icon name="file-document" size={24} color="black" />
+    <Text style={styles.menuText}>Nova Mapa</Text>
+    </TouchableOpacity>
     </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        position: 'relative',
-      },
-    sideMenu: {
-        position: "absolute",  
-        right: 0,
-        top: 0,
-        bottom: 0,
-        width: 250,
-        height: 200,
-        backgroundColor: "white",
-        padding: 20,
-        shadowColor: "#000",
-        shadowOffset: { width: 2, height: 0 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        zIndex: 1000,
-      },
-  closeButton: {
-    alignSelf: "flex-end",
+  sideMenu: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 250,
+    backgroundColor: "white",
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 2, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    zIndex: 1000,
   },
   menuText: {
     fontSize: 18,
     fontWeight: "bold",
     marginVertical: 10,
-    color: "black", 
+    color: "black",
   },
   menuItem: {
-    flexDirection: "row", 
-    alignItems: "center",     
-    paddingVertical: 5,     
-    marginBottom: 10,  
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    marginBottom: 12,
   },
-  overlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.3)",
+  uploadText: {
+    marginLeft: 10,
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "black",
   },
 });
 
