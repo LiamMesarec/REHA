@@ -49,7 +49,7 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
 
   };
 
-  const fileButtonMargin = Platform.OS === "web" ? 3 : 15;
+  const fileButtonMargin = Platform.OS === "web" ? 0 : 15;
 
 
   return (
