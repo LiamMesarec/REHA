@@ -49,7 +49,6 @@ export function WhitelistDash() {
                 }}>
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
-                        <Text style={styles.modalText}>Vpišite mail novega uporabnika:</Text>
                         <TextInput
                             style={{ height: hp(5), width: wp(80), borderColor: 'gray', borderWidth: 1, marginBottom: hp(2) }}
                             onChangeText={text => setEmail(text)}

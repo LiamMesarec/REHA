@@ -68,7 +68,20 @@ LocaleConfig.locales["si"] = {
   dayNamesShort: ["N", "P", "T", "S", "Č", "P", "S"],
 };
 
-LocaleConfig.defaultLocale = "si";
+export const monthNamesSi = [
+  "Januar",
+"Februar",
+"Marec",
+"April",
+"Maj",
+"Junij",
+"Julij",
+"August",
+"September",
+"Oktober",
+"November",
+"December",
+]
 
 export const monthNames = [
   "January",
@@ -393,12 +406,36 @@ export const Calendar: React.FC<{ route: any }> = ({ route }) => {
           />
         </View>
         <CalendarProvider
-        key={refreshKey}
+          hideArrows={false}
+          key={refreshKey}
           date={getTodayDate()}
           showTodayButton
           theme={todayBtnTheme.current}
         >
           <ExpandableCalendar
+          renderHeader={(dateArg) => {
+            const d = dateArg instanceof Date ? dateArg : new Date(dateArg);
+
+            const day   = d.getDate();
+            const month = monthNamesSi[d.getMonth()];
+            const year  = d.getFullYear();
+
+            return (
+              <View style={{
+                paddingVertical: 12,
+                backgroundColor: "#fff",
+                alignItems: "center"
+              }}>
+              <Text style={{
+                fontSize: 22,
+                fontWeight: "600",
+                color: "#333"
+              }}>
+              {`${month} ${year}`}
+              </Text>
+              </View>
+            );
+          }}
             testID={"expandableCalendar"}
             calendarStyle={styles.calendar}
             theme={theme}
