@@ -72,30 +72,22 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
     console.log("Nareto");
   }
 
-  const loadFromServer = () =>{ //potegne datoteke iz serverj. Služi lahko kot REFRESH
-    fileSystemRef.current = new Filesystem(); 
-    fileSystemRef.current?.addPath("Files/Mapa1/podatkiBolniki.pdf", 999, "testuuid", new Date().toString());
-    const fetchFiles = async () => {
-      try {
-        const response = await api.get("/files");
-        console.log("DATOTEKE IZ SERVERJA: ", response.data.files);
-        for (let file of response.data.files) {
-
-          //let pathBuff = file.path.slice(1); //tu porihtaj pol kr zgublamo procesor za brezveze slice je menda O(n)
-
-          fileSystemRef.current?.addPath(file.path,file.id ,file.uuid, file.date_uploaded);
-          loadFromSystem();
-        }
-      } catch (error) {
-        console.error("Error fetching files:", error);
-      }
-    };
-    fetchFiles();
-  }
+  const loadFromServer = async () => {
+    fileSystemRef.current = new Filesystem();
+    const response = await api.get("/files");
+    for (const file of response.data.files) {
+      fileSystemRef.current.addPath(
+        file.path,
+        file.id,
+        file.uuid,
+        file.date_uploaded
+      );
+    }
+    loadFromSystem();
+  };
 
   useEffect(() => {
-    loadFromServer();
-    
+    loadFromServer().catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -198,26 +190,28 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
     })
   }
 
-  const deleteSelected = () => {
-    for(let id of filesToDelete){
-      deleteFileById(id);
-    }
-
-    for(let path of foldersToDelete){
-      let node = fileSystemRef.current?.findNodeByPath(path);
-      let fileNodes = fileSystemRef.current?.findLeafNodes(node);
-      console.log("LEEF NODES:   ", fileNodes);
-      for(let file of fileNodes){
-          if(!file.model.name.endsWith(".folder")){
-            deleteFileById(file.model.id);
-          }
-      }
-    }
-    setFilesToDelete([]);
-    setFoldersToDelete([]);
-    loadFromServer();  
+  const deleteSelected = async () => {
     setEditActive(false);
-  }
+    try {
+      await Promise.all(filesToDelete.map(id => deleteFileById(id)));
+
+      for (let path of foldersToDelete) {
+        const node = fileSystemRef.current?.findNodeByPath(path);
+        const leafFiles = fileSystemRef.current?.findLeafNodes(node) || [];
+        await Promise.all(
+          leafFiles
+          .filter(n => !n.model.name.endsWith(".folder"))
+          .map(n => deleteFileById(n.model.id))
+        );
+      }
+
+      await loadFromServer();
+      setFilesToDelete([]);
+      setFoldersToDelete([]);
+    } catch (err) {
+      Alert.alert("Error", "Could not delete—please try again.");
+    }
+  };
 
   const connectSelected = () => {
     for(let id of filesToDelete){
