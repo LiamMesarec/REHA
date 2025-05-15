@@ -554,7 +554,12 @@ const styles = StyleSheet.create({
     height: "100%",
     outlineColor: "black",
     paddingLeft: 10,
-    outlineStyle: 'none'
+    ...Platform.select({
+      web: {
+        outlineWidth: 0,
+        outlineColor: "transparent",
+      }
+    })
   },
   searchButton: {
     marginLeft: 10,

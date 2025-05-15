@@ -26,7 +26,7 @@ const MapList: React.FC<MapListProps> = ({
   toggleSelectedFolder,
   editVisible,
 }) => {
-  const fileButtonMargin = Platform.OS === "web" ? 35 : 15;
+  const fileButtonMargin = Platform.OS === "web" ? 3: 15;
 
   return (
     <View style={styles.container}>
@@ -93,7 +93,6 @@ const styles = StyleSheet.create({
     textAlignVertical: "center",
   },
   fileContainer: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
   },

@@ -30,6 +30,8 @@ const CreateFolder: React.FC<createProps> = ({createFolder, refresh, visible, se
                     placeholderTextColor="gray"
                     value={name}
                     onChangeText={(newText) => setName(newText)}
+                    onSubmitEditing={() => submit()}
+                    returnKeyType="done"
                 />
                 <TouchableOpacity onPress={() => submit()}>
                     <Icon name="check-bold" size={30} color="green" />
