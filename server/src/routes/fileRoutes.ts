@@ -33,6 +33,12 @@ const upload = multer({ storage,  limits: {
     fileSize: 1 * 1024 ** 3
   }, });
 
+    // ⇩ if you also want to capture raw bodies for e.g. webhooks, you can do:
+  app.use(express.raw({
+    limit: '10mb',
+    type: () => true      // apply to all content-types (or specify mime here)
+  }));
+
 
 router.route('/').get(getFiles).post(upload.single('file'), createFile);
 

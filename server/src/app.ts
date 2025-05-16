@@ -14,6 +14,11 @@ export function App(db: Database): express.Application {
   app.use(cors());
   app.use(express.json({ limit: '1024mb' }));
   app.use(express.urlencoded({ limit: '1024mb', extended: true }));
+    // ⇩ if you also want to capture raw bodies for e.g. webhooks, you can do:
+  app.use(express.raw({
+    limit: '1024mb',
+    type: () => true      // apply to all content-types (or specify mime here)
+  }));
   app.locals.db = db;
 
   app.use('/api/events', eventRoutes);
