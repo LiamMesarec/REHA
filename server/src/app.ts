@@ -12,13 +12,17 @@ import { authHandler } from './middleware/authHandler';
 export function App(db: Database): express.Application {
   const app = express();
   app.use(cors());
+   // Limit JSON bodies to ~1 GiB
   app.use(express.json({ limit: '1024mb' }));
+  // Limit URL-encoded bodies (form data) to ~1 GiB
   app.use(express.urlencoded({ limit: '1024mb', extended: true }));
-    // ⇩ if you also want to capture raw bodies for e.g. webhooks, you can do:
-  app.use(express.raw({
-    limit: '1024mb',
-    type: () => true      // apply to all content-types (or specify mime here)
-  }));
+  // Catch any other raw payloads up to ~1 GiB
+  app.use(
+    express.raw({
+      limit: '1024mb',
+      type: () => true,
+    })
+  );
   app.locals.db = db;
 
   app.use('/api/events', eventRoutes);
