@@ -25,7 +25,6 @@ const storage = multer.diskStorage({
     const uniqueSuffix = `${uuidv4()}${path.extname(file.originalname)}`;
     cb(null, `${file.fieldname}-${uniqueSuffix}`);
   },
-  fileSize: 1 * 1024 ** 3,
 });
 const upload = multer({ storage,  limits: {
     // 1 GiB = 1 × 1024³ bytes
