@@ -17,12 +17,14 @@ export function App(db: Database): express.Application {
   // Limit URL-encoded bodies (form data) to ~1 GiB
   app.use(express.urlencoded({ limit: '1024mb', extended: true }));
   // Catch any other raw payloads up to ~1 GiB
-  app.use(
-    express.raw({
-      limit: '1024mb',
-      type: () => true,
-    })
-  );
+   // Only raw-parse non-multipart bodies
+  // app.use(express.raw({
+  //   limit: '1024mb',
+  //   type: (req) => {
+  //     const ct = req.headers['content-type'] || '';
+  //     return ct.startsWith('application/') && !ct.startsWith('multipart/');
+  //   }
+  // }));
   app.locals.db = db;
 
   app.use('/api/events', eventRoutes);
