@@ -3,8 +3,8 @@ services:
     build: .
     command: npm run dev
     volumes:
-      - dataStorage:/server/data
-      - fileStorage:/server/files
+      - ./server/data:/server/data
+      - ./server/files:/server/files
     develop:
       watch:
         - action: sync
@@ -27,6 +27,3 @@ services:
     volumes:
       - .:/server
       - /server/node_modules
-volumes: 
-  dataStorage: 
-  fileStorage: 
