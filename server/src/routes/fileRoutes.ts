@@ -15,7 +15,7 @@ import fs from 'fs';
 const router = express.Router();
 
 // Ensure upload directory exists
-const uploadDir = path.resolve(__dirname, '../files');
+const uploadDir = path.resolve(__dirname, '../../files');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
   console.log(`Created upload directory at ${uploadDir}`);
