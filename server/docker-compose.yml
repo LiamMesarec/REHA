@@ -8,12 +8,12 @@ services:
     develop:
       watch:
         - action: sync
-          path: ./
+          path: ./server       
           target: /server
           ignore:
             - node_modules/
         - action: rebuild
-          path: ./package.json
+          path: ./server/package.json
     ports:
       - "3000:3000"
     environment:
