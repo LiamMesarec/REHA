@@ -3,17 +3,17 @@ services:
     build: .
     command: npm run dev
     volumes:
-      - ./server/data:/server/data
-      - ./server/files:/server/files
+      - ./src/data:/server/data
+      - ./src/files:/server/files
     develop:
       watch:
         - action: sync
-          path: ./server       
+          path: ./
           target: /server
           ignore:
             - node_modules/
         - action: rebuild
-          path: ./server/package.json
+          path: ./package.json
     ports:
       - "3000:3000"
     environment:
