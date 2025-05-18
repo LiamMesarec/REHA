@@ -26,7 +26,7 @@ import Video, {VideoRef} from 'react-native-video';
 
 // Constants
 const IMAGE_EXTENSIONS = ["jpg", "png", "jpeg", "webp"];
-const VIDEO_EXTENSIONS = ["mp4", "webm", "wmv", "ogv", "m4v"];
+const VIDEO_EXTENSIONS = ["mp4", "webm", "wmv", "ogv", "m4v", "mov"];
 const IMAGE_SECTION_TITLE = "Galerija";
 const FILE_SECTION_TITLE = "Priložene datoteke";
 
@@ -116,6 +116,10 @@ interface VideoProps {
   paused: boolean;
   id: number;
 }
+interface VideoData {
+  uri: string;
+  title: string;
+}
 
 const VideoPlayer = (props: VideoProps) => {
  const videoRef = useRef<VideoRef>(null);
@@ -180,7 +184,7 @@ const EventPage = () => {
   const [eventDetails, setEventDetails] = useState<EventDetail[]>([]);
   const [files, setFiles] = useState<FileData[]>([]);
   const [images, setImages] = useState<ImageData[]>([]);
-  const [videos, setVideos] = useState<string[]>([]);
+  const [videos, setVideos] = useState<VideoData[]>([]);
   const [paused, setPaused] = useState<boolean[]>();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -224,7 +228,10 @@ const EventPage = () => {
       );
       const videoUris = await Promise.all(
         videoFiles.map(async (file) => (
-          await fetchFileUri(file.uuid)
+          {
+            uri: await fetchFileUri(file.uuid),
+            title: file.name
+          }
         ))
       );
 
@@ -306,8 +313,11 @@ const EventPage = () => {
           <Text style={styles.sectionTitle}>Videji</Text>
           {videos.map((video, i) => (
             <View key={i} style={styles.videoWrapper}>
+              <Text style={styles.sectionSubTitle}>
+                {video.title.substring(0, video.title.lastIndexOf('.'))}
+              </Text>
             <TouchableOpacity onPress={() => {togglePause(i);}}>
-            <VideoPlayer uri={video} paused={paused[i]} id={i}/>
+            <VideoPlayer uri={video.uri} paused={paused[i]} id={i}/>
             </TouchableOpacity>
             </View>
           ))}
@@ -372,6 +382,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#2D2D2D",
     marginBottom: 12,
+  },
+  sectionSubTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#2D2D2D",
+    marginBottom: 9,
   },
   sectionContent: {
     fontSize: 16,
