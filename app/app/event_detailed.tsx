@@ -8,8 +8,9 @@ import {
   Platform,
   RefreshControl,
   FlatList,
+  ActivityIndicator
 } from "react-native";
-import React, { useCallback, useEffect, useState, useContext } from "react";
+import React, { useCallback, useEffect, useState, useContext, useRef } from "react";
 import {
   deleteEventById,
   fetchAndOpenFile,
@@ -21,8 +22,11 @@ import { Link, router, useLocalSearchParams } from "expo-router";
 import alert from "./alert";
 import { AuthContext } from "./authContext";
 
+import Video, {VideoRef} from 'react-native-video';
+
 // Constants
 const IMAGE_EXTENSIONS = ["jpg", "png", "jpeg", "webp"];
+const VIDEO_EXTENSIONS = ["mp4", "webm", "wmv", "ogv", "m4v"];
 const IMAGE_SECTION_TITLE = "Galerija";
 const FILE_SECTION_TITLE = "Priložene datoteke";
 
@@ -107,6 +111,31 @@ const FileList: React.FC<FileListProps> = ({
   );
 };
 
+interface VideoProps {
+  uri: string;
+  paused: boolean;
+  id: number;
+}
+
+const VideoPlayer = (props: VideoProps) => {
+ const videoRef = useRef<VideoRef>(null);
+
+ return (
+   <Video 
+    // Can be a URL or a local file.
+    source={{ uri: props.uri }}
+    // Store reference  
+    ref={videoRef}
+    paused={props.paused}
+    // Callback when remote video is buffering                                      
+    onBuffer={() => {}}
+    // Callback when video cannot be loaded              
+    onError={() => {console.error("could not play video");}}               
+    style={styles.backgroundVideo}
+   />
+ )
+}
+
 const ImageGrid = ({ images }: { images: ImageData[] }) => (
   <View style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{IMAGE_SECTION_TITLE}</Text>
@@ -151,6 +180,9 @@ const EventPage = () => {
   const [eventDetails, setEventDetails] = useState<EventDetail[]>([]);
   const [files, setFiles] = useState<FileData[]>([]);
   const [images, setImages] = useState<ImageData[]>([]);
+  const [videos, setVideos] = useState<string[]>([]);
+  const [paused, setPaused] = useState<boolean[]>();
+
   const [refreshing, setRefreshing] = useState(false);
   const { token } = useContext(AuthContext);
 
@@ -173,7 +205,7 @@ const EventPage = () => {
         },
       ];
 
-      setEventDetails(details);
+      setEventDetails(details); 
 
       // Handle files and images
       const filesData = await fetchData(`/events/${eventId}/files`);
@@ -185,6 +217,21 @@ const EventPage = () => {
         )
       );
 
+      const videoFiles = filesData.files.filter((file) =>
+        VIDEO_EXTENSIONS.includes(
+          file.name.split(".").pop()?.toLowerCase() || ""
+        )
+      );
+      const videoUris = await Promise.all(
+        videoFiles.map(async (file) => (
+          await fetchFileUri(file.uuid)
+        ))
+      );
+
+      setVideos(videoUris)
+      setPaused(Array(videoUris.length).fill(true));
+
+      console.log("videos: ", videoUris);
       const imageUris = await Promise.all(
         imageFiles.map(async (file) => ({
           uri: await fetchFileUri(file.uuid),
@@ -215,6 +262,11 @@ const EventPage = () => {
     loadEventData();
   }, [eventId]);
 
+  const togglePause = (idx: number) => {
+  setPaused(prev =>
+    prev.map((p, i) => (i === idx ? !p : p))
+  );
+  }
   const handleDelete = () => {
     alert("Brisanje", "Ali ste prepričani, da želite izbrisati dogodek?", [
       {
@@ -224,7 +276,7 @@ const EventPage = () => {
           router.push("/calendar");
         },
       },
-      { text: "Prekliči", style: "cancel" },
+      { text: "Prekliči", style: "cancel", onPress: () => {} },
     ]);
   };
 
@@ -247,8 +299,21 @@ const EventPage = () => {
         eventId={Number(eventId)}
         files={files}
         onFilesUpdated={setFiles}
-      />{" "}
+      />
       {images.length > 0 && <ImageGrid images={images} />}
+       {videos && videos.length > 0 && (
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Videji</Text>
+          {videos.map((video, i) => (
+            <View key={i} style={styles.videoWrapper}>
+            <TouchableOpacity onPress={() => {togglePause(i);}}>
+            <VideoPlayer uri={video} paused={paused[i]} id={i}/>
+            </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+      )}
+      
       {token && (
         <View style={styles.buttonGroup}>
           <Link href={`/eventForm?eventId=${eventId}`} asChild>
@@ -358,5 +423,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     textTransform: "uppercase",
   },
+  backgroundVideo: {
+   position: "relative",
+   width: 800,
+   height: "auto",
+  },
+  videoWrapper: {
+    marginBottom: 20,
+    alignItems: "flex-start"
+  }
 });
 export default EventPage;
