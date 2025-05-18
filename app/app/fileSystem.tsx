@@ -368,7 +368,7 @@ const FileSystem: React.FC<FileListProps> = ({ route }) => {
           </TouchableOpacity>}
 
           {editActive && <TouchableOpacity onPress={connectSelected}>
-            <Icon name="delete" size={30} color="blue" />
+            <Icon name="plus-circle" size={30} color="#000" />
           </TouchableOpacity>}
         </View>
       </View>
