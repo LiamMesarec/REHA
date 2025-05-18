@@ -1,9 +1,25 @@
-import { ScrollView, View, Text, StyleSheet } from "react-native";
+import { useState } from "react";
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import EventFileModal from "./modales/addEventFile";
+import CreateEventModal from "./modales/createEvent";
+import EditEventModal from "./modales/editEvent";
 
 const About = () => {
+  const [fileEventVisible, setFileEventVisible] = useState<boolean>(false);
+  const [createEventVisible, setCreateEventVisible] = useState<boolean>(false);
+  const [editEventVisible, setEditEventVisible] = useState<boolean>(false)
+  const closeModals = () =>{
+    setFileEventVisible(false)
+    setCreateEventVisible(false)
+    setEditEventVisible(false)
+  }
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <EventFileModal visible={fileEventVisible} close={closeModals}/>
+      <CreateEventModal visible={createEventVisible} close={closeModals}/>
+      <EditEventModal visible={editEventVisible} close={closeModals}/>
+
       <View style={styles.container}>
         <Text style={styles.title}>Navodila za uporabo</Text>
         <View style={styles.qnaContainer}>
@@ -12,6 +28,9 @@ const About = () => {
           • Prijaviti se morate če ste študent ali mentor ki želi upravljati z e-knjižnico ali dogodki na strani. {"\n"}
           • Da se lahko prijavite morate kontaktirati mentorja ali administratorja. {"\n"}
         </Text>
+        <View>
+          
+        </View>
         </View>
 
         <View style={styles.qnaContainer}>
@@ -23,6 +42,9 @@ const About = () => {
             • Če želite da se dogodek tedensko ponavlja, izberite časovni okvir.{"\n"}
             • Stisnite gumb "Ustvari".{"\n"}
           </Text>
+          <TouchableOpacity onPress={() => {setCreateEventVisible(true)}}>
+              VEČ
+          </TouchableOpacity>
         </View>
 
         <View style={styles.qnaContainer}>
@@ -33,16 +55,25 @@ const About = () => {
           • Kliknite "Več" v dogodku pod koledarjem.{"\n"}
           • Kliknite "Uredi" ali "Izbriši".{"\n"}
         </Text>
+        <TouchableOpacity onPress={() => {setEditEventVisible(true)}}>
+            VEČ
+        </TouchableOpacity>
         </View>
 
         <View style={styles.qnaContainer}>
         <Text style={styles.question}>Želim dodati datoteko v e-knjižnici v dogodek</Text>
         <Text style={styles.answer}>
           • Če še ne obstaja, dodajte datoteke v e-knjižnico. {"\n"}
-          • Uredite dogodek in na enak način kot je razloženo v prejšnjem odseku in dodajte dogodke. {"\n"}
+          • V e-knjižnici stisnite gumb "UREDI" na dnu strani. {"\n"}
+          • Izberite datoteke ki jih želite dodati v dogodek in stisnite "+" na dnu strani. {"\n"}
+          • Nazadnje še izberete dogodek h kateremu želite dodati datoteko. Potrdite izbiro. {"\n"}
         </Text>
+        <TouchableOpacity onPress={() => {setFileEventVisible(true)}}>
+            VEČ
+        </TouchableOpacity>
         </View>
       </View>
+
     </ScrollView>
   );
 };
