@@ -258,18 +258,25 @@ export const fetchAndOpenFile = async (uuid: string, fileName: string) => {
 };
 
 export const fetchFileUri = async (uuid: string) => {
-  const downloadResumable = FileSystem.createDownloadResumable(
-    `https://${ip}/api/files/${uuid}/content`,
-    `${FileSystem.documentDirectory}${uuid}`
-  );
+  const downloadUrl = `https://${ip}/api/files/${uuid}/content`;
+  if (Platform.OS === "web") {
+    // Web download via anchor tag
+    return downloadUrl;
 
-  if (!downloadResumable) throw new Error("Error in filedownload");
+  } else {
+    // not sure if i need this
+    const downloadResumable = FileSystem.createDownloadResumable(
+      downloadUrl,
+      `${FileSystem.documentDirectory}${uuid}`
+    );
+    if (!downloadResumable) throw new Error("Error in file download");
 
-  const { uri } = await downloadResumable.downloadAsync();
-  if (!uri) {
-    throw new Error("Uri not valid");
+    const { uri } = await downloadResumable.downloadAsync();
+    if (!uri) {
+      throw new Error("Uri not valid");
+    }
+    return uri;
   }
-  return uri;
 };
 
 export const addFileToEvent = async (id: number, fileId: number) => {
