@@ -56,7 +56,7 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
     <View style={styles.container}>
       {files.map((file, index) => {
         const { name, color } = getFileIcon(file.name);
-        let fileName = (file.name.length <= 10) ? file.name : (file.name.slice(0, 8) + '...');
+        let fileName = (file.name.length <= 20) ? file.name : (file.name.slice(0, 20) + '...');
         if (fileName.endsWith(".folder")) {
           return null; // Skip rendering this file
         }
