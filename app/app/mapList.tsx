@@ -6,6 +6,7 @@ import {
   View,
   StyleSheet,
   Platform,
+  Dimensions,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { FileNode } from "./types";
@@ -28,31 +29,43 @@ const MapList: React.FC<MapListProps> = ({
 }) => {
   const fileButtonMargin = Platform.OS === "web" ? 3: 15;
 
-  return (
-    <View style={styles.container}>
-    {folders.map((folder) => (
-      <View key={folder.filePath} style={styles.fileContainer}>
-      {editVisible && (
-        <Checkbox
-        value={selectedFolders.includes(folder.filePath)}
-        onValueChange={() => toggleSelectedFolder(folder.filePath)}
-        />
-      )}
-      <TouchableOpacity
-        style={[styles.fileButton, { marginVertical: fileButtonMargin }]}
-        onPress={() => onFolderPress(folder)}
-      >
-        <View style={styles.rowContainer}>
-        <Icon name="folder" size={40} color="#F1C27D" />
-        <View style={styles.mapNameContainer}>
-        <Text style={styles.text}>{folder.name}</Text>
-        <Text style={styles.dateText}>{folder.date}</Text>
+ return (
+  <View style={styles.container}>
+    {folders.map((folder) => {
+      const screenWidth = Dimensions.get('window').width;
+      const isMobile: boolean = screenWidth < 768;
+      let folderName = folder.name;
+
+      if (isMobile && folder.name.length > 20) {
+        folderName = folder.name.slice(0, 20) + '...';
+      } else if (!isMobile && folder.name.length > 30) {
+        folderName = folder.name.slice(0, 30) + '...';
+      }
+
+      return (
+        <View key={folder.filePath} style={styles.fileContainer}>
+          {editVisible && (
+            <Checkbox
+              value={selectedFolders.includes(folder.filePath)}
+              onValueChange={() => toggleSelectedFolder(folder.filePath)}
+            />
+          )}
+          <TouchableOpacity
+            style={[styles.fileButton, { marginVertical: fileButtonMargin }]}
+            onPress={() => onFolderPress(folder)}
+          >
+            <View style={styles.rowContainer}>
+              <Icon name="folder" size={40} color="#F1C27D" />
+              <View style={styles.mapNameContainer}>
+                <Text style={styles.text}>{folderName}</Text> {/* Use truncated name */}
+                <Text style={styles.dateText}>{folder.date}</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
         </View>
-        </View>
-        </TouchableOpacity>
-        </View>
-    ))}
-    </View>
+      );
+    })}
+  </View>
   );
 };
 
