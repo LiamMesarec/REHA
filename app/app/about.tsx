@@ -4,21 +4,25 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import EventFileModal from "./modales/addEventFile";
 import CreateEventModal from "./modales/createEvent";
 import EditEventModal from "./modales/editEvent";
+import AddFileModal from "./modales/addFile";
 
 const About = () => {
   const [fileEventVisible, setFileEventVisible] = useState<boolean>(false);
   const [createEventVisible, setCreateEventVisible] = useState<boolean>(false);
-  const [editEventVisible, setEditEventVisible] = useState<boolean>(false)
+  const [editEventVisible, setEditEventVisible] = useState<boolean>(false);
+  const [fileVisible, setFileVisible] = useState<boolean>(false);
   const closeModals = () =>{
     setFileEventVisible(false)
     setCreateEventVisible(false)
     setEditEventVisible(false)
+    setFileVisible(false)
   }
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <EventFileModal visible={fileEventVisible} close={closeModals}/>
       <CreateEventModal visible={createEventVisible} close={closeModals}/>
       <EditEventModal visible={editEventVisible} close={closeModals}/>
+      <AddFileModal visible={fileVisible} close={closeModals}/>
 
       <View style={styles.container}>
         <Text style={styles.title}>Navodila za uporabo</Text>
@@ -42,8 +46,9 @@ const About = () => {
             • Če želite da se dogodek tedensko ponavlja, izberite časovni okvir.{"\n"}
             • Stisnite gumb "Ustvari".{"\n"}
           </Text>
-          <TouchableOpacity onPress={() => {setCreateEventVisible(true)}}>
-              VEČ
+          <TouchableOpacity style={styles.imageButton} onPress={() => {setCreateEventVisible(true)}}>
+              <Icon name="image-outline" size={20} color="#34495e" />
+              <Text style={styles.imageButtonText}>VEČ</Text>
           </TouchableOpacity>
         </View>
 
@@ -55,8 +60,9 @@ const About = () => {
           • Kliknite "Več" v dogodku pod koledarjem.{"\n"}
           • Kliknite "Uredi" ali "Izbriši".{"\n"}
         </Text>
-        <TouchableOpacity onPress={() => {setEditEventVisible(true)}}>
-            VEČ
+        <TouchableOpacity style={styles.imageButton} onPress={() => {setEditEventVisible(true)}}>
+            <Icon name="image-outline" size={20} color="#34495e" />
+            <Text style={styles.imageButtonText}>VEČ</Text>
         </TouchableOpacity>
         </View>
 
@@ -68,8 +74,22 @@ const About = () => {
           • Izberite datoteke ki jih želite dodati v dogodek in stisnite "+" na dnu strani. {"\n"}
           • Nazadnje še izberete dogodek h kateremu želite dodati datoteko. Potrdite izbiro. {"\n"}
         </Text>
-        <TouchableOpacity onPress={() => {setFileEventVisible(true)}}>
-            VEČ
+        <TouchableOpacity style={styles.imageButton} onPress={() => {setFileEventVisible(true)}}>
+            <Icon name="image-outline" size={20} color="#34495e" />
+            <Text style={styles.imageButtonText}>VEČ</Text>
+        </TouchableOpacity>
+        </View>
+        <View style={styles.qnaContainer}>
+        <Text style={styles.question}>Želim naložiti datoteko</Text>
+        <Text style={styles.answer}>
+          • Pojdite v zavihek "E-Knjižnica". {"\n"}
+          • Stisnite možnost za odpiranje menija desno zgoraj. {"\n"}
+          • Izberite ali želite dodati mapo ali datoteko.  {"\n"}
+          • Ob dodajanju mape prosim naložite vanjo tudi datoteko. Prazne mape se namreč avtomatsko pobrišejo.  {"\n"}
+        </Text>
+        <TouchableOpacity style={styles.imageButton} onPress={() => {setFileVisible(true)}}>
+              <Icon name="image-outline" size={20} color="#34495e" />
+              <Text style={styles.imageButtonText}>VEČ</Text>
         </TouchableOpacity>
         </View>
       </View>
@@ -136,6 +156,23 @@ const styles = StyleSheet.create({
     color: '#34495e',
     flex: 1,
   },
+  imageButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  alignSelf: 'flex-start',
+  borderWidth: 1,
+  borderRadius: 20,
+  paddingVertical: 5,
+  paddingHorizontal: 10,
+  borderColor: '#34495e'
+},
+
+imageButtonText: {
+  color: '#34495e',
+  fontSize: 16,
+  fontWeight: 'bold',
+  marginLeft: 8,
+},
 });
 
 export default About;
