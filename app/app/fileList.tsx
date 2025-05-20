@@ -58,7 +58,13 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
         const { name, color } = getFileIcon(file.name);
         const screenWidth = Dimensions.get('window').width;
         const isMobile: boolean = screenWidth < 768
-        let fileName = (file.name.length <= 20) && isMobile ? file.name : (file.name.slice(0, 20) + '...');
+        let fileName = file.name;
+
+        if (isMobile && file.name.length > 20) {
+          fileName = file.name.slice(0, 20) + '...';
+        } else if (!isMobile && file.name.length > 30) {
+          fileName = file.name.slice(0, 30) + '...';
+        }
         
         if (file.name.endsWith(".folder")) {
           return null; // Skip rendering this file
