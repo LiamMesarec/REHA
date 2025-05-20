@@ -56,8 +56,8 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
     <View style={styles.container}>
       {files.map((file, index) => {
         const { name, color } = getFileIcon(file.name);
-
-        if (file.name.endsWith(".folder")) {
+        let fileName = (file.name.length <= 10) ? file.name : (file.name.slice(8) + '...');
+        if (fileName.endsWith(".folder")) {
           return null; // Skip rendering this file
         }
 
@@ -71,7 +71,7 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
               <View style={styles.fileRow}>
                 <Icon name={name} size={40} color={color} />
                 <View style= {styles.mapNameContainer}>
-                <Text style={styles.text}>{file.name}</Text>
+                <Text style={styles.text}>{fileName}</Text>
                 <Text style={styles.dateText}>{file.date}</Text>
                 </View>
               </View>
