@@ -1,5 +1,5 @@
 
-import { View, Text, TouchableOpacity, Alert, StyleSheet, Platform} from 'react-native';
+import { View, Text, TouchableOpacity, Alert, StyleSheet, Platform, Dimensions} from 'react-native';
 import { Checkbox } from 'expo-checkbox';
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -56,8 +56,11 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
     <View style={styles.container}>
       {files.map((file, index) => {
         const { name, color } = getFileIcon(file.name);
-        let fileName = (file.name.length <= 20) ? file.name : (file.name.slice(0, 20) + '...');
-        if (fileName.endsWith(".folder")) {
+        const screenWidth = Dimensions.get('window').width;
+        const isMobile: boolean = screenWidth < 768
+        let fileName = (file.name.length <= 20) && isMobile ? file.name : (file.name.slice(0, 20) + '...');
+        
+        if (file.name.endsWith(".folder")) {
           return null; // Skip rendering this file
         }
 
