@@ -63,7 +63,7 @@ const FileList: React.FC<FileListProps> = ({ files, toggleSelectFile, selectedFi
         if (isMobile && file.name.length > 20) {
           fileName = file.name.slice(0, 20) + '...';
         } else if (!isMobile && file.name.length > 30) {
-          fileName = file.name.slice(0, 30) + '...';
+          fileName = file.name.slice(0, 45) + '...';
         }
         
         if (file.name.endsWith(".folder")) {

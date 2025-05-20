@@ -39,7 +39,7 @@ const MapList: React.FC<MapListProps> = ({
       if (isMobile && folder.name.length > 20) {
         folderName = folder.name.slice(0, 20) + '...';
       } else if (!isMobile && folder.name.length > 30) {
-        folderName = folder.name.slice(0, 30) + '...';
+        folderName = folder.name.slice(0, 45) + '...';
       }
 
       return (
