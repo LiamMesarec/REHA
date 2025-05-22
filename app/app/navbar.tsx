@@ -1,9 +1,10 @@
-import React, { useContext } from 'react';
+import React, { use, useContext, useState, useEffect } from 'react';
 import { Image, Platform, Text, TouchableOpacity, View, ScrollView } from "react-native";
 import { LoginButton } from "./login";
 import { AuthContext } from './authContext';
 import { StyleSheet } from 'react-native';
 import {wp, hp} from './size';
+import { fetchMe } from './api_helper';
 
 import { useRouter } from "expo-router";
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,7 +13,16 @@ export function Navbar() {
   const logoLongIcon = require('./logo_fakulteta_long.png');
   const logoSource = Platform.OS === 'web' ? logoLongIcon : logoIcon;
   const { token } = useContext(AuthContext);
+  const [ me, setMe ] = useState({email: "", accessLevel: ""});
   const router = useRouter();
+
+  useEffect(() => {
+    if (token) {
+      fetchMe().then((response) => {
+        setMe(response);
+      });
+    }
+  }), [token];
 
   return (
     <SafeAreaView style={[{ margin: 0}, Platform.OS== 'android' ? {marginBottom: -hp(5)} : {marginBottom: 0}]}>
@@ -23,7 +33,7 @@ export function Navbar() {
               <Text style={styles.label}>Koledar</Text>
             </TouchableOpacity>
 
-            {token && (
+            {(token && me.accessLevel == "3") && (
               <TouchableOpacity
                 style={styles.button}
                 onPress={() => router.push('/fileSystem')}
@@ -31,7 +41,7 @@ export function Navbar() {
                 <Text style={styles.label}>E-Knjižnica</Text>
               </TouchableOpacity>
             )}
-            {token && (
+            {(token && me.accessLevel >= "1" ) && (
               <TouchableOpacity
                 style={styles.button}
                 onPress={() => router.push('/whitelistDash')}
