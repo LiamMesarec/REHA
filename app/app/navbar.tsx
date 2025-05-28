@@ -8,6 +8,7 @@ import { fetchMe } from './api_helper';
 
 import { useRouter } from "expo-router";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as SecureStore from 'expo-secure-store';
 export function Navbar() {
   const logoIcon = require('./logo_fakulteta.png');
   const logoLongIcon = require('./logo_fakulteta_long.png');
@@ -19,7 +20,10 @@ export function Navbar() {
   useEffect(() => {
     if (token) {
       fetchMe().then((response) => {
-        setMe(response);
+        if (response ==null)
+          SecureStore.deleteItemAsync('token');
+        else 
+          setMe(response);
       });
     }
   }), [token];
