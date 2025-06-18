@@ -95,7 +95,6 @@ export const submitEvent = async (
   title: string,
   description: string,
   coordinator: string,
-  location: string,
   date: string,
   from: string | null,
   to: string | null
@@ -120,7 +119,6 @@ export const submitEvent = async (
         title,
         coordinator,
         description,
-        location,
         start: date,
         ...(from && to ? { from_date: from, to_date: to } : {}),
       }),
@@ -143,7 +141,6 @@ export const submitUpdateEvent = async (
   title: string,
   description: string,
   coordinator: string,
-  location: string,
   date: string,
   from: string | null,
   to: string | null
@@ -160,7 +157,7 @@ export const submitUpdateEvent = async (
   }
 
   // 3) Build request body
-  const body: any = { title, coordinator, description, location, start: date };
+  const body: any = { title, coordinator, description, start: date };
   if (from && to) {
     body.from_date = from;
     body.to_date = to;

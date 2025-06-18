@@ -69,7 +69,6 @@ export const EventForm = () => {
   const [fromDate, setFromDate] = useState("2025-03-14");
   const [fromTime, setFromTime] = useState("12:00");
   const [showToDate, setShowToDate] = useState(false);
-  const [location, setLocation] = useState("");
   const { token } = useContext(AuthContext);
 
   if (eventId && eventId !== "null") {
@@ -86,7 +85,6 @@ export const EventForm = () => {
         const startDate = new Date(eventData.start);
         const hours = String(startDate.getHours()).padStart(2, "0");
         const minutes = String(startDate.getMinutes()).padStart(2, "0");
-        setLocation(eventData.location);
         setFromTime(`${hours}:${minutes}`);
       };
 
@@ -118,7 +116,6 @@ export const EventForm = () => {
           TitleValue,
           DescriptionValue,
           CoordinatorValue,
-          location,
           joinDate(fromDate, fromTime),
           fromDate,
           toDate
@@ -129,7 +126,6 @@ export const EventForm = () => {
           TitleValue,
           DescriptionValue,
           CoordinatorValue,
-          location,
           joinDate(fromDate, fromTime),
           fromDate,
           toDate
@@ -164,11 +160,6 @@ export const EventForm = () => {
           title="Koordinator"
           data={CoordinatorValue}
           onChange={setCoordinatorValue}
-        />
-        <Field
-          title="Lokacija"
-          data={location}
-          onChange={setLocation}
         />
 
         <View style={styles.sectionContainer}>

@@ -240,7 +240,7 @@ const unlinkFileFromEvent = asyncHandler(
 const createEvent = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
-    const { title, coordinator, description, location, start, from_date, to_date } = req.body;
+    const { title, coordinator, description, start, from_date, to_date } = req.body;
     const user = await req.body.user;
 
     if (user == null) {
@@ -260,9 +260,9 @@ const createEvent = asyncHandler(
     }
 
     db.run(
-      `INSERT INTO Events (title, coordinator, description, location, start)
+      `INSERT INTO Events (title, coordinator, description, start)
         VALUES (?, ?, ?, ?)`,
-      [title, coordinator, description, location, start],
+      [title, coordinator, description, start],
       (err: any) => {
         if (err) {
           return next(err);
@@ -323,7 +323,7 @@ const updateEvent = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const db = req.app.locals.db;
     const { id } = req.params;
-    const { title, coordinator, description, location, start, from_date, to_date } = req.body;
+    const { title, coordinator, description, start, from_date, to_date } = req.body;
 
     const user = await req.body.user;
     if (user == null) {
@@ -343,8 +343,8 @@ const updateEvent = asyncHandler(
     }
 
     db.run(
-      `UPDATE Events SET title = ?, coordinator = ?, description = ?, location = ?, start = ? WHERE id = ?`,
-      [title, coordinator, description, location, start, id],
+      `UPDATE Events SET title = ?, coordinator = ?, description = ?, start = ? WHERE id = ?`,
+      [title, coordinator, description, start, id],
       (err: any) => {
         if (err) {
           return next(err);
