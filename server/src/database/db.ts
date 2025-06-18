@@ -65,3 +65,16 @@ export function closeDB(db: Database): void {
     }
   });
 }
+
+
+export function addLocationColumn(db: Database): void {
+  db.serialize(() => {
+    db.run(`ALTER TABLE Events ADD COLUMN location TEXT`, (err: any) => {
+      if (err) {
+        console.error('Error adding location column:', err.message);
+      } else {
+        console.log('Location column added successfully.');
+      }
+    });
+  });
+}

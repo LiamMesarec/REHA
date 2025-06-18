@@ -5,7 +5,7 @@ import { AuthContext } from './authContext';
 import { StyleSheet } from 'react-native';
 import {wp, hp} from './size';
 import { fetchMe } from './api_helper';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from "expo-router";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
@@ -16,17 +16,6 @@ export function Navbar() {
   const { token } = useContext(AuthContext);
   const [ me, setMe ] = useState({email: "", accessLevel: ""});
   const router = useRouter();
-
-  useEffect(() => {
-    if (token) {
-      fetchMe().then((response) => {
-        if (response ==null)
-          SecureStore.deleteItemAsync('token');
-        else 
-          setMe(response);
-      });
-    }
-  }), [token];
 
   return (
     <SafeAreaView style={[{ margin: 0}, Platform.OS== 'android' ? {marginBottom: -hp(5)} : {marginBottom: 0}]}>
