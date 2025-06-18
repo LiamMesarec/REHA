@@ -73,7 +73,7 @@ export const EventForm = () => {
   const [mode, setMode] = useState<"date" | "time">("date");
   const [date, setDate] = useState(new Date());
   const [toDate, setToDate] = useState(getTodayDate());
-  const [fromDate, setFromDate] = useState("2025-03-14");
+  const [fromDate, setFromDate] = useState(getTodayDate());
   const [fromTime, setFromTime] = useState("12:00");
   const [showToDate, setShowToDate] = useState(false);
   const [location, setLocation] = useState("");
