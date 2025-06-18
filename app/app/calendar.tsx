@@ -148,8 +148,6 @@ export const getEvents = async (): Promise<DayEventProps[]> => {
     eventsData.events.forEach((event: any) => {
       let dateStart = new Date(event.start);
       let dateEnd = event.to_date ? new Date(event.to_date) : null;
-
-      console.log(event);
       
       if (!dateEnd) {
         events.push({
@@ -191,9 +189,9 @@ export const getEvents = async (): Promise<DayEventProps[]> => {
         }
       }
     });
-    forEach(events, (event) => {
+    /*forEach(events, (event) => {
       console.log(event);
-    });
+    });*/
   } catch (error) {
     console.error("Error fetching events:", error);
   }
