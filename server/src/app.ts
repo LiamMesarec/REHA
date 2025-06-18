@@ -28,8 +28,6 @@ export function App(db: Database): express.Application {
   // }));
   app.locals.db = db;
 
-  addLocationColumn(db);
-
   app.use('/api/events', eventRoutes);
   app.use('/api/files', fileRoutes);
   app.use('/api/users', users);
