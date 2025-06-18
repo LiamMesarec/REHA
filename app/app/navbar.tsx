@@ -5,7 +5,7 @@ import { AuthContext } from './authContext';
 import { StyleSheet } from 'react-native';
 import {wp, hp} from './size';
 import { fetchMe } from './api_helper';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from "expo-router";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
@@ -20,8 +20,14 @@ export function Navbar() {
   useEffect(() => {
     if (token) {
       fetchMe().then((response) => {
-        if (response ==null)
-          SecureStore.deleteItemAsync('token');
+        if (response ==null){
+          if (Platform.OS === 'web') {
+            AsyncStorage.removeItem('token')
+          }
+          else {
+            SecureStore.deleteItemAsync('token');
+          }
+        }
         else 
           setMe(response);
       });

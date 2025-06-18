@@ -182,6 +182,7 @@ const EventPage = () => {
   const { eventId } = useLocalSearchParams();
   const [eventTitle, setEventTitle] = useState("");
   const [eventDetails, setEventDetails] = useState<EventDetail[]>([]);
+  const [eventLocation, setEventLocation] = useState<string | null>("");
   const [files, setFiles] = useState<FileData[]>([]);
   const [images, setImages] = useState<ImageData[]>([]);
   const [videos, setVideos] = useState<VideoData[]>([]);
@@ -205,7 +206,7 @@ const EventPage = () => {
           title: "Podrobnosti",
           content: `📅 Začetek: ${formatDate(
             eventData.event.start
-          )}\n👤 Koordinator: ${eventData.event.coordinator}`,
+          )}\n👤 Koordinator: ${eventData.event.coordinator}\n🗺️ Lokacija: ${eventLocation}`,
         },
       ];
 
