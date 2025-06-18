@@ -63,6 +63,12 @@ function getTodayDate(): string {
   return today.toISOString().split("T")[0];
 }
 
+function getTomorrowDate(): string {
+  const today = new Date();
+  today.setDate(today.getDate() + 1);
+  return today.toISOString().split("T")[0];
+}
+
 export const EventForm = () => {
   const { eventId } = useLocalSearchParams();
   const [TitleValue, setTitleValue] = useState("");
@@ -72,7 +78,7 @@ export const EventForm = () => {
   const [show, setShow] = useState(false);
   const [mode, setMode] = useState<"date" | "time">("date");
   const [date, setDate] = useState(new Date());
-  const [toDate, setToDate] = useState(getTodayDate());
+  const [toDate, setToDate] = useState(getTomorrowDate());
   const [fromDate, setFromDate] = useState(getTodayDate());
   const [fromTime, setFromTime] = useState("12:00");
   const [showToDate, setShowToDate] = useState(false);
