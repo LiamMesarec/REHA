@@ -21,6 +21,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { WebView } from "react-native-webview";
 import { AuthContext } from "./authContext";
+import { get } from "lodash";
 
 interface FieldProps {
   title: string;
@@ -56,6 +57,12 @@ const joinDate = (date: string, time: string) => {
 }
 
 
+function getTodayDate(): string {
+  const today = new Date();
+  // yyyy-mm-dd format
+  return today.toISOString().split("T")[0];
+}
+
 export const EventForm = () => {
   const { eventId } = useLocalSearchParams();
   const [TitleValue, setTitleValue] = useState("");
@@ -65,7 +72,7 @@ export const EventForm = () => {
   const [show, setShow] = useState(false);
   const [mode, setMode] = useState<"date" | "time">("date");
   const [date, setDate] = useState(new Date());
-  const [toDate, setToDate] = useState("2025-03-14");
+  const [toDate, setToDate] = useState(getTodayDate());
   const [fromDate, setFromDate] = useState("2025-03-14");
   const [fromTime, setFromTime] = useState("12:00");
   const [showToDate, setShowToDate] = useState(false);
