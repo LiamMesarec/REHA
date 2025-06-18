@@ -53,7 +53,7 @@ const formatDate = (dateIn: Date) => {
 };
 
 const joinDate = (date: string, time: string) => {
-  return date+" "+time+":00";
+  return date + " " + time + ":00";
 }
 
 
@@ -69,6 +69,12 @@ function getTomorrowDate(): string {
   return today.toISOString().split("T")[0];
 }
 
+function datePlus1Day(date: string): string {
+  const dateObj = new Date(date);
+  dateObj.setDate(dateObj.getDate() + 1);
+  return dateObj.toISOString().split("T")[0];
+}
+
 export const EventForm = () => {
   const { eventId } = useLocalSearchParams();
   const [TitleValue, setTitleValue] = useState("");
@@ -78,11 +84,12 @@ export const EventForm = () => {
   const [show, setShow] = useState(false);
   const [mode, setMode] = useState<"date" | "time">("date");
   const [date, setDate] = useState(new Date());
-  const [toDate, setToDate] = useState(getTomorrowDate());
+  const [toDate, setToDate] = useState(datePlus1Day(getTodayDate()));
   const [fromDate, setFromDate] = useState(getTodayDate());
   const [fromTime, setFromTime] = useState("12:00");
   const [showToDate, setShowToDate] = useState(false);
   const [location, setLocation] = useState("");
+  const [toTimeChanged, setToTimeChanged] = useState(false);
   const { token } = useContext(AuthContext);
 
   if (eventId && eventId !== "null") {
@@ -126,27 +133,54 @@ export const EventForm = () => {
       //console.log(joinDate(fromDate, fromTime));
       if (eventId && eventId !== "null") {
         // update existing event immediately
-        await submitUpdateEvent(
-          Array.isArray(eventId) ? eventId[0] : eventId,
-          TitleValue,
-          DescriptionValue,
-          CoordinatorValue,
-          location,
-          joinDate(fromDate, fromTime),
-          fromDate,
-          toDate
-        );
+        if (toTimeChanged) {
+          await submitUpdateEvent(
+            Array.isArray(eventId) ? eventId[0] : eventId,
+            TitleValue,
+            DescriptionValue,
+            CoordinatorValue,
+            location,
+            joinDate(fromDate, fromTime),
+            fromDate,
+            toDate
+          );
+        }
+        else {
+          await submitUpdateEvent(
+            Array.isArray(eventId) ? eventId[0] : eventId,
+            TitleValue,
+            DescriptionValue,
+            CoordinatorValue,
+            location,
+            joinDate(fromDate, fromTime),
+            fromDate,
+            datePlus1Day(toDate)
+          );
+        }
       } else {
         // create new event
-        await submitEvent(
-          TitleValue,
-          DescriptionValue,
-          CoordinatorValue,
-          location,
-          joinDate(fromDate, fromTime),
-          fromDate,
-          toDate
-        );
+        if (toTimeChanged) {
+          await submitEvent(
+            TitleValue,
+            DescriptionValue,
+            CoordinatorValue,
+            location,
+            joinDate(fromDate, fromTime),
+            fromDate,
+            toDate
+          );
+        }
+        else{
+          await submitEvent(
+            TitleValue,
+            DescriptionValue,
+            CoordinatorValue,
+            location,
+            joinDate(fromDate, fromTime),
+            fromDate,
+            datePlus1Day(toDate)
+          );
+        }
       }
       router.push("/calendar");
     } catch (error) {
@@ -187,46 +221,46 @@ export const EventForm = () => {
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Časovni okvir</Text>
           <View style={styles.dateRow}>
-                <Text style={styles.sectionSubTitle}>Začetek dogodka: </Text>
-                {showToDate && <Text style={styles.sectionSubTitle}>Ponavlja do: </Text>}
-                
+            <Text style={styles.sectionSubTitle}>Začetek dogodka: </Text>
+            {showToDate && <Text style={styles.sectionSubTitle}>Ponavlja do: </Text>}
+
           </View>
           <View style={styles.dateRow}>
 
-               <input
-                  type="date"
-                  value={fromDate}
-                  onChange={e => setFromDate(e.target.value)}
-                  style={{ flex: 1, minWidth: 120 }}
-                />
+            <input
+              type="date"
+              value={fromDate}
+              onChange={e => setFromDate(e.target.value)}
+              style={{ flex: 1, minWidth: 120 }}
+            />
 
-                <input
-                  type="time"
-                  value={fromTime}
-                  onChange={e => setFromTime(e.target.value)}
-                  style={{ flex: 1, minWidth: 120 }}
-                />
-            <Button title="Ponavljajoči dogodek" onPress={() => {setShowToDate(!showToDate)}}/>
-                          {showToDate && 
-               <input
+            <input
+              type="time"
+              value={fromTime}
+              onChange={e => setFromTime(e.target.value)}
+              style={{ flex: 1, minWidth: 120 }}
+            />
+            <Button title="Ponavljajoči dogodek" onPress={() => { setShowToDate(!showToDate) }} />
+            {showToDate &&
+              <input
                 type="date"
                 value={toDate}
-                onChange={e => setToDate(e.target.value)}
+                onChange={e => {setToDate(e.target.value); setToTimeChanged(true);}}
                 style={{ flex: 1, minWidth: 120 }}
-                />            
+              />
             }
           </View>
 
 
           {Platform.OS === "web" ? (
-              (
-          <View>
-           
-              
-          </View>
-          
-          
-        )
+            (
+              <View>
+
+
+              </View>
+
+
+            )
           ) : (
             <>
               <TouchableOpacity
@@ -255,25 +289,25 @@ export const EventForm = () => {
 
         {eventId && eventId != "null" && (
           <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Priložene datoteke</Text>
-          <FileUploadScreen
-          refresh={() => {}}
-          currentPath="Files"
-          event={Array.isArray(eventId) ? eventId[0] : eventId}
-          />
+            <Text style={styles.sectionTitle}>Priložene datoteke</Text>
+            <FileUploadScreen
+              refresh={() => { }}
+              currentPath="Files"
+              event={Array.isArray(eventId) ? eventId[0] : eventId}
+            />
           </View>
         )}
 
         {token && (
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: "#4CAF50" }]}
-          onPress={submitFn}
-        >
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: "#4CAF50" }]}
+            onPress={submitFn}
+          >
 
-          <Text style={styles.actionButtonText}>
-            {eventId ? "POSODOBI" : "USTVARI"}
-          </Text>
-        </TouchableOpacity>
+            <Text style={styles.actionButtonText}>
+              {eventId ? "POSODOBI" : "USTVARI"}
+            </Text>
+          </TouchableOpacity>
         )}
       </ScrollView>
     </GestureHandlerRootView>
@@ -321,7 +355,7 @@ const styles = StyleSheet.create({
     color: "#2D2D2D",
     marginBottom: 16,
   },
-    sectionSubTitle: {
+  sectionSubTitle: {
     fontSize: 15,
     fontWeight: "500",
     color: "#2D2D2D",
