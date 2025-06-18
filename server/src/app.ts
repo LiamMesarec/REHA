@@ -8,7 +8,6 @@ import login from './routes/login';
 import { notFound } from './middleware/errorHandler';
 import { errorHandler } from './middleware/errorHandler';
 import { authHandler } from './middleware/authHandler';
-import { addLocationColumn } from './database/db';
 
 export function App(db: Database): express.Application {
   const app = express();
