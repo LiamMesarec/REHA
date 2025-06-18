@@ -24,6 +24,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import DropDownPicker from "react-native-dropdown-picker";
 import { AuthContext } from "./authContext";
 import { SearchType } from "./eventSearch";
+import { forEach } from "lodash";
 
 const leftArrowIcon = require("./previous.png");
 const rightArrowIcon = require("./next.png");
@@ -93,6 +94,7 @@ interface DayEventProps {
   id: number;
   description: string;
   coordinator: string;
+  location?: string;
 }
 
 export interface AgendaEvent {
@@ -146,6 +148,8 @@ export const getEvents = async (): Promise<DayEventProps[]> => {
     eventsData.events.forEach((event: any) => {
       let dateStart = new Date(event.start);
       let dateEnd = event.to_date ? new Date(event.to_date) : null;
+
+      console.log(event);
       
       if (!dateEnd) {
         events.push({
@@ -158,6 +162,7 @@ export const getEvents = async (): Promise<DayEventProps[]> => {
           dayNum: dateStart.getDate(),
           month: dateStart.getMonth(),
           year: dateStart.getFullYear(),
+          location: event.location || '',
           header: false,
           id: event.id,
           coordinator: event.coordinator || '',
@@ -176,6 +181,7 @@ export const getEvents = async (): Promise<DayEventProps[]> => {
             dayNum: date.getDate(),
             month: date.getMonth(),
             year: date.getFullYear(),
+            location: event.location || '',
             header: false,
             id: event.id,
             coordinator: event.coordinator || '',
@@ -184,6 +190,9 @@ export const getEvents = async (): Promise<DayEventProps[]> => {
           date.setDate(date.getDate() + 1);
         }
       }
+    });
+    forEach(events, (event) => {
+      console.log(event);
     });
   } catch (error) {
     console.error("Error fetching events:", error);
@@ -201,6 +210,7 @@ interface EventEntry {
   time: string;
   id: number;
   title: string;
+  location?: string;
   description: string;
   coordinator: string;
 }
@@ -219,6 +229,7 @@ function groupEventsByDate(events: DayEventProps[]): GroupedEvent[] {
         time: event.time,
         id: event.id,
         title: event.event,
+        location: event.location || '',
         coordinator: event.coordinator,
         description: event.description
       });
@@ -230,6 +241,7 @@ function groupEventsByDate(events: DayEventProps[]): GroupedEvent[] {
             time: event.time,
             id: event.id,
             title: event.event,
+            location: event.location || '',
             coordinator: event.coordinator,
             description: event.description
           },
