@@ -23,6 +23,7 @@ import alert from "./alert";
 import { AuthContext } from "./authContext";
 
 import Video, {VideoRef} from 'react-native-video';
+import { wp, hp } from "./size";
 
 // Constants
 const IMAGE_EXTENSIONS = ["jpg", "png", "jpeg", "webp"];
@@ -186,6 +187,7 @@ const EventPage = () => {
   const [images, setImages] = useState<ImageData[]>([]);
   const [videos, setVideos] = useState<VideoData[]>([]);
   const [paused, setPaused] = useState<boolean[]>();
+  const [location, setLocation] = useState<string>("");
 
   const [refreshing, setRefreshing] = useState(false);
   const { token } = useContext(AuthContext);
@@ -195,6 +197,7 @@ const EventPage = () => {
       const eventData = await fetchData(`/events/${eventId}`);
 
       setEventTitle(eventData.event.title);
+      setLocation(eventData.event.location);
 
       const details = [
         {
@@ -323,6 +326,12 @@ const EventPage = () => {
           ))}
         </View>
       )}
+      {location === "Večnamenska dvorana 1" && 
+      <Image source={require("./images/vecnamenskaDvorana1.gif")} style={styles.location} />
+      }
+      {location === "Večnamenska dvorana 2" &&
+      <Image source={require("./images/vecnamenskaDvorana2.gif")} style={styles.location} />
+      }
       
       {token && (
         <View style={styles.buttonGroup}>
@@ -447,6 +456,12 @@ const styles = StyleSheet.create({
   videoWrapper: {
     marginBottom: 20,
     alignItems: "flex-start"
+  },
+  location: {
+    height: hp(60), 
+    alignSelf: "center", 
+    marginBottom: 20,
+    width: wp(100) > 600 ? wp(35) : wp(100),
   }
 });
 export default EventPage;
