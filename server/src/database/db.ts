@@ -78,3 +78,27 @@ export function addLocationColumn(db: Database): void {
     });
   });
 }
+
+export function addBranchColumnToEvent(db: Database): void {
+  db.serialize(() => {
+    db.run(`ALTER TABLE Events ADD COLUMN branch TEXT DEFAULT 'FZSV'`, (err: any) => {
+      if (err) {
+        console.error('Error adding branch column:', err.message);
+      } else {
+        console.log('Branch column added successfully.');
+      }
+    });
+  });
+}
+
+export function addBranchColumnToFiles(db: Database): void {
+  db.serialize(() => {
+    db.run(`ALTER TABLE Files ADD COLUMN branch TEXT DEFAULT 'FZSV'`, (err: any) => {
+      if (err) {
+        console.error('Error adding branch column to Files:', err.message);
+      } else {
+        console.log('Branch column added to Files successfully.');
+      }
+    });
+  });
+}

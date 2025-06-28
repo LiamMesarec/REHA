@@ -15,7 +15,23 @@ export function Navbar() {
   const logoSource = Platform.OS === 'web' ? logoLongIcon : logoIcon;
   const { token } = useContext(AuthContext);
   const [ me, setMe ] = useState({email: "", accessLevel: ""});
+  console.log(me);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const storedToken = AsyncStorage.getItem('token') || await SecureStore.getItemAsync('token');
+        if (await storedToken) {
+          const userData = await fetchMe();
+          setMe(userData);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData();
+  }, [token]);
 
   return (
     <SafeAreaView style={[{ margin: 0}, Platform.OS== 'android' ? {marginBottom: -hp(5)} : {marginBottom: 0}]}>
