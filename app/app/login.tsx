@@ -16,7 +16,7 @@ const isWeb = Platform.OS === 'web';
 export const LoginButton = () => {
   const discovery = useAutoDiscovery('https://login.microsoftonline.com/common/v2.0');
   const redirectUri = makeRedirectUri({ scheme: 'https://193.2.219.130' });
-  const clientId = '21bd0147-4d70-40b6-b482-8f63a0cb6e44';
+  const clientId = '254e900e-530c-4a0a-9150-93868c601b3e';
   const initialToken = isWeb
   ? window.localStorage.getItem('token')
   : null;
